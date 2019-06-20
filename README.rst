@@ -3,7 +3,7 @@ baseCam
 
 A base library for camera wrapping and actor.
 
-|travis| |coveralls| |docs|
+|docs|
 
 .. |docs| image:: https://readthedocs.org/projects/docs/badge/?version=latest
     :alt: Documentation Status
