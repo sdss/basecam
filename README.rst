@@ -1,5 +1,5 @@
-basecam
-==============================
+baseCam
+=======
 
 A base library for camera wrapping and actor.
 
@@ -10,8 +10,8 @@ A base library for camera wrapping and actor.
     :scale: 100%
     :target: https://sdss-basecam.readthedocs.io/en/latest/?badge=latest
 
-.. |travis| image:: https://travis-ci.org/albireox/basecam.svg?branch=master
-   :target: https://travis-ci.org/albireox/basecam
+.. |travis| image:: https://travis-ci.org/sdss/basecam.svg?branch=master
+   :target: https://travis-ci.org/sdss/basecam
 
-.. |coveralls| image:: https://coveralls.io/repos/github/albireox/basecam/badge.svg?branch=master
-   :target: https://coveralls.io/github/albireox/basecam?branch=master
+.. |coveralls| image:: https://coveralls.io/repos/github/sdss/basecam/badge.svg?branch=master
+   :target: https://coveralls.io/github/sdss/basecam?branch=master
