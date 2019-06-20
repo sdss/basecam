@@ -5,7 +5,7 @@ A base library for camera wrapping and actor.
 
 |docs|
 
-.. |docs| image:: https://readthedocs.org/projects/docs/badge/?version=latest
+.. |docs| image:: https://readthedocs.org/projects/sdss-basecam/badge/?version=latest
     :alt: Documentation Status
     :scale: 100%
     :target: https://sdss-basecam.readthedocs.io/en/latest/?badge=latest
