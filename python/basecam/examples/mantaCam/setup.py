@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-06-23 13:22:10
+# @Last modified time: 2019-06-24 11:44:37
 
 # Setup file based on https://github.com/pybind/python_example
 
@@ -135,5 +135,7 @@ setup(
 )
 
 # Clear temporary files
-if os.path.exists(os.path.join(os.path.dirname(__file__), './var')):
-    shutil.rmtree(os.path.join(os.path.dirname(__file__), './var'))
+DIRNAME = os.path.dirname(__file__)
+for tmpdir in ['tmp', 'var']:
+    if os.path.exists(os.path.join(DIRNAME, tmpdir)):
+        shutil.rmtree(os.path.join(DIRNAME, tmpdir))
