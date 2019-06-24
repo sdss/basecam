@@ -7,13 +7,13 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-06-24 11:44:37
+# @Last modified time: 2019-06-24 12:31:50
 
 # Setup file based on https://github.com/pybind/python_example
 
 import os
-import shutil
 import sys
+import tempfile
 
 import setuptools
 from setuptools import Extension, find_packages, setup
@@ -61,15 +61,17 @@ def has_flag(compiler, flagname):
     the specified compiler.
     """
 
-    import tempfile
-
     with tempfile.NamedTemporaryFile('w', suffix='.cpp') as f:
+        cwd = os.getcwd()
         f.write('int main (int argc, char **argv) { return 0; }')
+        os.chdir(os.path.dirname(f.name))
         try:
             compiler.compile([f.name], extra_postargs=[flagname])
         except setuptools.distutils.errors.CompileError:
+            os.chdir(cwd)
             return False
 
+    os.chdir(cwd)
     return True
 
 
@@ -133,9 +135,3 @@ setup(
     cmdclass={'build_ext': BuildExt},
     zip_safe=False,
 )
-
-# Clear temporary files
-DIRNAME = os.path.dirname(__file__)
-for tmpdir in ['tmp', 'var']:
-    if os.path.exists(os.path.join(DIRNAME, tmpdir)):
-        shutil.rmtree(os.path.join(DIRNAME, tmpdir))
