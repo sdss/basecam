@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-06-24 12:31:50
+# @Last modified time: 2019-06-24 23:45:53
 
 # Setup file based on https://github.com/pybind/python_example
 
@@ -49,6 +49,7 @@ ext_modules = [
             get_pybind_include(),
             get_pybind_include(user=True)
         ],
+        libraries=['VimbaCPP', 'VimbaC'],
         language='c++'
     ),
 ]
