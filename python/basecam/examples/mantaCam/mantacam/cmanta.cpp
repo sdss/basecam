@@ -22,5 +22,6 @@ using namespace AVT::VmbAPI;
 
 PYBIND11_MODULE(cmanta, module) {
     py::class_<VimbaSystem, std::unique_ptr<VimbaSystem, py::nodelete>>(module, "VimbaSystem")
-        .def("GetInstance", &VimbaSystem::GetInstance);
+        .def("GetInstance", &VimbaSystem::GetInstance)
+        .def("GetCameras", &VimbaSystem::GetCameras);
 }
