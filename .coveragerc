@@ -1,8 +1,0 @@
-[run]
-branch = true
-
-[report]
-omit =
-    python/basecam/etc/*
-    python/basecam/utils/*
-    python/basecam/tests/*
