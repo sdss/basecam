@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-06-24 23:45:53
+# @Last modified time: 2019-07-23 15:10:20
 
 # Setup file based on https://github.com/pybind/python_example
 
@@ -16,7 +16,7 @@ import sys
 import tempfile
 
 import setuptools
-from setuptools import Extension, find_packages, setup
+from setuptools import Extension
 from setuptools.command.build_ext import build_ext
 
 
@@ -118,21 +118,12 @@ class BuildExt(build_ext):
         build_ext.build_extensions(self)
 
 
-with open('requirements.txt', 'r') as ff:
-    install_requires = ff.read().splitlines()
+def build(setup_kwargs):
+    """To build the extensions with poetry."""
 
-
-setup(
-    name='mantacam',
-    version=__version__,
-    author='José Sánchez-Gallego',
-    author_email='gallegoj@uw.edu',
-    url='https://github.com/sdss/baseCam',
-    description='An example of baseCam implementation using a Manta camera',
-    long_description='',
-    ext_modules=ext_modules,
-    install_requires=install_requires,
-    packages=find_packages('./'),
-    cmdclass={'build_ext': BuildExt},
-    zip_safe=False,
-)
+    setup_kwargs.update({
+        'ext_modules': ext_modules,
+        'cmdclass': {
+            'build_ext': BuildExt
+        }
+    })

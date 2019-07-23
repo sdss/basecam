@@ -1,0 +1,14 @@
+[[package]]
+category = "main"
+description = "Seamless operability between C++11 and Python"
+name = "pybind11"
+optional = false
+python-versions = "*"
+version = "2.3.0"
+
+[metadata]
+content-hash = "1324fbb725b145eeca8dae708ac6c80123369af650c47b4887d33e8940877f72"
+python-versions = "^3.7"
+
+[metadata.hashes]
+pybind11 = ["199a915e0f81b5a593d1a13a18f137f59a6111f0049543211d936d26dab34324", "5531dee811310ff02ff69fe4f45feb56d845154ba692b8e4660ae2c478ee313a"]
