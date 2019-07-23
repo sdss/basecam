@@ -13,14 +13,28 @@
 
 #include <vector>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl_bind.h>
 #include <VimbaCPP/Include/VimbaCPP.h>
 
 namespace py = pybind11;
-
 using namespace AVT::VmbAPI;
 
+// Adding #include <pybind11/stl.h> causes a SIGSEGV error although everything seems to work.
 
-// PYBIND11_DECLARE_HOLDER_TYPE(CameraPtr, shared_ptr<CameraPtr>, true);
+
+// This is necessary because VmbAPI defines it's own smart pointer.
+PYBIND11_DECLARE_HOLDER_TYPE(T, AVT::VmbAPI::shared_ptr<T>, true);
+
+
+// The Vimba API tends to use output parameters which don't work too well with
+// pybind11. Instead we modify the method to return a tuple of error message and
+// value. This macro simplifies that.
+#define TUPLIFY(name, InstanceClass, ReturnType, method)  \
+    .def(name, [](InstanceClass &instance) {              \
+        ReturnType value;                                 \
+        VmbErrorType err = instance.method(value);        \
+        return py::make_tuple(err, value);                \
+    })
 
 
 PYBIND11_MODULE(cmanta, module) {
@@ -47,28 +61,40 @@ PYBIND11_MODULE(cmanta, module) {
         .value("VmbErrorNotSupported", VmbErrorType::VmbErrorNotSupported)
         .value("VmbErrorIncomplete", VmbErrorType::VmbErrorIncomplete);
 
-    py::class_<Camera>(module, "Camera")
-        .def(py::init<const char *, const char *, const char *, const char *, const char *, VmbInterfaceType>());
+    py::enum_<VmbAccessModeType>(module, "VmbAccessModeType")
+        .value("VmbAccessModeNone", VmbAccessModeType::VmbAccessModeNone)
+        .value("VmbAccessModeFull", VmbAccessModeType::VmbAccessModeFull)
+        .value("VmbAccessModeRead", VmbAccessModeType::VmbAccessModeRead)
+        .value("VmbAccessModeConfig", VmbAccessModeType::VmbAccessModeConfig)
+        .value("VmbAccessModeLite", VmbAccessModeType::VmbAccessModeLite);
+
+    py::class_<Camera, std::shared_ptr<Camera>>(module, "Camera")
+        .def(py::init<const char *, const char *, const char *,
+                      const char *, const char *, VmbInterfaceType>())
+        TUPLIFY("GetID", Camera, std::string, GetID)
+        TUPLIFY("GetName", Camera, std::string, GetName)
+        TUPLIFY("GetModel", Camera, std::string, GetModel)
+        TUPLIFY("GetInterfaceID", Camera, std::string, GetInterfaceID)
+        TUPLIFY("GetSerialNumber", Camera, std::string, GetSerialNumber)
+        .def("Open", &Camera::Open)
+        .def("Close", &Camera::Close);
 
     py::class_<Interface>(module, "Interface")
         .def(py::init<const VmbInterfaceInfo_t *>());
 
-    // py::bind_vector<std::vector<CameraPtr>>(module, "CameraPtrVector");
-
-    // py::class_<CameraPtr, shared_ptr<Camera>>(module, "CameraPtr");
+    py::bind_vector<std::vector<CameraPtr>>(module, "CameraPtrVector");
 
     py::class_<VimbaSystem, std::unique_ptr<VimbaSystem, py::nodelete>>(module, "VimbaSystem")
-        .def_static("GetInstance", &VimbaSystem::GetInstance)
+        .def_static("GetInstance", &VimbaSystem::GetInstance, py::return_value_policy::reference)
         .def("Startup", &VimbaSystem::Startup)
-        .def("GetInterfaces", [](VimbaSystem &vs) {
-            InterfacePtrVector interfaces;
-            VmbErrorType err = vs.GetInterfaces(interfaces);
-            return py::make_tuple(err, interfaces);
-        })
-        .def("GetCameras", [](VimbaSystem &vs) {
-            CameraPtrVector cameras;
-            VmbErrorType err = vs.GetCameras(cameras);
-            return py::make_tuple(err, cameras);
+        .def("Shutdown", &VimbaSystem::Shutdown)
+        TUPLIFY("GetInterfaces", VimbaSystem, InterfacePtrVector, GetInterfaces)
+        TUPLIFY("GetCameras", VimbaSystem, CameraPtrVector, GetCameras)
+        .def("GetCameraByID", [](VimbaSystem &vs, const char* cameraID) {
+            CameraPtr cameraPtr;
+            VmbErrorType err = vs.GetCameraByID(cameraID, cameraPtr);
+            // Derreferencing here seems to avoid problems.
+            return py::make_tuple(err, cameraPtr.get());
         });
 
 }
