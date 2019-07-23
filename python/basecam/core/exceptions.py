@@ -4,11 +4,9 @@
 # Licensed under a 3-clause BSD license.
 #
 # @Author: Brian Cherinka
-# @Date:   2017-12-05 12:01:21
-# @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-12-05 12:19:32
-
-from __future__ import print_function, division, absolute_import
+# @Date: 2017-12-05 12:01:21
+# @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
+# @Last modified time: 2019-07-22 21:33:16
 
 
 class BasecamError(Exception):

@@ -10,9 +10,6 @@ This module includes astropy-based functions for colour printing.
 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 import sys
 import multiprocessing
 import threading
