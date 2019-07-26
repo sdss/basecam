@@ -36,6 +36,26 @@ PYBIND11_DECLARE_HOLDER_TYPE(T, AVT::VmbAPI::shared_ptr<T>, true);
         return py::make_tuple(err, value);                \
     })
 
+#define GET_VALUE(name, type)                         \
+    .def(name, [](Feature &feature) {                 \
+        type value;                                   \
+        VmbErrorType err = feature.GetValue(value);   \
+        return py::make_tuple(err, value);            \
+    })
+
+
+// We need to declare a subclass of ICameraListObserver because
+// ICameraListObserver is an abstract class.
+class CameraListObserver : public ICameraListObserver {
+
+    public:
+        CameraListObserver(void) { }
+        ~CameraListObserver(void) { }
+
+        void CameraListChanged(CameraPtr pCam, UpdateTriggerType reason) { }
+
+};
+
 
 PYBIND11_MODULE(cmanta, module) {
 
@@ -68,7 +88,22 @@ PYBIND11_MODULE(cmanta, module) {
         .value("VmbAccessModeConfig", VmbAccessModeType::VmbAccessModeConfig)
         .value("VmbAccessModeLite", VmbAccessModeType::VmbAccessModeLite);
 
-    py::class_<Camera, std::shared_ptr<Camera>>(module, "Camera")
+    py::enum_<UpdateTriggerType>(module, "UpdateTriggerType")
+        // A new camera was discovered by Vimba
+        .value("UpdateTriggerPluggedIn", UpdateTriggerType::UpdateTriggerPluggedIn)
+        // A camera has disappeared from the bus
+        .value("UpdateTriggerPluggedOut", UpdateTriggerType::UpdateTriggerPluggedOut)
+        // The possible opening mode of a camera has changed.
+        .value("UpdateTriggerOpenStateChanged", UpdateTriggerType::UpdateTriggerOpenStateChanged);
+
+    py::class_<Feature, AVT::VmbAPI::shared_ptr<Feature>>(module, "Feature")
+        GET_VALUE("GetValueDouble", double)
+        GET_VALUE("GetValueInt", VmbInt64_t)
+        GET_VALUE("GetValueString", std::string)
+        GET_VALUE("GetValueBool", bool)
+        GET_VALUE("GetValueCharVector", UcharVector);
+
+    py::class_<Camera, AVT::VmbAPI::shared_ptr<Camera>>(module, "Camera")
         .def(py::init<const char *, const char *, const char *,
                       const char *, const char *, VmbInterfaceType>())
         TUPLIFY("GetID", Camera, std::string, GetID)
@@ -76,6 +111,12 @@ PYBIND11_MODULE(cmanta, module) {
         TUPLIFY("GetModel", Camera, std::string, GetModel)
         TUPLIFY("GetInterfaceID", Camera, std::string, GetInterfaceID)
         TUPLIFY("GetSerialNumber", Camera, std::string, GetSerialNumber)
+        .def("GetFeatureByName", [](Camera &camera, const char *pName) {
+            FeaturePtr featurePtr;
+            VmbErrorType err = camera.GetFeatureByName(pName, featurePtr);
+            // Derreferencing here seems to avoid problems.
+            return py::make_tuple(err, featurePtr.get());
+        })
         .def("Open", &Camera::Open)
         .def("Close", &Camera::Close);
 
@@ -83,6 +124,7 @@ PYBIND11_MODULE(cmanta, module) {
         .def(py::init<const VmbInterfaceInfo_t *>());
 
     py::bind_vector<std::vector<CameraPtr>>(module, "CameraPtrVector");
+    py::bind_vector<std::vector<ICameraListObserverPtr>>(module, "ICameraListObserverPtrVector");
 
     py::class_<VimbaSystem, std::unique_ptr<VimbaSystem, py::nodelete>>(module, "VimbaSystem")
         .def_static("GetInstance", &VimbaSystem::GetInstance, py::return_value_policy::reference)
@@ -95,6 +137,19 @@ PYBIND11_MODULE(cmanta, module) {
             VmbErrorType err = vs.GetCameraByID(cameraID, cameraPtr);
             // Derreferencing here seems to avoid problems.
             return py::make_tuple(err, cameraPtr.get());
-        });
+        })
+        .def("RegisterCameraListObserver", &VimbaSystem::RegisterCameraListObserver);
+
+    // Declare the parent class so that we can then define the child one.
+    // No need to include the constructor (which is protected).
+    py::class_<ICameraListObserver,
+               AVT::VmbAPI::shared_ptr<ICameraListObserver>>(module, "ICameraListObserver");
+
+    // The subclass must include the name of the parent. We also indicate the type
+    // of shared pointer we want this object to decay to.
+    py::class_<CameraListObserver, ICameraListObserver,
+               AVT::VmbAPI::shared_ptr<CameraListObserver>>(module, "CameraListObserver")
+        .def(py::init<>())
+        .def("CameraListChanged", &CameraListObserver::CameraListChanged);
 
 }
