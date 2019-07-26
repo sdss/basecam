@@ -5,6 +5,7 @@ description = "Example for baseCam using a Manta camera"
 authors = ["José Sánchez-Gallego <gallegoj@uw.edu>"]
 license = "BSD-3-Clause"
 build = 'build.py'
+packages = [{include = "mantacam"}]
 
 [tool.poetry.dependencies]
 python = "^3.7"
