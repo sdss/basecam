@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-07-23 15:10:20
+# @Last modified time: 2019-07-25 21:19:04
 
 # Setup file based on https://github.com/pybind/python_example
 
@@ -42,7 +42,7 @@ class get_pybind_include(object):
 
 ext_modules = [
     Extension(
-        'mantacam/cmanta',
+        'mantacam.cmanta',
         ['mantacam/cmanta.cpp'],
         include_dirs=[
             # Path to pybind11 headers
