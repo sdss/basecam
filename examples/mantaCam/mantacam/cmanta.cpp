@@ -44,16 +44,26 @@ PYBIND11_DECLARE_HOLDER_TYPE(T, AVT::VmbAPI::shared_ptr<T>, true);
     })
 
 
-// We need to declare a subclass of ICameraListObserver because
-// ICameraListObserver is an abstract class.
-class CameraListObserver : public ICameraListObserver {
+// We need to declare a trampoline class for ICameraListObserver so that we
+// can override the virtual function CameraListChanged in Python.
+// See http://bit.ly/2Y8LtJg.
+class TrampolineCameraListObserver : public ICameraListObserver {
 
     public:
-        CameraListObserver(void) { }
-        ~CameraListObserver(void) { }
 
-        void CameraListChanged(CameraPtr pCam, UpdateTriggerType reason) { }
+        // Use UCameraListObserver constructors
+        using ICameraListObserver::ICameraListObserver;
 
+        // This defines a method that can be overriden in Python class.
+        void CameraListChanged(CameraPtr pCam, UpdateTriggerType reason) override {
+            PYBIND11_OVERLOAD_PURE(
+                void,                 /* Return type */
+                ICameraListObserver,  /* Parent class */
+                CameraListChanged,    /* Name of function in C++ (must match Python name) */
+                pCam,                 /* Argument(s) */
+                reason
+            );
+        }
 };
 
 
@@ -140,16 +150,11 @@ PYBIND11_MODULE(cmanta, module) {
         })
         .def("RegisterCameraListObserver", &VimbaSystem::RegisterCameraListObserver);
 
-    // Declare the parent class so that we can then define the child one.
-    // No need to include the constructor (which is protected).
-    py::class_<ICameraListObserver,
-               AVT::VmbAPI::shared_ptr<ICameraListObserver>>(module, "ICameraListObserver");
-
-    // The subclass must include the name of the parent. We also indicate the type
-    // of shared pointer we want this object to decay to.
-    py::class_<CameraListObserver, ICameraListObserver,
-               AVT::VmbAPI::shared_ptr<CameraListObserver>>(module, "CameraListObserver")
-        .def(py::init<>())
-        .def("CameraListChanged", &CameraListObserver::CameraListChanged);
+    // Declare ICameraListObserver with its trampoline class.
+    py::class_<ICameraListObserver, TrampolineCameraListObserver,
+               AVT::VmbAPI::shared_ptr<ICameraListObserver>>
+               icameralistobserver (module, "ICameraListObserver");
+    icameralistobserver.def(py::init<>());
+    icameralistobserver.def("CameraListChanged", &ICameraListObserver::CameraListChanged);
 
 }
