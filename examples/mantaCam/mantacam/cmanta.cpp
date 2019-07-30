@@ -36,12 +36,17 @@ PYBIND11_DECLARE_HOLDER_TYPE(T, AVT::VmbAPI::shared_ptr<T>, true);
         return py::make_tuple(err, value);                \
     })
 
+
 #define GET_VALUE(name, type)                         \
     .def(name, [](Feature &feature) {                 \
         type value;                                   \
         VmbErrorType err = feature.GetValue(value);   \
         return py::make_tuple(err, value);            \
     })
+
+#define SET_VALUE(name, type)                     \
+    .def(name, [](Feature &feature, type value)   \
+        { return feature.SetValue(value); })
 
 
 // We need to declare a trampoline class for ICameraListObserver so that we
@@ -62,6 +67,24 @@ class TrampolineCameraListObserver : public ICameraListObserver {
                 CameraListChanged,    /* Name of function in C++ (must match Python name) */
                 pCam,                 /* Argument(s) */
                 reason
+            );
+        }
+};
+
+
+class TrampolineFrameObserver : public IFrameObserver {
+
+    public:
+
+        TrampolineFrameObserver(CameraPtr pCamera) : IFrameObserver(pCamera) { }
+
+        // using IFrameObserver::IFrameObserver;
+        void FrameReceived(const FramePtr pFrame) override {
+            PYBIND11_OVERLOAD_PURE(
+                void,
+                IFrameObserver,
+                FrameReceived,
+                pFrame
             );
         }
 };
@@ -111,7 +134,13 @@ PYBIND11_MODULE(cmanta, module) {
         GET_VALUE("GetValueInt", VmbInt64_t)
         GET_VALUE("GetValueString", std::string)
         GET_VALUE("GetValueBool", bool)
-        GET_VALUE("GetValueCharVector", UcharVector);
+        GET_VALUE("GetValueCharVector", UcharVector)
+        SET_VALUE("SetValueDouble", const double &)
+        SET_VALUE("SetValueInt", const VmbInt64_t &)
+        SET_VALUE("SetValueString", const char *)
+        SET_VALUE("SetValueBool", bool)
+        SET_VALUE("SetValueCharVector", const UcharVector &)
+        .def("RunCommand", &Feature::RunCommand);
 
     py::class_<Camera, AVT::VmbAPI::shared_ptr<Camera>>(module, "Camera")
         .def(py::init<const char *, const char *, const char *,
@@ -128,7 +157,12 @@ PYBIND11_MODULE(cmanta, module) {
             return py::make_tuple(err, featurePtr.get());
         })
         .def("Open", &Camera::Open)
-        .def("Close", &Camera::Close);
+        .def("Close", &Camera::Close)
+        .def("QueueFrame", &Camera::QueueFrame)
+        .def("StartCapture", &Camera::StartCapture)
+        .def("EndCapture", &Camera::EndCapture)
+        .def("AnnounceFrame", &Camera::AnnounceFrame)
+        .def("RevokeAllFrames", &Camera::RevokeAllFrames);
 
     py::class_<Interface>(module, "Interface")
         .def(py::init<const VmbInterfaceInfo_t *>());
@@ -152,9 +186,23 @@ PYBIND11_MODULE(cmanta, module) {
 
     // Declare ICameraListObserver with its trampoline class.
     py::class_<ICameraListObserver, TrampolineCameraListObserver,
-               AVT::VmbAPI::shared_ptr<ICameraListObserver>>
-               icameralistobserver (module, "ICameraListObserver");
-    icameralistobserver.def(py::init<>());
-    icameralistobserver.def("CameraListChanged", &ICameraListObserver::CameraListChanged);
+               AVT::VmbAPI::shared_ptr<ICameraListObserver>> icameralistobserver
+                    (module, "ICameraListObserver");
+    icameralistobserver
+        .def(py::init<>())
+        .def("CameraListChanged", &ICameraListObserver::CameraListChanged);
+
+    py::class_<Frame, AVT::VmbAPI::shared_ptr<Frame>>(module, "Frame")
+        .def(py::init<VmbInt64_t>())
+        .def("RegisterObserver", &Frame::RegisterObserver)
+        TUPLIFY("GetImage", Frame, VmbUchar_t*, GetImage)
+        TUPLIFY("GetImageSize", Frame, VmbUint32_t, GetImageSize);
+
+    py::class_<IFrameObserver, TrampolineFrameObserver,
+               AVT::VmbAPI::shared_ptr<IFrameObserver>> iframeobserver
+                    (module, "IFrameObserver");
+    iframeobserver
+        .def(py::init<CameraPtr>())
+        .def("FrameReceived", &IFrameObserver::FrameReceived);
 
 }
