@@ -90,6 +90,14 @@ class TrampolineFrameObserver : public IFrameObserver {
 };
 
 
+class PublicistIFrameObserver : public IFrameObserver {
+
+    public:
+        using IFrameObserver::m_pCamera;
+
+};
+
+
 PYBIND11_MODULE(cmanta, module) {
 
     py::enum_<VmbErrorType>(module, "VmbErrorType")
@@ -196,6 +204,7 @@ PYBIND11_MODULE(cmanta, module) {
         .def(py::init<VmbInt64_t>())
         .def("RegisterObserver", &Frame::RegisterObserver)
         TUPLIFY("GetImage", Frame, VmbUchar_t*, GetImage)
+        TUPLIFY("GetBuffer", Frame, VmbUchar_t*, GetBuffer)
         TUPLIFY("GetImageSize", Frame, VmbUint32_t, GetImageSize);
 
     py::class_<IFrameObserver, TrampolineFrameObserver,
@@ -203,6 +212,7 @@ PYBIND11_MODULE(cmanta, module) {
                     (module, "IFrameObserver");
     iframeobserver
         .def(py::init<CameraPtr>())
+        .def_readonly("camera", &PublicistIFrameObserver::m_pCamera)
         .def("FrameReceived", &IFrameObserver::FrameReceived);
 
 }
