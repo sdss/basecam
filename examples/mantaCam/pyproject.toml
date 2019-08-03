@@ -10,8 +10,9 @@ packages = [{include = "mantacam"}]
 
 [tool.poetry.dependencies]
 python = "^3.7"
+numpy = "^1.17"
 pybind11 = "^2.3.0"
-# sdss-baseCam = "^0.1.0"
+# sdss-basecam = "^0.1.0"
 
 [tool.poetry.dev-dependencies]
 
