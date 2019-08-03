@@ -1,4 +1,4 @@
-baseCam
+basecam
 =======
 
 A base library for camera wrapping and actor.
