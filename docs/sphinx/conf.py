@@ -7,13 +7,13 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-06-19 16:57:46
+# @Last modified time: 2019-08-04 08:40:44
 
 import os
 
 from pkg_resources import parse_version
 
-from jaeger import __version__
+from basecam import __version__
 
 
 # Are we building in RTD?
@@ -44,7 +44,7 @@ source_parsers = {
 master_doc = 'index'
 
 # General information about the project.
-project = project = 'baseCam'
+project = project = 'basecam'
 copyright = '{0}, {1}'.format('2019', 'José Sánchez-Gallego')
 author = 'José Sánchez-Gallego'
 
@@ -102,7 +102,6 @@ releases_unstable_prehistory = True
 
 # Intersphinx mappings
 intersphinx_mapping = {'python': ('https://docs.python.org/3.7', None),
-                       'can': ('https://python-can.readthedocs.io/en/develop/', None),
                        'numpy': ('http://docs.scipy.org/doc/numpy/', None)}
 # 'astropy': ('http://docs.astropy.org/en/latest', None),
 # 'matplotlib': ('https://matplotlib.org/', None),
