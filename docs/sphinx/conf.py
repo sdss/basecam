@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-08-04 08:40:44
+# @Last modified time: 2019-08-05 17:15:49
 
 import os
 
@@ -25,8 +25,7 @@ on_rtd = os.environ.get('READTHEDOCS') == 'True'
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx.ext.autosummary',
               'sphinx.ext.todo', 'sphinx.ext.viewcode', 'sphinx.ext.mathjax',
-              'sphinx.ext.intersphinx', 'sphinxcontrib_trio', 'releases',
-              'sphinx_click.ext']
+              'sphinx.ext.intersphinx', 'sphinxcontrib_trio', 'releases']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -133,7 +132,7 @@ html_theme = 'alabaster'
 html_theme_options = {
     'logo': 'sdss_logo.png',
     'github_user': 'sdss',
-    'github_repo': 'baseCam',
+    'github_repo': 'basecam',
     'github_button': True,
     'github_type': 'star',
     'sidebar_collapse': True,

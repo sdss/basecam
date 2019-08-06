@@ -3,3 +3,5 @@
 
 API Reference
 =============
+
+.. automodule:: basecam.camera

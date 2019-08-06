@@ -1,8 +1,8 @@
 
-jaeger's documentation
-=======================
+basecam's documentation
+========================
 
-This is the Sphinx documentation for the SDSS Python product ``baseCam``.
+This is the Sphinx documentation for the SDSS Python product ``basecam``.
 
 
 Contents
