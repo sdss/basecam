@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-05-09 10:44:49
+# @Last modified time: 2019-08-05 10:56:59
 
 import os
 
@@ -15,7 +15,7 @@ import yaml
 from pkg_resources import parse_version
 
 
-__all__ = ['get_config']
+__all__ = ['get_config', 'read_yaml_file']
 
 
 def merge_config(user, default):
@@ -29,6 +29,19 @@ def merge_config(user, default):
                 user[kk] = merge_config(user[kk], vv)
 
     return user
+
+
+def read_yaml_file(path):
+    """Read a YAML file and returns a dictionary."""
+
+    yaml_kwds = dict()
+    if parse_version(yaml.__version__) >= parse_version('5.1'):
+        yaml_kwds.update(Loader=yaml.FullLoader)
+
+    with open(path, 'r') as fp:
+        config = yaml.load(fp, **yaml_kwds)
+
+    return config
 
 
 def get_config(name, allow_user=True, user_path=None, config_envvar=None,
@@ -72,14 +85,9 @@ def get_config(name, allow_user=True, user_path=None, config_envvar=None,
 
     assert merge_mode in ['update', 'replace'], 'invalid merge mode.'
 
-    yaml_kwds = dict()
-    if parse_version(yaml.__version__) >= parse_version('5.1'):
-        yaml_kwds.update(Loader=yaml.FullLoader)
-
     # Loads config
     config_path = os.path.join(os.path.dirname(__file__), '../etc/{0}.yml'.format(name))
-    with open(config_path, 'r') as fp:
-        config = yaml.load(fp, **yaml_kwds)
+    config = read_yaml_file(config_path)
 
     if allow_user is False:
         return config
@@ -98,8 +106,7 @@ def get_config(name, allow_user=True, user_path=None, config_envvar=None,
     else:
         return config
 
-    with open(custom_config_fn, 'r') as fp:
-        user_config = yaml.load(fp, **yaml_kwds)
+    user_config = read_yaml_file(custom_config_fn)
 
     if merge_mode == 'update':
         return merge_config(user_config, config)
