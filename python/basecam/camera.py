@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-08-05 17:27:39
+# @Last modified time: 2019-08-06 04:59:43
 
 import abc
 import asyncio
@@ -33,6 +33,8 @@ class CameraSystem(LoggerMixIn):
         A dictionary with the configuration parameters for the multiple
         cameras that can be present in the system, or the path to a YAML file.
         Refer to the documentation for details on the accepted format.
+    loop
+        The asyncio event loop.
 
     """
 
@@ -44,8 +46,8 @@ class CameraSystem(LoggerMixIn):
     def __new__(cls, *args, **kwargs):
 
         assert cls.camera_class, 'camera_class must be overriden when subclassing.'
-        assert isinstance(cls.camera_class, Camera) and cls.camera_class != Camera, \
-            'camera_class must be a subclass of Camera.'
+        # assert isinstance(cls.camera_class, Camera) and cls.camera_class != Camera, \
+        #     'camera_class must be a subclass of Camera.'
 
         if cls.log_header is None:
             cls.log_header = f'[{cls.__name__.upper()}]: '
@@ -59,15 +61,17 @@ class CameraSystem(LoggerMixIn):
 
         return cls._instance
 
-    def __init__(self, config=None):
+    def __init__(self, config=None, loop=None):
 
         self.config = config
         self.config_file = None
 
+        self.loop = loop or asyncio.get_event_loop()
+
         #: list: The list of cameras being handled.
         self.cameras = []
 
-        self._camera_poller = Poller(self._check_cameras)
+        self._camera_poller = None
 
         if config and not isinstance(config, dict):
             self.config_file = config
@@ -142,6 +146,9 @@ class CameraSystem(LoggerMixIn):
             for changes.
 
         """
+
+        if self._camera_poller is None:
+            self._camera_poller = Poller(self._check_cameras)
 
         await self._camera_poller.set_delay(interval)
 
@@ -233,14 +240,16 @@ class CameraSystem(LoggerMixIn):
 
         """
 
-        if use_config:
+        assert name or uid, 'either name or uid are required.'
+
+        if use_config and self.config:
             camera_params = self.get_camera_params(name=name, uid=uid)
         else:
-            camera_params = {'name': name, 'uid': uid}
+            camera_params = {'name': name or uid, 'uid': uid}
 
         camera_params.update(kwargs)
 
-        name = camera_params[name]
+        name = camera_params['name']
         if name in [camera.name for camera in self.cameras]:
             self.log('a camera {name!r} is already connected.', logging.WARNING)
             return
@@ -254,10 +263,13 @@ class CameraSystem(LoggerMixIn):
 
         # If the autoconnect parameter is set, connects the camera.
         connection_params = camera_params.get('connection_params', None)
-        if connection_params and connection_params.get('autoconnect', True):
+        if not connection_params or \
+                (connection_params and connection_params.get('autoconnect', True)):
             await camera.connect()
 
-        self.append(camera)
+        self.cameras.append(camera)
+
+        return camera
 
     async def remove_camera(self, name=None, uid=None):
         """Removes a camera, cancelling any ongoing process.
@@ -290,7 +302,7 @@ class CameraSystem(LoggerMixIn):
 
         """
 
-        asyncio.create_task(self.add_camera(uid=uid))
+        return asyncio.run_coroutine_threadsafe(self.add_camera(uid=uid), self.loop).result()
 
     def on_camera_disconnected(self, uid):
         """Event handler for a camera that was disconnected.
@@ -302,7 +314,7 @@ class CameraSystem(LoggerMixIn):
 
         """
 
-        asyncio.create_task(self.remove_camera(uid=uid))
+        return asyncio.run_coroutine_threadsafe(self.remove_camera(uid=uid), self.loop).result()
 
 
 class Camera(object, metaclass=abc.ABCMeta):
