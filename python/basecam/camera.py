@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-08-05 17:18:12
+# @Last modified time: 2019-08-05 17:27:39
 
 import abc
 import asyncio
@@ -123,7 +123,7 @@ class CameraSystem(LoggerMixIn):
     async def start_camera_poller(self, interval=1.):
         """Monitors changes in the camera list.
 
-        Issues calls to `.get_system_cameras` on an interval and compares
+        Issues calls to `.get_connected_cameras` on an interval and compares
         the connected cameras with those in `.cameras`. New found cameras
         are added and cameras not present are cleanly removed.
 
