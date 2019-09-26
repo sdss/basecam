@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-08-06 23:22:40
+# @Last modified time: 2019-09-25 20:20:58
 
 import abc
 import asyncio
@@ -18,7 +18,7 @@ from .helpers import LoggerMixIn, Poller
 from .utils.configuration import read_yaml_file
 
 
-class CameraSystem(LoggerMixIn):
+class BaseCameraSystem(LoggerMixIn):
     """A base class for the camera system.
 
     Provides an abstract class for the camera system, including camera
@@ -163,7 +163,7 @@ class CameraSystem(LoggerMixIn):
     async def _check_cameras(self):
         """Checks the list of connected cameras.
 
-        This is an internal function only to be used by the camera poller.
+        This is an internal function to be used only by the camera poller.
 
         """
 
@@ -329,7 +329,7 @@ class CameraSystem(LoggerMixIn):
         return asyncio.run_coroutine_threadsafe(self.remove_camera(uid=uid), self.loop).result()
 
 
-class Camera(object, metaclass=abc.ABCMeta):
+class BaseCamera(object, metaclass=abc.ABCMeta):
     """A base class for wrapping a camera API in a standard implementation.
 
     Instantiating the `.Camera` class does not open the camera and makes it
