@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-08-06 04:59:43
+# @Last modified time: 2019-08-06 23:22:40
 
 import abc
 import asyncio
@@ -46,8 +46,8 @@ class CameraSystem(LoggerMixIn):
     def __new__(cls, *args, **kwargs):
 
         assert cls.camera_class, 'camera_class must be overriden when subclassing.'
-        # assert isinstance(cls.camera_class, Camera) and cls.camera_class != Camera, \
-        #     'camera_class must be a subclass of Camera.'
+        assert isinstance(cls.camera_class, Camera) and cls.camera_class != Camera, \
+            'camera_class must be a subclass of Camera.'
 
         if cls.log_header is None:
             cls.log_header = f'[{cls.__name__.upper()}]: '
@@ -90,7 +90,7 @@ class CameraSystem(LoggerMixIn):
 
         pass
 
-    def get_camera_params(self, name=None, uid=None):
+    def get_camera_config(self, name=None, uid=None):
         """Gets camera parameters from the configuration.
 
         Parameters
@@ -171,12 +171,14 @@ class CameraSystem(LoggerMixIn):
             uids = self.get_connected_cameras()
         except BasecamNotImplemented:
             await self.stop_camera_poller()
-            raise BasecamNotImplemented('get_connected cameras is not '
-                                        'implemented. Stopping camera poller.')
+            self.log('get_connected cameras is not implemented. '
+                     'Stopping camera poller.', logging.ERROR)
+            return
 
+        # Checks cameras that are handled but not connected.
         to_remove = []
         for camera in self.cameras:
-            if camera.uid not in uids:
+            if camera.uid not in uids and not camera.force:
                 self.log('camera with UID {camera.uid!r} ({camera.name}) '
                          'is not connected.', logging.INFO)
                 to_remove.append(camera.name)
@@ -184,6 +186,7 @@ class CameraSystem(LoggerMixIn):
         for camera_name in to_remove:
             self.remove_camera(camera_name)
 
+        # Checks cameras that are connected but not yet being handled.
         camera_uids = [camera.uid for camera in self.cameras]
         for uid in uids:
             if uid not in camera_uids:
@@ -243,7 +246,7 @@ class CameraSystem(LoggerMixIn):
         assert name or uid, 'either name or uid are required.'
 
         if use_config and self.config:
-            camera_params = self.get_camera_params(name=name, uid=uid)
+            camera_params = self.get_camera_config(name=name, uid=uid)
         else:
             camera_params = {'name': name or uid, 'uid': uid}
 
@@ -269,6 +272,9 @@ class CameraSystem(LoggerMixIn):
 
         self.cameras.append(camera)
 
+        if self.actor:
+            self.actor.on_camera_connected(camera)
+
         return camera
 
     async def remove_camera(self, name=None, uid=None):
@@ -285,9 +291,15 @@ class CameraSystem(LoggerMixIn):
 
         for camera in self.cameras:
             if camera.name == name or camera.uid == uid:
+
                 await camera.shutdown()
                 self.cameras.remove(camera)
+
                 self.log(f'removed camera {name!r}.')
+
+                if self.actor:
+                    self.actor.on_camera_disconnected(camera)
+
                 return
 
         raise ValueError(f'camera {name} is not connected.')
@@ -347,7 +359,10 @@ class Camera(object, metaclass=abc.ABCMeta):
                  **kwargs):
 
         self.name = name
+
         self.camera_system = camera_system
+        self.actor = self.camera_system.actor
+
         self.force = force
 
         self.connection_params = connection_params or {}
