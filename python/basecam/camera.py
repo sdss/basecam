@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-01 18:21:08
+# @Last modified time: 2019-10-01 18:24:15
 
 import abc
 import asyncio
@@ -401,10 +401,11 @@ class Camera(LoggerMixIn, metaclass=abc.ABCMeta):
         await self._connect_internal(**self.config_params)
         self.connected = True
 
-        # Get the same logger as the camera system but uses the UID of the
-        # camera as prefix for messages from this camera.
+        # Get the same logger as the camera system but uses the UID or name of
+        # the camera as prefix for messages from this camera.
+        log_header = self.uid or self.name
         LoggerMixIn.__init__(self, self.camera_system.logger.name,
-                             log_header=f'[{self.uid.upper()}]: ')
+                             log_header=f'[{log_header.upper()}]: ')
 
         self.log('camera connected.')
         self.camera_system.notifier.notify(CameraEvent.CAMERA_OPEN,
