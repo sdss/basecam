@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-02 01:39:45
+# @Last modified time: 2019-10-01 18:21:08
 
 import abc
 import asyncio
@@ -423,11 +423,37 @@ class Camera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         pass
 
-    @abc.abstractproperty
-    def uid(self):
-        """Get the unique identifier for the camera (e.g., serial number)."""
+    @property
+    def _uid(self):
+        """Get the unique identifier from the camera (e.g., serial number).
 
-        pass
+        This method can be internally overridden to return the UID of the
+        camera by calling the internal camera firmware.
+
+        """
+
+        return None
+
+    @property
+    def uid(self):
+        """Returns the unique identifier of the camera.
+
+        Calls `._uid` to get the unique identifier directly from the camera
+        firmware. Otherwise, returns the UID from the configuration, or `None`
+        if not defined.
+
+        """
+
+        uid_from_camera = self._uid
+        uid_from_config = self.config_params.get('uid', None)
+
+        if uid_from_camera and uid_from_config:
+            assert uid_from_camera == uid_from_config, 'mismatch between config and camera UID.'
+            return uid_from_camera
+        elif uid_from_camera:
+            return uid_from_camera
+        else:
+            return uid_from_config
 
     async def expose(self, exposure_time):
         """Exposes the camera."""
