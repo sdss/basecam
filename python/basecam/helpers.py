@@ -7,26 +7,38 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-08-05 14:30:01
+# @Last modified time: 2019-10-02 01:09:08
 
 import asyncio
 import logging
 from contextlib import suppress
 
-from . import log
+from .utils import get_logger
 
 
 class LoggerMixIn(object):
-    """A mixin to provide easy logging with a header."""
+    """A mixin to provide easy logging with a header.
 
-    log_header = None
+    Parameters
+    ----------
+    name : str
+        The name of the logger to which to output.
+    log_header : str
+        A header to prefix to each message.
+
+    """
+
+    def __init__(self, name, log_header=None):
+
+        self.logger = get_logger(name)
+        self.log_header = log_header
 
     def log(self, message, level=logging.DEBUG, use_header=True):
         """Logs a message with a header."""
 
-        header = self.log_header or '' if use_header else ''
+        header = (self.log_header or '') if use_header else ''
 
-        log.log(level, header + message)
+        self.logger.log(level, header + message)
 
 
 class Poller(object):
