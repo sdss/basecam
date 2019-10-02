@@ -7,18 +7,20 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-09-25 20:20:58
+# @Last modified time: 2019-10-02 01:39:45
 
 import abc
 import asyncio
 import logging
+import warnings
 
-from .exceptions import BasecamNotImplemented
+from .exceptions import BasecamNotImplemented, BasecamUserWarning
 from .helpers import LoggerMixIn, Poller
+from .notifier import CameraEvent, CameraSystemEvent, EventNotifier
 from .utils.configuration import read_yaml_file
 
 
-class BaseCameraSystem(LoggerMixIn):
+class CameraSystem(LoggerMixIn):
     """A base class for the camera system.
 
     Provides an abstract class for the camera system, including camera
@@ -33,6 +35,11 @@ class BaseCameraSystem(LoggerMixIn):
         A dictionary with the configuration parameters for the multiple
         cameras that can be present in the system, or the path to a YAML file.
         Refer to the documentation for details on the accepted format.
+    logger_name : str
+        The name of the logger to use. If not specified, the name of the class
+        will be used.
+    log_header : str
+        A string to be prefixed to each message logged.
     loop
         The asyncio event loop.
 
@@ -46,11 +53,8 @@ class BaseCameraSystem(LoggerMixIn):
     def __new__(cls, *args, **kwargs):
 
         assert cls.camera_class, 'camera_class must be overriden when subclassing.'
-        assert isinstance(cls.camera_class, Camera) and cls.camera_class != Camera, \
+        assert issubclass(cls.camera_class, Camera) and cls.camera_class != Camera, \
             'camera_class must be a subclass of Camera.'
-
-        if cls.log_header is None:
-            cls.log_header = f'[{cls.__name__.upper()}]: '
 
         # Implements singleton
         if not cls._instance:
@@ -61,7 +65,12 @@ class BaseCameraSystem(LoggerMixIn):
 
         return cls._instance
 
-    def __init__(self, config=None, loop=None):
+    def __init__(self, config=None, logger_name=None, log_header=None, loop=None):
+
+        logger_name = logger_name or self.__class__.__name__.upper()
+        log_header = log_header or f'[{logger_name.upper()}]: '
+
+        LoggerMixIn.__init__(self, logger_name, log_header=log_header)
 
         self.config = config
         self.config_file = None
@@ -73,15 +82,18 @@ class BaseCameraSystem(LoggerMixIn):
 
         self._camera_poller = None
 
+        #: .EventNotifier: Notifies of `.CameraSystemEvent` and `.CameraEvent` events.
+        self.notifier = EventNotifier()
+
         if config and not isinstance(config, dict):
             self.config_file = config
             self.config = read_yaml_file(self.config)
             self.log(f'read configuration file from {self.config_file}')
 
         # Custom setup for the camera system.
-        self._camera_system_internal()
+        self.setup_camera_system()
 
-    def _camera_system_internal(self):
+    def setup_camera_system(self):
         """Setup custom camera system.
 
         To be overridden by the subclass if needed.
@@ -103,15 +115,25 @@ class BaseCameraSystem(LoggerMixIn):
         Returns
         -------
         camera_params : `dict`
-            A dictionary with the camera parameters.
+            A dictionary with the camera parameters. If the camera is not
+            present in the configuration, returns a simple dictionary with the
+            ``name`` or ``uid``.
 
         """
 
         assert name or uid, 'either a name or unique identifier are required.'
-        assert self.config, 'camera system does not have a configuration.'
+
+        if not self.config:
+            warnings.warn('no configuration available. Returning empty '
+                          'camera configuration.', BasecamUserWarning)
+            return {'name': name or uid, 'uid': uid}
 
         if name:
-            assert name in self.config, f'cannot find configuration for {name!r}.'
+            if name not in self.config:
+                warnings.warn(f'cannot find configuration for {name!r}.',
+                              BasecamUserWarning)
+                return {'name': name or uid, 'uid': uid}
+
             config_params = {'name': name}
             config_params.update(self.config[name])
             return config_params
@@ -122,7 +144,11 @@ class BaseCameraSystem(LoggerMixIn):
                     config_params = {'name': name}
                     config_params.update(self.config[name])
                     return config_params
-            raise ValueError(f'cannot find configuration for UID={uid!r}.')
+
+            # No camera with this UID found.
+            warnings.warn(f'cannot find configuration for {name!r}.',
+                          BasecamUserWarning)
+            return {'name': name or uid, 'uid': uid}
 
     async def start_camera_poller(self, interval=1.):
         """Monitors changes in the camera list.
@@ -151,6 +177,8 @@ class BaseCameraSystem(LoggerMixIn):
             self._camera_poller = Poller(self._check_cameras)
 
         await self._camera_poller.set_delay(interval)
+
+        self.log('started camera poller.')
 
         return self
 
@@ -184,14 +212,14 @@ class BaseCameraSystem(LoggerMixIn):
                 to_remove.append(camera.name)
 
         for camera_name in to_remove:
-            self.remove_camera(camera_name)
+            await self.remove_camera(camera_name)
 
         # Checks cameras that are connected but not yet being handled.
         camera_uids = [camera.uid for camera in self.cameras]
         for uid in uids:
             if uid not in camera_uids:
                 self.log('detected new camera with UID {uid!r}.', logging.INFO)
-                await self.add_camera(uid=uid, use_config=True)
+                self.loop.create_task(self.add_camera(uid=uid, use_config=True))
 
     def get_connected_cameras(self):
         """Lists the connected cameras as reported by the camera system.
@@ -213,12 +241,13 @@ class BaseCameraSystem(LoggerMixIn):
 
         raise BasecamNotImplemented
 
-    async def add_camera(self, name=None, uid=None, use_config=True,
-                         force=False, **kwargs):
+    async def add_camera(self, name=None, uid=None, force=False, **kwargs):
         """Adds a new `.Camera` instance to `.cameras`.
 
-        If ``use_config=True``, the camera connection parameter will be
-        queried from the configuration using the provided ``name`` or ``uid``.
+        The configuration values (if any) found in the configuration that
+        match the ``name`` or ``uid`` of the camera will be used. These
+        parameters can be overridden by providing additional keyword values
+        for the corresponding parameters.
 
         Parameters
         ----------
@@ -226,15 +255,13 @@ class BaseCameraSystem(LoggerMixIn):
             The name of the camera.
         uid : str
             The unique identifier for the camera.
-        use_config : bool
-            Whether to read the information from the configuration.
         force : bool
             Forces the camera to stay in the `.CameraSystem` list even if it
             does not appear in the system camera list.
         kwargs
-            Other arguments to be passed to `.Camera` during initialisation.
-            If ``use_config=True``, these parameters override the default
-            configuration where applicable.
+            Other arguments to be passed to `.Camera` during
+            initialisation. These parameters override the default configuration
+            where applicable.
 
         Returns
         -------
@@ -245,35 +272,30 @@ class BaseCameraSystem(LoggerMixIn):
 
         assert name or uid, 'either name or uid are required.'
 
-        if use_config and self.config:
-            camera_params = self.get_camera_config(name=name, uid=uid)
-        else:
-            camera_params = {'name': name or uid, 'uid': uid}
-
+        # This returns the camera parameters or a placeholder dict with the
+        # name and uid of the camera, if the camera cannot be found in the
+        # configuration or there is no configuration whatsoever.
+        camera_params = self.get_camera_config(name=name, uid=uid)
         camera_params.update(kwargs)
 
-        name = camera_params['name']
+        name = camera_params.pop('name')
         if name in [camera.name for camera in self.cameras]:
-            self.log('a camera {name!r} is already connected.', logging.WARNING)
+            self.log('camera {name!r} is already connected.', logging.WARNING)
             return
 
-        self.log(f'adding camera with parameters {camera_params!r}')
+        self.log(f'adding camera {name!r} with parameters {camera_params!r}')
 
-        camera_params['camera_system'] = self
-        camera_params['force'] = force
-
-        camera = self.camera_class(**camera_params)
+        camera = self.camera_class(name, self, force=force, **camera_params)
 
         # If the autoconnect parameter is set, connects the camera.
-        connection_params = camera_params.get('connection_params', None)
-        if not connection_params or \
-                (connection_params and connection_params.get('autoconnect', True)):
+        connection_params = camera_params.get('connection_params', {})
+        if connection_params.get('autoconnect', True):
             await camera.connect()
 
         self.cameras.append(camera)
 
-        if self.actor:
-            self.actor.on_camera_connected(camera)
+        # Notify event
+        self.notifier.notify(CameraSystemEvent.CAMERA_CONNECTED, camera_params)
 
         return camera
 
@@ -297,8 +319,9 @@ class BaseCameraSystem(LoggerMixIn):
 
                 self.log(f'removed camera {name!r}.')
 
-                if self.actor:
-                    self.actor.on_camera_disconnected(camera)
+                # Notify event
+                self.notifier.notify(CameraSystemEvent.CAMERA_DISCONNECTED,
+                                     {'uid': camera.uid, 'name': camera.name})
 
                 return
 
@@ -329,11 +352,11 @@ class BaseCameraSystem(LoggerMixIn):
         return asyncio.run_coroutine_threadsafe(self.remove_camera(uid=uid), self.loop).result()
 
 
-class BaseCamera(object, metaclass=abc.ABCMeta):
+class Camera(LoggerMixIn, metaclass=abc.ABCMeta):
     """A base class for wrapping a camera API in a standard implementation.
 
-    Instantiating the `.Camera` class does not open the camera and makes it
-    ready to be used. To do that, call and await `.connect`.
+    Instantiating the `.Camera` class does not open the camera and makes
+    it ready to be used. To do that, call and await `.connect`.
 
     Parameters
     ----------
@@ -344,48 +367,60 @@ class BaseCamera(object, metaclass=abc.ABCMeta):
     force : bool
         Forces the camera to stay in the `.CameraSystem` list even if it
         does not appear in the system camera list.
-    connection_params : dict
-        A series of parameters to be passed to the camera to open
-        the connection. The format of the parameters must follow the structure
-        of the configuration file.
-    kwargs : dict
-        Other parameters used to define the camera geometry, defaults, etc.
-        The format of the parameters must follow the structure of the
-        configuration file.
+    config_params : dict
+        Parameters used to define how to connect to the camera, its geometry,
+        initialisation parameters, etc. The format of the parameters must
+        follow the structure of the configuration file.
 
     """
 
-    def __init__(self, name, camera_system, force=False, connection_params=None,
-                 **kwargs):
+    def __init__(self, name, camera_system, force=False, **config_params):
 
         self.name = name
 
         self.camera_system = camera_system
-        self.actor = self.camera_system.actor
+
+        self.connected = False
 
         self.force = force
+        self.config_params = config_params
 
-        self.connection_params = connection_params or {}
-
-    async def connect(self, **connection_params):
+    async def connect(self, **user_config_params):
         """Connects the camera and performs all the necessary setup.
 
         Parameters
         ----------
-        connection_params : dict
-            A series of keyword arguments to be passed to the camera to open
-            the connection.
+        user_config_params : dict
+            A series of keyword arguments that override the configuration
+            parameters defined during the object instantiation.
 
         """
 
-        self.connection_params.update(connection_params or {})
+        self.config_params.update(user_config_params)
 
-        await self._connect_internal(**connection_params)
+        await self._connect_internal(**self.config_params)
+        self.connected = True
+
+        # Get the same logger as the camera system but uses the UID of the
+        # camera as prefix for messages from this camera.
+        LoggerMixIn.__init__(self, self.camera_system.logger.name,
+                             log_header=f'[{self.uid.upper()}]: ')
+
+        self.log('camera connected.')
+        self.camera_system.notifier.notify(CameraEvent.CAMERA_OPEN,
+                                           self._get_basic_payload())
 
         return self
 
+    def _get_basic_payload(self):
+        """Returns a dictionary with basic payload for notifying events."""
+
+        return {'uid': self.uid, 'name': self.name}
+
     @abc.abstractmethod
-    async def _connect_internal(self):
+    async def _connect_internal(self, **config_params):
+        """Internal method to connect the camera."""
+
         pass
 
     @abc.abstractproperty
@@ -394,14 +429,27 @@ class BaseCamera(object, metaclass=abc.ABCMeta):
 
         pass
 
-    async def expose(self, exposure_time=None):
+    async def expose(self, exposure_time):
         """Exposes the camera."""
 
-        await self._expose_internal()
+        await self._expose_internal(exposure_time)
 
     @abc.abstractmethod
     async def _expose_internal(self, exposure_time, shutter=True):
+        """Internal method to handle camera exposures."""
+
         pass
 
     async def shutdown(self):
+        """Shuts down the camera."""
+
+        await self._disconnect_internal()
+
+        self.camera_system.notifier.notify(CameraEvent.CAMERA_CLOSED,
+                                           self._get_basic_payload())
+
+    @abc.abstractmethod
+    async def _disconnect_internal(self):
+        """Internal method to disconnect a camera."""
+
         pass
