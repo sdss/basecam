@@ -7,12 +7,23 @@ API Reference
 Camera
 ------
 
-.. automodule:: basecam.camera
+.. autoclass:: basecam.camera.CameraSystem
     :members:
+
+.. autoclass:: basecam.camera.Camera
+    :members:
+    :private-members:
 
 
 Notifier
 --------
 
 .. automodule:: basecam.notifier
+    :members:
+
+
+Helpers
+-------
+
+.. automodule:: basecam.helpers
     :members:
