@@ -50,14 +50,14 @@ class CameraSystem(LoggerMixIn):
 
     _instance = None
 
-    #: The subclass of `.Camera` to use with this class.
+    #: The subclass of `.BaseCamera` to use with this class.
     camera_class = None
 
     def __new__(cls, *args, **kwargs):
 
         assert cls.camera_class, 'camera_class must be overriden when subclassing.'
-        assert issubclass(cls.camera_class, Camera) and cls.camera_class != Camera, \
-            'camera_class must be a subclass of Camera.'
+        assert issubclass(cls.camera_class, BaseCamera) and cls.camera_class != BaseCamera, \
+            'camera_class must be a subclass of BaseCamera.'
 
         # Implements singleton
         if not cls._instance:
@@ -228,7 +228,7 @@ class CameraSystem(LoggerMixIn):
         """Lists the connected cameras as reported by the camera system.
 
         This method should not be confused with `.cameras`, which lists the
-        `.Camera` instance currently being handled by the `.CameraSystem`.
+        `.BaseCamera` instance currently being handled by the `.CameraSystem`.
         `.get_connected_cameras` returns the cameras that the camera API
         believes are connected at any given time. While both lists are likely
         to match if the camera poller or camera event handling is used, it does
@@ -262,14 +262,14 @@ class CameraSystem(LoggerMixIn):
             Forces the camera to stay in the `.CameraSystem` list even if it
             does not appear in the system camera list.
         kwargs
-            Other arguments to be passed to `.Camera` during
+            Other arguments to be passed to `.BaseCamera` during
             initialisation. These parameters override the default configuration
             where applicable.
 
         Returns
         -------
-        camera : `.Camera`
-            The new `.Camera` instance.
+        camera
+            The new camera instance.
 
         """
 
