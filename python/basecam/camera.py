@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-03 06:44:04
+# @Last modified time: 2019-10-03 18:28:49
 
 import abc
 import asyncio
@@ -16,9 +16,10 @@ import warnings
 
 from astropy.io import fits
 
+from .events import CameraEvent, CameraSystemEvent
 from .exceptions import BasecamNotImplemented, BasecamUserWarning
 from .helpers import LoggerMixIn, Poller, create_fits_image
-from .notifier import CameraEvent, CameraSystemEvent, EventNotifier
+from .notifier import EventNotifier
 from .utils.configuration import read_yaml_file
 
 
