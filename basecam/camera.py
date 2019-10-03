@@ -592,7 +592,7 @@ class Camera(LoggerMixIn, metaclass=abc.ABCMeta):
         if not self.has_shutter:
             return
 
-        return await self._get_shutter_internal(shutter_open)
+        return await self._set_shutter_internal(shutter_open)
 
     async def get_shutter(self):
         """Gets the position of the shutter."""
@@ -600,7 +600,7 @@ class Camera(LoggerMixIn, metaclass=abc.ABCMeta):
         if not self.has_shutter:
             return False
 
-        return await self._set_shutter_internal()
+        return await self._get_shutter_internal()
 
     async def shutdown(self):
         """Shuts down the camera."""
