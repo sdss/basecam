@@ -367,7 +367,7 @@ class CameraSystem(LoggerMixIn):
         self.shutdown()
 
 
-class Camera(LoggerMixIn, metaclass=abc.ABCMeta):
+class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
     """A base class for wrapping a camera API in a standard implementation.
 
     Instantiating the `.Camera` class does not open the camera and makes
