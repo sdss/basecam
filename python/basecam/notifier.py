@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-02 00:15:37
+# @Last modified time: 2019-10-03 05:11:26
 
 import asyncio
 import contextlib
@@ -27,8 +27,9 @@ class CameraEvent(enum.Enum):
     CAMERA_OPEN = enum.auto()
     CAMERA_CLOSED = enum.auto()
     EXPOSURE_STARTED = enum.auto()
-    EXPOSURE_READING = enum.auto()
     EXPOSURE_FLUSHING = enum.auto()
+    EXPOSURE_EXPOSING = enum.auto()
+    EXPOSURE_READING = enum.auto()
     EXPOSURE_DONE = enum.auto()
     EXPOSURE_FAILED = enum.auto()
 
