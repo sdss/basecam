@@ -34,6 +34,8 @@ class CameraSystem(LoggerMixIn):
 
     Parameters
     ----------
+    camera_class : .BaseCamera subclass
+        The subclass of `.BaseCamera` to use with this camera system.
     config : dict or path
         A dictionary with the configuration parameters for the multiple
         cameras that can be present in the system, or the path to a YAML file.
@@ -50,14 +52,7 @@ class CameraSystem(LoggerMixIn):
 
     _instance = None
 
-    #: The subclass of `.BaseCamera` to use with this class.
-    camera_class = None
-
     def __new__(cls, *args, **kwargs):
-
-        assert cls.camera_class, 'camera_class must be overriden when subclassing.'
-        assert issubclass(cls.camera_class, BaseCamera) and cls.camera_class != BaseCamera, \
-            'camera_class must be a subclass of BaseCamera.'
 
         # Implements singleton
         if not cls._instance:
@@ -68,7 +63,13 @@ class CameraSystem(LoggerMixIn):
 
         return cls._instance
 
-    def __init__(self, config=None, logger_name=None, log_header=None, loop=None):
+    def __init__(self, camera_class, config=None, logger_name=None,
+                 log_header=None, loop=None):
+
+        assert issubclass(camera_class, BaseCamera) and camera_class != BaseCamera, \
+            'camera_class must be a subclass of BaseCamera.'
+
+        self.camera_class = camera_class
 
         logger_name = logger_name or self.__class__.__name__.upper()
         log_header = log_header or f'[{logger_name.upper()}]: '
