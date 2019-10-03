@@ -50,19 +50,6 @@ class CameraSystem(LoggerMixIn):
 
     """
 
-    _instance = None
-
-    def __new__(cls, *args, **kwargs):
-
-        # Implements singleton
-        if not cls._instance:
-            cls._instance = object.__new__(cls)
-        else:
-            cls._instance.log('camera system was already instantiated. '
-                              'This will reinitialise it.', logging.WARNING)
-
-        return cls._instance
-
     def __init__(self, camera_class, config=None, logger_name=None,
                  log_header=None, loop=None):
 
