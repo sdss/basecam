@@ -557,7 +557,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
                                  flavour='object', **kwargs)
 
     @abc.abstractmethod
-    async def _expose_internal(self, exposure_time, shutter=True):
+    async def _expose_internal(self, exposure_time):
         """Internal method to handle camera exposures.
 
         Returns
