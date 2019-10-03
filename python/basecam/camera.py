@@ -408,10 +408,15 @@ class Camera(LoggerMixIn, metaclass=abc.ABCMeta):
                              log_header=f'[{log_header.upper()}]: ')
 
         self.log('camera connected.')
-        self.camera_system.notifier.notify(CameraEvent.CAMERA_OPEN,
-                                           self._get_basic_payload())
+        self.notify(CameraEvent.CAMERA_OPEN)
 
         return self
+
+    def notify(self, event, payload=None):
+        """Notifies an event."""
+
+        payload = payload or self._get_basic_payload()
+        self.camera_system.notifier.notify(event, payload)
 
     def _get_basic_payload(self):
         """Returns a dictionary with basic payload for notifying events."""
@@ -472,8 +477,7 @@ class Camera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         await self._disconnect_internal()
 
-        self.camera_system.notifier.notify(CameraEvent.CAMERA_CLOSED,
-                                           self._get_basic_payload())
+        self.notify(CameraEvent.CAMERA_CLOSED)
 
     @abc.abstractmethod
     async def _disconnect_internal(self):
