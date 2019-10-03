@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-03 05:16:29
+# @Last modified time: 2019-10-03 06:44:04
 
 import abc
 import asyncio
@@ -339,7 +339,8 @@ class CameraSystem(LoggerMixIn):
 
         """
 
-        return asyncio.run_coroutine_threadsafe(self.add_camera(uid=uid), self.loop).result()
+        return asyncio.run_coroutine_threadsafe(self.add_camera(uid=uid),
+                                                self.loop).result()
 
     def on_camera_disconnected(self, uid):
         """Event handler for a camera that was disconnected.
@@ -351,7 +352,8 @@ class CameraSystem(LoggerMixIn):
 
         """
 
-        return asyncio.run_coroutine_threadsafe(self.remove_camera(uid=uid), self.loop).result()
+        return asyncio.run_coroutine_threadsafe(self.remove_camera(uid=uid),
+                                                self.loop).result()
 
     def shutdown(self):
         """Shuts down the system."""
