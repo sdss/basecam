@@ -351,6 +351,15 @@ class CameraSystem(LoggerMixIn):
 
         return asyncio.run_coroutine_threadsafe(self.remove_camera(uid=uid), self.loop).result()
 
+    def shutdown(self):
+        """Shuts down the system."""
+
+        pass
+
+    def __del__(self):
+
+        self.shutdown()
+
 
 class Camera(LoggerMixIn, metaclass=abc.ABCMeta):
     """A base class for wrapping a camera API in a standard implementation.
