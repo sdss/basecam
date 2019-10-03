@@ -446,7 +446,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         pass
 
     @property
-    def _uid(self):
+    def _uid_internal(self):
         """Get the unique identifier from the camera (e.g., serial number).
 
         This method can be internally overridden to return the UID of the
@@ -460,13 +460,13 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
     def uid(self):
         """Returns the unique identifier of the camera.
 
-        Calls `._uid` to get the unique identifier directly from the camera
-        firmware. Otherwise, returns the UID from the configuration, or `None`
-        if not defined.
+        Calls `._uid_internal` to get the unique identifier directly from the
+        camera firmware. Otherwise, returns the UID from the configuration, or
+        `None` if not defined.
 
         """
 
-        uid_from_camera = self._uid
+        uid_from_camera = self._uid_internal
         uid_from_config = self.config_params.get('uid', None)
 
         if uid_from_camera and uid_from_config:
