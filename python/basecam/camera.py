@@ -7,15 +7,17 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-01 18:24:15
+# @Last modified time: 2019-10-03 05:16:29
 
 import abc
 import asyncio
 import logging
 import warnings
 
+from astropy.io import fits
+
 from .exceptions import BasecamNotImplemented, BasecamUserWarning
-from .helpers import LoggerMixIn, Poller
+from .helpers import LoggerMixIn, Poller, create_fits_image
 from .notifier import CameraEvent, CameraSystemEvent, EventNotifier
 from .utils.configuration import read_yaml_file
 
@@ -390,6 +392,7 @@ class Camera(LoggerMixIn, metaclass=abc.ABCMeta):
         self.camera_system = camera_system
 
         self.connected = False
+        self.has_shutter = config_params.pop('shutter', False)
 
         self.force = force
         self.config_params = config_params
@@ -470,22 +473,138 @@ class Camera(LoggerMixIn, metaclass=abc.ABCMeta):
         else:
             return uid_from_config
 
-    async def expose(self, exposure_time):
-        """Exposes the camera."""
+    async def expose(self, exposure_time, flavour='object', shutter=True, header=None):
+        """Exposes the camera.
 
-        await self._expose_internal(exposure_time)
+        This is a general method to expose the camera. Other methods such as
+        `.bias` or `.dark` ultimately call `.expose` with the appropriate
+        parameters.
+
+        Parameters
+        ----------
+        exposure_time : float
+            The exposure time of the image.
+        flavour : str
+            The type of image.
+        shutter : bool
+            Whether to open the shutter while exposing (`True`) or not
+            (`False`).
+        header : ~astropy.io.fits.Header or dict
+            Keyword pairs (as a dictionary or astropy
+            `~astropy.io.fits.Header`) to be added to the image header.
+
+        Returns
+        -------
+        fits : `astropy.io.fits.HDUList`
+            An `astropy.io.fits.HDUList` object with a single extension
+            containing the image data and header.
+
+
+        """
+
+        # Commands the shutter
+        if self.has_shutter and self.get_shutter() != shutter:
+            await self.set_shutter(shutter)
+
+        self.notify(CameraEvent.EXPOSURE_STARTED)
+
+        # Takes the image.
+        image = await self._expose_internal(exposure_time)
+
+        if not isinstance(image, fits.HDUList):
+            image = create_fits_image(image, exposure_time)
+
+        image[0].header.update({'FLAVOUR': (flavour.upper(), 'Image type')})
+
+        self.notify(CameraEvent.EXPOSURE_DONE)
+
+        # Closes the shutter
+        if self.has_shutter and self.get_shutter():
+            await self.set_shutter(False)
+
+        return image
+
+    async def bias(self, **kwargs):
+        """Take a bias image."""
+
+        kwargs.pop('shutter', None)
+
+        return await self.expose(0.0, shutter=False, flavour='bias', **kwargs)
+
+    async def dark(self, exposure_time, **kwargs):
+        """Take a dark image."""
+
+        kwargs.pop('shutter', None)
+
+        return await self.expose(exposure_time, shutter=False,
+                                 flavour='dark', **kwargs)
+
+    async def flat(self, exposure_time, **kwargs):
+        """Take a flat image."""
+
+        return await self.expose(exposure_time, flavour='flat', **kwargs)
+
+    async def science(self, exposure_time, **kwargs):
+        """Take a science image."""
+
+        kwargs.pop('shutter', None)
+
+        return await self.expose(exposure_time, shutter=True,
+                                 flavour='object', **kwargs)
 
     @abc.abstractmethod
     async def _expose_internal(self, exposure_time, shutter=True):
-        """Internal method to handle camera exposures."""
+        """Internal method to handle camera exposures.
+
+        Returns
+        -------
+        fits : `~astropy.io.fits.HDUList`
+            An HDU list with a single extension containing the image data
+            and header.
+
+        """
 
         pass
+
+    async def _set_shutter_internal(self, shutter_open):
+        """Internal method to set the position of the shutter."""
+
+        raise NotImplementedError
+
+    async def _get_shutter_internal(self):
+        """Internal method to get the position of the shutter."""
+
+        raise NotImplementedError
+
+    async def set_shutter(self, shutter_open):
+        """Sets the position of the shutter.
+
+        Parameters
+        ----------
+        shutter_open : bool
+            If `True` moves the shutter open, otherwise closes it.
+
+        """
+
+        if not self.has_shutter:
+            return
+
+        return await self._get_shutter_internal(shutter_open)
+
+    async def get_shutter(self):
+        """Gets the position of the shutter."""
+
+        if not self.has_shutter:
+            return False
+
+        return await self._set_shutter_internal()
 
     async def shutdown(self):
         """Shuts down the camera."""
 
         await self._disconnect_internal()
 
+        self.log('camera has been disconnected.')
         self.notify(CameraEvent.CAMERA_CLOSED)
 
     @abc.abstractmethod
