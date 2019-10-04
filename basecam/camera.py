@@ -28,7 +28,43 @@ from .utils import create_fits_image, read_yaml_file
 __all__ = ['CameraSystem', 'BaseCamera', 'VirtualCamera']
 
 
-class CameraSystem(LoggerMixIn):
+class ExposureFlavourMixIn(object):
+    """Methods to take exposures with different flavours."""
+
+    async def bias(self, *args, **kwargs):
+        """Take a bias image."""
+
+        kwargs.pop('flavour', None)
+        kwargs.pop('shutter', None)
+
+        return await self.expose(*args, 0.0, shutter=False, flavour='bias', **kwargs)
+
+    async def dark(self, *args, **kwargs):
+        """Take a dark image."""
+
+        kwargs.pop('flavour', None)
+        kwargs.pop('shutter', None)
+
+        return await self.expose(*args, shutter=False, flavour='dark', **kwargs)
+
+    async def flat(self, *args, **kwargs):
+        """Take a flat image."""
+
+        kwargs.pop('flavour', None)
+        kwargs.pop('shutter', None)
+
+        return await self.expose(*args, shutter=True, flavour='flat', **kwargs)
+
+    async def science(self, *args, **kwargs):
+        """Take a science image."""
+
+        kwargs.pop('flavour', None)
+        kwargs.pop('shutter', None)
+
+        return await self.expose(*args, shutter=True, flavour='object', **kwargs)
+
+
+class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
     """A base class for the camera system.
 
     Provides an abstract class for the camera system, including camera
@@ -364,7 +400,7 @@ class CameraSystem(LoggerMixIn):
             await self.stop_camera_poller()
 
 
-class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
+class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
     """A base class for wrapping a camera API in a standard implementation.
 
     Instantiating the `.Camera` class does not open the camera and makes
@@ -524,34 +560,6 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             await self.set_shutter(False)
 
         return image
-
-    async def bias(self, **kwargs):
-        """Take a bias image."""
-
-        kwargs.pop('shutter', None)
-
-        return await self.expose(0.0, shutter=False, flavour='bias', **kwargs)
-
-    async def dark(self, exposure_time, **kwargs):
-        """Take a dark image."""
-
-        kwargs.pop('shutter', None)
-
-        return await self.expose(exposure_time, shutter=False,
-                                 flavour='dark', **kwargs)
-
-    async def flat(self, exposure_time, **kwargs):
-        """Take a flat image."""
-
-        return await self.expose(exposure_time, flavour='flat', **kwargs)
-
-    async def science(self, exposure_time, **kwargs):
-        """Take a science image."""
-
-        kwargs.pop('shutter', None)
-
-        return await self.expose(exposure_time, shutter=True,
-                                 flavour='object', **kwargs)
 
     @abc.abstractmethod
     async def _expose_internal(self, exposure_time):
