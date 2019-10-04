@@ -7,7 +7,7 @@ cache:
 sudo: false
 
 python:
-- '3.6'
+- '3.7'
 
 os:
 - linux
@@ -29,10 +29,10 @@ install:
 - pip install pytest
 - pip install pytest-coverage
 - pip install coveralls
-- python setup.py install
+- pip install .[dev]
 
 script:
-- pytest python/basecam/tests --cov python/basecam --cov-report html
+- pytest tests --cov basecam --cov-report html
 
 after_success:
 - coveralls
