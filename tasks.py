@@ -53,11 +53,14 @@ def clean(ctx):
     """Cleans up the crap before a Pip build"""
 
     print('Cleaning')
-    ctx.run('rm -rf htmlcov')
+    ctx.run('rm -rf htmlcov .coverage')
     ctx.run('rm -rf build')
     ctx.run('rm -rf dist')
     ctx.run('rm -rf *.egg-info')
     ctx.run('rm -rf python/*.egg-info')
+    ctx.run('rm -rf **/htmlcov **/.coverage')
+    ctx.run('rm -rf .tox')
+    ctx.run('rm -rf .pytest_cache **/.pytest_cache')
 
 
 @task(clean)
