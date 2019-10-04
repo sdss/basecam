@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-03 21:16:48
+# @Last modified time: 2019-10-03 21:53:31
 
 import asyncio
 
@@ -15,6 +15,7 @@ import pytest
 
 from basecam.camera import VirtualCamera
 from basecam.exceptions import BasecamNotImplemented, BasecamUserWarning
+from basecam.notifier import EventListener
 
 from .conftest import TEST_CONFIG_FILE, TestCameraSystem
 
@@ -103,3 +104,35 @@ async def test_config_from_uid(camera_system):
     data = camera_system.get_camera_config(uid='DEV_12345')
 
     assert data['name'] == 'test_camera'
+
+
+async def test_listener(camera_system, event_loop):
+
+    events = []
+
+    async def store_event(event, payload):
+        events.append(event)
+
+    listener = EventListener(event_loop)
+    listener.register_callback(store_event)
+
+    camera_system.notifier.register_listener(listener)
+
+    await camera_system.add_camera('test_camera')
+    await asyncio.sleep(0.1)
+
+    n_events = len(events)
+    assert n_events > 0
+
+    # Stop the listener and check that we don't receive more events
+    await listener.stop_listener()
+    await camera_system.remove_camera('test_camera')
+    assert len(events) == n_events
+
+    # Restart
+
+    await listener.start_listener()
+    await camera_system.add_camera('test_camera')
+    await asyncio.sleep(0.1)
+
+    assert len(events) > n_events

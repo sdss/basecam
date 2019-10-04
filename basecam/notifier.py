@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-03 18:27:51
+# @Last modified time: 2019-10-03 21:50:30
 
 import asyncio
 import contextlib
@@ -85,19 +85,21 @@ class EventListener(asyncio.Queue):
 
     def __init__(self, loop=None):
 
+        asyncio.Queue.__init__(self)
+
         self.callbacks = []
 
         self.loop = loop or asyncio.get_running_loop()
 
         self.listerner_task = None
-        self.loop.create_task(self.start_listener())
+        self.listerner_task = self.loop.create_task(self._process_queue())
 
-    def _process_queue(self):
+    async def _process_queue(self):
         """Processes the queue and calls callbacks."""
 
         while True:
             try:
-                event, payload = self.get()
+                event, payload = await self.get()
             except TypeError:
                 continue
 

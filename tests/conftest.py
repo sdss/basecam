@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-03 20:11:21
+# @Last modified time: 2019-10-03 21:31:58
 
 # import asyncio
 import os
@@ -55,7 +55,12 @@ def config():
 async def camera_system(config, event_loop):
 
     camera_system = TestCameraSystem(VirtualCamera, config=config, loop=event_loop).setup()
+
     yield camera_system
+
+    for listener in camera_system.notifier.listeners:
+        await listener.stop_listener()
+
     await camera_system.shutdown()
 
 
