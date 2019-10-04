@@ -7,13 +7,14 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-03 20:11:16
+# @Last modified time: 2019-10-03 20:24:49
 
 import asyncio
 
 import pytest
 
 from basecam.camera import VirtualCamera
+from basecam.exceptions import BasecamNotImplemented
 
 from .conftest import TEST_CONFIG_FILE, TestCameraSystem
 
@@ -64,3 +65,14 @@ async def test_camera_connected(camera_system):
     await asyncio.sleep(0.1)
 
     assert len(camera_system.cameras) == 0
+
+
+async def test_get_cameras_not_implemented(camera_system, mocker):
+
+    camera_system.get_connected_cameras = mocker.Mock(side_effect=BasecamNotImplemented)
+
+    await camera_system.start_camera_poller(0.1)
+    await asyncio.sleep(0.5)
+
+    assert camera_system._camera_poller is not None
+    assert camera_system._camera_poller.running is False

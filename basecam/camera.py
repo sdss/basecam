@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-03 19:59:46
+# @Last modified time: 2019-10-03 20:59:09
 
 import abc
 import asyncio
@@ -188,10 +188,13 @@ class CameraSystem(LoggerMixIn):
         try:
             uids = self.get_connected_cameras()
         except BasecamNotImplemented:
-            await self.stop_camera_poller()
             self.log('get_connected cameras is not implemented. '
                      'Stopping camera poller.', logging.ERROR)
-            return
+            # It's important to not do await self.stop_camera_poller()
+            # because that would stop the poller from inside the callback
+            # and that creates a max recursion error.
+            self.loop.create_task(self.stop_camera_poller())
+            return False
 
         # Checks cameras that are handled but not connected.
         to_remove = []
@@ -354,7 +357,7 @@ class CameraSystem(LoggerMixIn):
     async def shutdown(self):
         """Shuts down the system."""
 
-        if self._camera_poller:
+        if self._camera_poller and self._camera_poller.running:
             await self.stop_camera_poller()
 
 
