@@ -176,7 +176,7 @@ class CameraSystem(LoggerMixIn):
     async def stop_camera_poller(self):
         """Stops the camera poller if it is running."""
 
-        if self._camera_poller.running:
+        if self._camera_poller and self._camera_poller.running:
             await self._camera_poller.stop()
 
     async def _check_cameras(self):
