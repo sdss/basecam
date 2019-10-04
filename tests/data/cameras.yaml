@@ -1,0 +1,8 @@
+---
+
+test_camera:
+    uid: DEV_12345
+    shutter: true
+    connection_params:
+        device: /dev/camera
+        autoconnect: true
