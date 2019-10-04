@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-04 08:15:04
+# @Last modified time: 2019-10-04 12:22:00
 
 import abc
 import asyncio
@@ -389,6 +389,30 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
                 return camera
 
         return False
+
+    def expose(self, camera_name, exposure_time, **kwargs):
+        """Exposes a given camera and returns a FITS object.
+
+        Parameters
+        ----------
+        camera_name : str
+            The name of the camera to expose.
+        exposure_time : float
+            The exposure time of the image.
+        kwargs : dict
+            Other parameters to pass to `.BaseCamera.expose`.
+
+        Returns
+        -------
+        fits : `astropy.io.fits.HDUList`
+            An `astropy.io.fits.HDUList` object with a single extension
+            containing the image data and header.
+
+        """
+
+        camera = self.get_camera(name=camera_name)
+
+        return camera.expose(exposure_time, **kwargs)
 
     def on_camera_connected(self, uid):
         """Event handler for a newly connected camera.
