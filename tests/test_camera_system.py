@@ -7,9 +7,10 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-03 21:53:31
+# @Last modified time: 2019-10-04 12:25:26
 
 import asyncio
+import logging
 
 import pytest
 
@@ -88,6 +89,15 @@ async def test_config_bad_name(camera_system):
     assert data['uid'] is None
 
 
+async def test_config_bad_uid(camera_system):
+
+    with pytest.warns(BasecamUserWarning):
+        data = camera_system.get_camera_config(uid='BAD_UID')
+
+    assert data['name'] == 'BAD_UID'
+    assert data['uid'] == 'BAD_UID'
+
+
 async def test_no_config(camera_system):
 
     camera_system.config = None
@@ -104,6 +114,8 @@ async def test_config_from_uid(camera_system):
     data = camera_system.get_camera_config(uid='DEV_12345')
 
     assert data['name'] == 'test_camera'
+    assert data['uid'] == 'DEV_12345'
+    assert data['shutter'] is True
 
 
 async def test_listener(camera_system, event_loop):
@@ -136,3 +148,60 @@ async def test_listener(camera_system, event_loop):
     await asyncio.sleep(0.1)
 
     assert len(events) > n_events
+
+
+@pytest.mark.parametrize('param,value', [('name', 'test_camera'), ('uid', 'DEV_12345')])
+async def test_add_camerera_already_connected(camera_system, caplog, param, value):
+
+    camera = await eval(f'camera_system.add_camera({param}={value!r})')
+    assert camera
+    assert getattr(camera, param) == value
+
+    caplog.clear()
+
+    new_camera = await camera_system.add_camera(name='test_camera')
+
+    assert len(caplog.record_tuples) > 0
+
+    last_record = caplog.record_tuples[-1]
+    assert last_record[1] == logging.WARNING
+    assert 'already connected' in last_record[2]
+
+    assert new_camera == camera
+
+
+async def test_remove_camera_not_connected(camera_system):
+
+    with pytest.raises(ValueError):
+        await camera_system.remove_camera('not_connected_camera')
+
+
+@pytest.mark.parametrize('params', ['name="test_camera"', 'uid="DEV_12345"',
+                                    'name="test_camera", uid="DEV_12345"'])
+async def test_get_camera(camera_system, params):
+
+    await camera_system.add_camera(name='test_camera')
+
+    camera = eval(f'camera_system.get_camera({params})')
+
+    assert camera.name == 'test_camera'
+    assert camera.uid == 'DEV_12345'
+
+
+async def test_get_camera_not_found(camera_system):
+
+    camera = camera_system.get_camera('bad_camera')
+
+    assert camera is False
+
+
+async def test_expose(camera_system):
+
+    await camera_system.add_camera(name='test_camera')
+
+    exposure = await camera_system.science('test_camera', 5)
+
+    header = exposure[0].header
+    assert header['CAMNAME'] == 'TEST_CAMERA'
+    assert header['EXPTIME'] == 5
+    assert header['IMAGETYP'] == 'OBJECT'

@@ -7,12 +7,13 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-03 21:31:58
+# @Last modified time: 2019-10-04 11:04:35
 
 # import asyncio
 import os
 
 import pytest
+from asynctest import CoroutineMock
 
 from basecam.camera import CameraSystem, VirtualCamera
 from basecam.utils import read_yaml_file
@@ -67,5 +68,10 @@ async def camera_system(config, event_loop):
 @pytest.fixture
 async def camera(camera_system):
 
-    camera = await camera_system.add_camera('DEV_12345')
+    camera = await camera_system.add_camera('test_camera')
+
+    # We don't really want to mock _set_shutter_internal, just provide
+    # a method to track the calls received.
+    camera._set_shutter_internal = CoroutineMock(wraps=camera._set_shutter_internal)
+
     yield camera
