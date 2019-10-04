@@ -311,9 +311,10 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
         camera_params.update(kwargs)
 
         name = camera_params.pop('name')
-        if name in [camera.name for camera in self.cameras]:
-            self.log('camera {name!r} is already connected.', logging.WARNING)
-            return
+        connected_camera = self.get_camera(name)
+        if connected_camera:
+            self.log(f'camera {name!r} is already connected.', logging.WARNING)
+            return connected_camera
 
         self.log(f'adding camera {name!r} with parameters {camera_params!r}')
 
