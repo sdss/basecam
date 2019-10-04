@@ -7,9 +7,20 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-08-06 07:36:53
+# @Last modified time: 2019-10-04 00:05:41
 
 from clu.legacy import LegacyActor
 
 
-class CameraActor(LegacyActor)
+class CameraActor(LegacyActor):
+    """SDSS-style actor."""
+
+    def __init__(self, camera_system, *args, **kwargs):
+
+        self.camera_system = camera_system
+
+        # Pass the camera system instance as the second argument to each parser
+        # command (the first argument is always the actor command).
+        self.parser_args = [camera_system]
+
+        super().__init__(*args, **kwargs)
