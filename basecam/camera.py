@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-03 20:59:09
+# @Last modified time: 2019-10-04 08:15:04
 
 import abc
 import asyncio
@@ -23,6 +23,9 @@ from .exceptions import BasecamNotImplemented, BasecamUserWarning
 from .helpers import LoggerMixIn, Poller
 from .notifier import EventNotifier
 from .utils import create_fits_image, read_yaml_file
+
+
+__all__ = ['CameraSystem', 'BaseCamera', 'VirtualCamera']
 
 
 class CameraSystem(LoggerMixIn):
