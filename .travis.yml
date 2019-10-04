@@ -14,6 +14,10 @@ os:
 
 matrix:
   fast_finish: true
+  include:
+    - python: 3.8-dev
+      dist: xenial
+      sudo: true
 
 notifications:
   email: false
