@@ -326,10 +326,14 @@ class CameraSystem(LoggerMixIn):
         uid : str
             The unique identifier for the camera.
 
+        Returns
+        -------
+        task : `asyncio.Task`
+            The task calling `.add_camera`.
+
         """
 
-        return asyncio.run_coroutine_threadsafe(self.add_camera(uid=uid),
-                                                self.loop).result()
+        return self.loop.create_task(self.add_camera(uid=uid))
 
     def on_camera_disconnected(self, uid):
         """Event handler for a camera that was disconnected.
@@ -339,19 +343,20 @@ class CameraSystem(LoggerMixIn):
         uid : str
             The unique identifier for the camera.
 
+        Returns
+        -------
+        task : `asyncio.Task`
+            The task calling `.remove_camera`.
+
         """
 
-        return asyncio.run_coroutine_threadsafe(self.remove_camera(uid=uid),
-                                                self.loop).result()
+        return self.loop.create_task(self.remove_camera(uid=uid))
 
-    def shutdown(self):
+    async def shutdown(self):
         """Shuts down the system."""
 
-        pass
-
-    def __del__(self):
-
-        self.shutdown()
+        if self._camera_poller:
+            await self.stop_camera_poller()
 
 
 class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
