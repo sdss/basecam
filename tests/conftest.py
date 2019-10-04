@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-03 17:15:15
+# @Last modified time: 2019-10-03 19:57:16
 
 # import asyncio
 import os
@@ -54,3 +54,10 @@ async def camera_system(config, event_loop):
     camera_system = TestCameraSystem(VirtualCamera, config=config, loop=event_loop).setup()
     yield camera_system
     await camera_system.shutdown()
+
+
+@pytest.fixture
+async def camera(camera_system):
+
+    camera = await camera_system.add_camera('DEV_12345')
+    yield camera

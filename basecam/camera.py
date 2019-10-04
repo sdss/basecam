@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-03 18:22:32
+# @Last modified time: 2019-10-03 19:59:46
 
 import abc
 import asyncio
@@ -639,8 +639,6 @@ class VirtualCamera(BaseCamera):
 
     async def _expose_internal(self, exposure_time):
 
-        data = numpy.zeros((self.width, self.height), dtype=numpy.uint16)
-
         # Creates a spiral pattern
         xx = numpy.arange(-5, 5, 0.1)
         yy = numpy.arange(-5, 5, 0.1)
@@ -648,8 +646,8 @@ class VirtualCamera(BaseCamera):
         tile = numpy.sin(xg**2 + yg**2) / (xg**2 + yg**2)
 
         # Repeats the tile to match the size of the image.
-        data = numpy.tile(tile, (self.height // len(yy) + 1,
-                                 self.width // len(yy) + 1))
+        data = numpy.tile(tile.astype(numpy.uint16),
+                          (self.height // len(yy) + 1, self.width // len(yy) + 1))
         data = data[0:self.height, 0:self.width]
 
         obstime = astropy.time.Time('2000-01-01 00:00:00')
