@@ -13,6 +13,8 @@ matrix:
     - python: 3.7
       dist: xenial
       sudo: true
+      after_success:
+        - coveralls
     - python: 3.8-dev
       dist: xenial
       sudo: true
@@ -38,6 +40,3 @@ install:
 
 script:
   - pytest --cov basecam --cov-report html
-
-after_success:
-  - coveralls
