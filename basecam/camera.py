@@ -536,11 +536,10 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
             An `astropy.io.fits.HDUList` object with a single extension
             containing the image data and header.
 
-
         """
 
         # Commands the shutter
-        if self.has_shutter and self.get_shutter() != shutter:
+        if self.has_shutter and (await self.get_shutter()) is not shutter:
             await self.set_shutter(shutter)
 
         self.notify(CameraEvent.EXPOSURE_STARTED)
@@ -556,7 +555,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         self.notify(CameraEvent.EXPOSURE_DONE)
 
         # Closes the shutter
-        if self.has_shutter and self.get_shutter():
+        if self.has_shutter and (await self.get_shutter()):
             await self.set_shutter(False)
 
         return image
