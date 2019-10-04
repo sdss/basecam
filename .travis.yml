@@ -1,7 +1,7 @@
 language: python
 
 python:
-  - '3.7'
+  - 3.7
 
 dist: trusty
 
@@ -14,25 +14,25 @@ matrix:
       dist: xenial
       sudo: true
   allow_failures:
-    - 3.8-dev
+    - python: 3.8-dev
 
 notifications:
   email: false
 
 # repo branches to test
 branches:
-- master
+  - master
 
 install:
-- pip install -U pip wheel --quiet
-- pip install --upgrade setuptools --quiet
-- pip install pytest
-- pip install pytest-coverage
-- pip install coveralls
-- pip install .[dev]
+  - pip install -U pip wheel --quiet
+  - pip install --upgrade setuptools --quiet
+  - pip install pytest
+  - pip install pytest-coverage
+  - pip install coveralls
+  - pip install .[dev]
 
 script:
-- pytest --cov basecam --cov-report html
+  - pytest --cov basecam --cov-report html
 
 after_success:
-- coveralls
+  - coveralls
