@@ -167,11 +167,11 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
             config_params.update(self.config[name])
             return config_params
 
-        if uid:
-            for name in self.config:
-                if self.config[name]['uid'] == uid:
-                    config_params = {'name': name}
-                    config_params.update(self.config[name])
+        else:
+            for name_ in self.config:
+                if self.config[name_]['uid'] == uid:
+                    config_params = {'name': name_}
+                    config_params.update(self.config[name_])
                     return config_params
 
             # No camera with this UID found.
