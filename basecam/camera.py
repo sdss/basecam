@@ -550,7 +550,12 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         if not isinstance(image, fits.HDUList):
             image = create_fits_image(image, exposure_time)
 
-        image[0].header.update({'FLAVOUR': (flavour.upper(), 'Image type')})
+        image[0].header.update(
+            {
+                'IMAGETYP': (flavour.upper(), 'Image type'),
+                'CAMNAME': (self.name.upper(), 'Name of the camera'),
+            }
+        )
 
         self.notify(CameraEvent.EXPOSURE_DONE)
 
