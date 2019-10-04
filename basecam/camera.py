@@ -198,7 +198,7 @@ class CameraSystem(LoggerMixIn):
         to_remove = []
         for camera in self.cameras:
             if camera.uid not in uids and not camera.force:
-                self.log('camera with UID {camera.uid!r} ({camera.name}) '
+                self.log(f'camera with UID {camera.uid!r} ({camera.name}) '
                          'is not connected.', logging.INFO)
                 to_remove.append(camera.name)
 
@@ -209,8 +209,7 @@ class CameraSystem(LoggerMixIn):
         camera_uids = [camera.uid for camera in self.cameras]
         for uid in uids:
             if uid not in camera_uids:
-                self.log('detected new camera with UID {uid!r}.', logging.INFO)
-                self.loop.create_task(self.add_camera(uid=uid, use_config=True))
+                self.log(f'detected new camera with UID {uid!r}.', logging.INFO)
 
     def get_connected_cameras(self):
         """Lists the connected cameras as reported by the camera system.
