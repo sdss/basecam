@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-03 18:22:50
+# @Last modified time: 2019-10-03 20:11:16
 
 import asyncio
 
@@ -15,8 +15,18 @@ import pytest
 
 from basecam.camera import VirtualCamera
 
+from .conftest import TEST_CONFIG_FILE, TestCameraSystem
+
 
 pytestmark = pytest.mark.asyncio
+
+
+async def test_load_config():
+
+    camera_system = TestCameraSystem(VirtualCamera, config=TEST_CONFIG_FILE)
+
+    assert isinstance(camera_system, TestCameraSystem)
+    assert 'test_camera' in camera_system.config
 
 
 async def test_system(camera_system):

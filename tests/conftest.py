@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-03 19:57:16
+# @Last modified time: 2019-10-03 20:11:21
 
 # import asyncio
 import os
@@ -16,6 +16,9 @@ import pytest
 
 from basecam.camera import CameraSystem, VirtualCamera
 from basecam.utils import read_yaml_file
+
+
+TEST_CONFIG_FILE = os.path.dirname(__file__) + '/data/cameras.yaml'
 
 
 class TestCameraSystem(CameraSystem):
@@ -37,7 +40,7 @@ class TestCameraSystem(CameraSystem):
 
 @pytest.fixture(scope='module')
 def config():
-    return read_yaml_file(os.path.dirname(__file__) + '/data/cameras.yaml')
+    return read_yaml_file(TEST_CONFIG_FILE)
 
 
 # @pytest.yield_fixture(scope='module')
