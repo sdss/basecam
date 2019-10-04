@@ -210,6 +210,7 @@ class CameraSystem(LoggerMixIn):
         for uid in uids:
             if uid not in camera_uids:
                 self.log(f'detected new camera with UID {uid!r}.', logging.INFO)
+                await self.add_camera(uid=uid, use_config=True)
 
     def get_connected_cameras(self):
         """Lists the connected cameras as reported by the camera system.
