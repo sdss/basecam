@@ -81,10 +81,7 @@ class CameraSystem(LoggerMixIn):
             self.config = read_yaml_file(self.config)
             self.log(f'read configuration file from {self.config_file}')
 
-        # Custom setup for the camera system.
-        self.setup_camera_system()
-
-    def setup_camera_system(self):
+    def setup(self):
         """Setup custom camera system.
 
         To be overridden by the subclass if needed.
