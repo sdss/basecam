@@ -360,6 +360,36 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
 
         raise ValueError(f'camera {name} is not connected.')
 
+    def get_camera(self, name=None, uid=None):
+        """Gets a camera matching a name or UID.
+
+        Parameters
+        ----------
+        name : str
+            The name of the camera.
+        uid : str
+            The unique identifier for the camera.
+
+        Returns
+        -------
+        camera : `.BaseCamera`
+            The connected camera (must be one of the cameras in `.cameras`)
+            whose name or UID matches the input parameters.
+
+        """
+
+        assert name or uid, 'either name or uid are needed.'
+
+        for camera in self.cameras:
+            if name and camera.name == name:
+                if uid:
+                    assert camera.uid == uid, 'camera name does not match uid.'
+                return camera
+            elif uid and camera.uid == uid:
+                return camera
+
+        return False
+
     def on_camera_connected(self, uid):
         """Event handler for a newly connected camera.
 
