@@ -1,3 +1,7 @@
+cache:
+  pip: true
+  timeout: 1000
+
 language: python
 
 python:
@@ -6,6 +10,7 @@ python:
 dist: trusty
 
 matrix:
+  fast_finish: true
   include:
     - python: 3.8-dev
       dist: xenial
