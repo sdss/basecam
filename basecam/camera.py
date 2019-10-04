@@ -7,13 +7,15 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-03 18:34:21
+# @Last modified time: 2019-10-03 18:22:32
 
 import abc
 import asyncio
 import logging
 import warnings
 
+import numpy
+import astropy.time
 from astropy.io import fits
 
 from .events import CameraEvent, CameraSystemEvent
@@ -604,4 +606,63 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
     async def _disconnect_internal(self):
         """Internal method to disconnect a camera."""
 
+        pass
+
+
+class VirtualCamera(BaseCamera):
+    """A virtual camera that does not require hardware.
+
+    This class is mostly intended for testing and development. It behaves
+    in all ways as a real camera with pre-defined responses that depend on the
+    input parameters.
+
+    """
+
+    # Sets the internal UID for the camera.
+    _uid = 'DEV_12345'
+
+    def __init__(self, *args, **kwargs):
+
+        self._shutter_position = False
+
+        self.width = 640
+        self.height = 480
+
+        super().__init__(*args, **kwargs)
+
+    async def _connect_internal(self, **config_params):
+        return True
+
+    @property
+    def _uid_internal(self):
+        return self._uid
+
+    async def _expose_internal(self, exposure_time):
+
+        data = numpy.zeros((self.width, self.height), dtype=numpy.uint16)
+
+        # Creates a spiral pattern
+        xx = numpy.arange(-5, 5, 0.1)
+        yy = numpy.arange(-5, 5, 0.1)
+        xg, yg = numpy.meshgrid(xx, yy, sparse=True)
+        tile = numpy.sin(xg**2 + yg**2) / (xg**2 + yg**2)
+
+        # Repeats the tile to match the size of the image.
+        data = numpy.tile(tile, (self.height // len(yy) + 1,
+                                 self.width // len(yy) + 1))
+        data = data[0:self.height, 0:self.width]
+
+        obstime = astropy.time.Time('2000-01-01 00:00:00')
+
+        fits_image = create_fits_image(data, exposure_time, obstime=obstime)
+
+        return fits_image
+
+    async def _set_shutter_internal(self, shutter_open):
+        self._shutter_position = shutter_open
+
+    async def _get_shutter_internal(self):
+        return self._shutter_position
+
+    async def _disconnect_internal(self):
         pass
