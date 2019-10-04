@@ -5,14 +5,13 @@ python:
 
 dist: trusty
 
-os:
-  - linux
-
 matrix:
   include:
     - python: 3.8-dev
       dist: xenial
       sudo: true
+      before_install:
+        - pip install git+https://github.com/astropy/astropy@master
   allow_failures:
     - python: 3.8-dev
 
