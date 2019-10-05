@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-04 12:22:00
+# @Last modified time: 2019-10-04 19:35:35
 
 import abc
 import asyncio
@@ -363,6 +363,9 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
     def get_camera(self, name=None, uid=None):
         """Gets a camera matching a name or UID.
 
+        If only one camera is connected and the method is called without
+        arguments, returns the camera.
+
         Parameters
         ----------
         name : str
@@ -378,7 +381,8 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
 
         """
 
-        assert name or uid, 'either name or uid are needed.'
+        if name is None and uid is None and len(self.cameras) == 1:
+            return self.cameras[0]
 
         for camera in self.cameras:
             if name and camera.name == name:

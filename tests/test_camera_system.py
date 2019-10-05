@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-04 12:25:26
+# @Last modified time: 2019-10-04 19:42:47
 
 import asyncio
 import logging
@@ -150,7 +150,8 @@ async def test_listener(camera_system, event_loop):
     assert len(events) > n_events
 
 
-@pytest.mark.parametrize('param,value', [('name', 'test_camera'), ('uid', 'DEV_12345')])
+@pytest.mark.parametrize('param,value', [('name', 'test_camera'),
+                                         ('uid', 'DEV_12345')])
 async def test_add_camerera_already_connected(camera_system, caplog, param, value):
 
     camera = await eval(f'camera_system.add_camera({param}={value!r})')
@@ -193,6 +194,14 @@ async def test_get_camera_not_found(camera_system):
     camera = camera_system.get_camera('bad_camera')
 
     assert camera is False
+
+
+async def test_get_camera_no_params(camera_system):
+
+    await camera_system.add_camera(name='test_camera')
+    camera = camera_system.get_camera()
+
+    assert camera
 
 
 async def test_expose(camera_system):
