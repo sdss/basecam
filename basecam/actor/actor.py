@@ -7,9 +7,11 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-04 00:05:41
+# @Last modified time: 2019-10-04 18:23:20
 
 from clu.legacy import LegacyActor
+
+from .commands import basecam_parser
 
 
 class CameraActor(LegacyActor):
@@ -23,4 +25,4 @@ class CameraActor(LegacyActor):
         # command (the first argument is always the actor command).
         self.parser_args = [camera_system]
 
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, parser=basecam_parser, **kwargs)
