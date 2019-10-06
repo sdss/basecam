@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-05 20:07:48
+# @Last modified time: 2019-10-05 23:20:19
 
 import asyncio
 import os
@@ -105,7 +105,7 @@ async def actor_setup(config):
     yield actor
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 async def actor(actor_setup):
 
     yield actor_setup
