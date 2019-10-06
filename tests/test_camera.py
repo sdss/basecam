@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-04 12:23:14
+# @Last modified time: 2019-10-05 23:03:08
 
 import astropy
 import astropy.io.fits
@@ -59,17 +59,17 @@ async def test_shutter(camera):
     assert camera.has_shutter
     assert await camera.get_shutter() is False
 
-    await camera.set_shutter(True)
+    await camera.open_shutter()
     assert await camera.get_shutter() is True
 
-    await camera.set_shutter(False)
+    await camera.close_shutter()
     assert await camera.get_shutter() is False
 
 
 async def test_bias(camera):
 
     # Open the shutter
-    await camera.set_shutter(True)
+    await camera.open_shutter()
 
     exposure = await camera.bias()
 

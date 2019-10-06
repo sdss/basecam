@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-05 15:29:57
+# @Last modified time: 2019-10-05 23:05:49
 
 import abc
 import asyncio
@@ -668,6 +668,16 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
             return
 
         return await self._set_shutter_internal(shutter_open)
+
+    async def open_shutter(self):
+        """Opens the shutter (alias for ``set_shutter(True)``)."""
+
+        return await self.set_shutter(True)
+
+    async def close_shutter(self):
+        """Opens the shutter (alias for ``set_shutter(False)``)."""
+
+        return await self.set_shutter(False)
 
     async def get_shutter(self):
         """Gets the position of the shutter."""
