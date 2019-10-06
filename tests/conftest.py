@@ -7,19 +7,26 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-04 11:04:35
+# @Last modified time: 2019-10-05 20:07:48
 
-# import asyncio
+import asyncio
 import os
 
 import pytest
 from asynctest import CoroutineMock
 
+from basecam.actor import CameraActor
 from basecam.camera import CameraSystem, VirtualCamera
 from basecam.utils import read_yaml_file
 
 
-TEST_CONFIG_FILE = os.path.dirname(__file__) + '/data/cameras.yaml'
+try:
+    import clu.testing
+except ImportError:
+    clu.testing = None
+
+
+TEST_CONFIG_FILE = os.path.dirname(__file__) + '/data/test_config.yaml'
 
 
 class TestCameraSystem(CameraSystem):
@@ -44,18 +51,21 @@ def config():
     return read_yaml_file(TEST_CONFIG_FILE)
 
 
-# @pytest.yield_fixture(scope='module')
-# def event_loop(request):
-#     """A module scoped event loop."""
-#     loop = asyncio.get_event_loop_policy().new_event_loop()
-#     yield loop
-#     loop.close()
+@pytest.fixture(scope='module')
+def event_loop(request):
+    """A module-scoped event loop."""
+
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
 
 
 @pytest.fixture(scope='function')
 async def camera_system(config, event_loop):
 
-    camera_system = TestCameraSystem(VirtualCamera, config=config, loop=event_loop).setup()
+    camera_system = TestCameraSystem(VirtualCamera,
+                                     config=config,
+                                     loop=event_loop).setup()
 
     yield camera_system
 
@@ -75,3 +85,30 @@ async def camera(camera_system):
     camera._set_shutter_internal = CoroutineMock(wraps=camera._set_shutter_internal)
 
     yield camera
+
+
+@pytest.fixture(scope='module')
+async def actor_setup(config):
+    """Setups an actor for testing, mocking the client transport.
+
+    This fixture has module scope. Usually you'll want to use it for a
+    function-scoped fixture in which you clear the mock replies after each
+    test.
+
+    """
+
+    camera_system = TestCameraSystem(VirtualCamera, config=config).setup()
+
+    actor = CameraActor.from_config(config, camera_system)
+    actor = await clu.testing.setup_test_actor(actor)
+
+    yield actor
+
+
+@pytest.fixture(scope='module')
+async def actor(actor_setup):
+
+    yield actor_setup
+
+    # Clear replies in preparation for next test.
+    # actor_setup.mock_replies.clear()
