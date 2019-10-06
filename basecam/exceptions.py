@@ -7,25 +7,16 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-02 21:45:14
+# @Last modified time: 2019-10-05 21:55:45
 
 
-class BasecamError(Exception):
-    """A custom core Basecam exception"""
+class CameraError(Exception):
+    """A custom core exception"""
 
 
-class ExposureError(BasecamError):
+class ExposureError(CameraError):
     """The exposure failed."""
 
 
-class BasecamNotImplemented(BaseException):
-    """Not implemented feature."""
-
-
-class BasecamWarning(Warning):
-    """Base warning for Basecam."""
-
-
-class BasecamUserWarning(UserWarning, BasecamWarning):
-    """The primary warning class."""
-    pass
+class CameraWarning(UserWarning):
+    """Base warning."""

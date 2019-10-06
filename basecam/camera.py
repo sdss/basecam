@@ -14,12 +14,12 @@ import asyncio
 import logging
 import warnings
 
-import numpy
 import astropy.time
+import numpy
 from astropy.io import fits
 
 from .events import CameraEvent, CameraSystemEvent
-from .exceptions import BasecamNotImplemented, BasecamUserWarning
+from .exceptions import CameraError, CameraWarning
 from .helpers import LoggerMixIn, Poller
 from .notifier import EventNotifier
 from .utils import create_fits_image, read_yaml_file
@@ -160,13 +160,13 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
 
         if not self.config:
             warnings.warn('no configuration available. Returning empty '
-                          'camera configuration.', BasecamUserWarning)
+                          'camera configuration.', CameraWarning)
             return {'name': name or uid, 'uid': uid}
 
         if name:
             if name not in self.config:
                 warnings.warn(f'cannot find configuration for {name!r}.',
-                              BasecamUserWarning)
+                              CameraWarning)
                 return {'name': name or uid, 'uid': uid}
 
             config_params = {'name': name}
@@ -182,7 +182,7 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
 
             # No camera with this UID found.
             warnings.warn(f'cannot find configuration for {name!r}.',
-                          BasecamUserWarning)
+                          CameraWarning)
             return {'name': name or uid, 'uid': uid}
 
     async def start_camera_poller(self, interval=1.):
@@ -232,7 +232,7 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
 
         try:
             uids = self.get_connected_cameras()
-        except BasecamNotImplemented:
+        except NotImplementedError:
             self.log('get_connected cameras is not implemented. '
                      'Stopping camera poller.', logging.ERROR)
             # It's important to not do await self.stop_camera_poller()
@@ -277,7 +277,7 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
 
         """
 
-        raise BasecamNotImplemented
+        raise NotImplementedError
 
     async def add_camera(self, name=None, uid=None, force=False, **kwargs):
         """Adds a new `.Camera` instance to `.cameras`.
@@ -673,7 +673,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         """Gets the position of the shutter."""
 
         if not self.has_shutter:
-            return False
+            raise CameraError('camera {self.name!r} does not have a shutter.')
 
         return await self._get_shutter_internal()
 

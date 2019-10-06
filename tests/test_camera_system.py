@@ -15,7 +15,7 @@ import logging
 import pytest
 
 from basecam.camera import VirtualCamera
-from basecam.exceptions import BasecamNotImplemented, BasecamUserWarning
+from basecam.exceptions import CameraWarning
 from basecam.notifier import EventListener
 
 from .conftest import TEST_CONFIG_FILE, TestCameraSystem
