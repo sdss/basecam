@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-05 21:12:25
+# @Last modified time: 2019-10-05 22:15:58
 
 import pytest
 
@@ -30,7 +30,7 @@ async def test_actor_basic(actor, config):
 
 async def test_help(actor):
 
-    command = actor.issue_command('help')
+    command = actor.receive_mock_command('help')
     await command
 
     assert len(actor.mock_replies) > 3
