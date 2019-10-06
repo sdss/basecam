@@ -5,9 +5,6 @@
 # @Date: 2019-10-03
 # @Filename: test_camera_system.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
-#
-# @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-05 22:10:37
 
 import asyncio
 import logging
