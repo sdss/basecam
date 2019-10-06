@@ -111,4 +111,4 @@ async def actor(actor_setup):
     yield actor_setup
 
     # Clear replies in preparation for next test.
-    # actor_setup.mock_replies.clear()
+    actor_setup.mock_replies.clear()
