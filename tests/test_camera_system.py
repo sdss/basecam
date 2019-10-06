@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-04 19:42:47
+# @Last modified time: 2019-10-05 22:10:37
 
 import asyncio
 import logging
@@ -71,7 +71,7 @@ async def test_camera_connected(camera_system):
 
 async def test_get_cameras_not_implemented(camera_system, mocker):
 
-    camera_system.get_connected_cameras = mocker.Mock(side_effect=BasecamNotImplemented)
+    camera_system.get_connected_cameras = mocker.Mock(side_effect=NotImplementedError)
 
     await camera_system.start_camera_poller(0.1)
     await asyncio.sleep(0.5)
@@ -82,7 +82,7 @@ async def test_get_cameras_not_implemented(camera_system, mocker):
 
 async def test_config_bad_name(camera_system):
 
-    with pytest.warns(BasecamUserWarning):
+    with pytest.warns(CameraWarning):
         data = camera_system.get_camera_config('BAD_CAMERA')
 
     assert data['name'] == 'BAD_CAMERA'
@@ -91,7 +91,7 @@ async def test_config_bad_name(camera_system):
 
 async def test_config_bad_uid(camera_system):
 
-    with pytest.warns(BasecamUserWarning):
+    with pytest.warns(CameraWarning):
         data = camera_system.get_camera_config(uid='BAD_UID')
 
     assert data['name'] == 'BAD_UID'
@@ -102,7 +102,7 @@ async def test_no_config(camera_system):
 
     camera_system.config = None
 
-    with pytest.warns(BasecamUserWarning):
+    with pytest.warns(CameraWarning):
         data = camera_system.get_camera_config('test_camera')
 
     assert data['name'] == 'test_camera'
