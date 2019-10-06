@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 #
 # @Last modified by: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Last modified time: 2019-10-04 19:35:35
+# @Last modified time: 2019-10-05 15:29:57
 
 import abc
 import asyncio
@@ -121,6 +121,12 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
             self.config_file = config
             self.config = read_yaml_file(self.config)
             self.log(f'read configuration file from {self.config_file}')
+        else:
+            self.config = self.config.copy()
+
+        # If the config has a section named cameras, prefer that.
+        if isinstance(self.config.get('cameras', None), dict):
+            self.config = self.config['cameras']
 
     def setup(self):
         """Setup custom camera system.
