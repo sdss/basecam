@@ -26,7 +26,7 @@ except ImportError:
 TEST_CONFIG_FILE = os.path.dirname(__file__) + '/data/test_config.yaml'
 
 
-class TestCameraSystem(CameraSystem):
+class CameraSystemTester(CameraSystem):
 
     _connected_cameras = []
     _connected = False
@@ -60,9 +60,9 @@ def event_loop(request):
 @pytest.fixture(scope='function')
 async def camera_system(config, event_loop):
 
-    camera_system = TestCameraSystem(VirtualCamera,
-                                     config=config,
-                                     loop=event_loop).setup()
+    camera_system = CameraSystemTester(VirtualCamera,
+                                       config=config,
+                                       loop=event_loop).setup()
 
     yield camera_system
 
@@ -94,7 +94,7 @@ async def actor_setup(config):
 
     """
 
-    camera_system = TestCameraSystem(VirtualCamera, config=config).setup()
+    camera_system = CameraSystemTester(VirtualCamera, config=config).setup()
 
     actor = CameraActor.from_config(config, camera_system)
     actor = await clu.testing.setup_test_actor(actor)

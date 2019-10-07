@@ -13,9 +13,8 @@ import pytest
 
 from basecam.camera import VirtualCamera
 from basecam.exceptions import CameraWarning
-from basecam.notifier import EventListener
 
-from .conftest import TEST_CONFIG_FILE, TestCameraSystem
+from .conftest import TEST_CONFIG_FILE, CameraSystemTester
 
 
 pytestmark = pytest.mark.asyncio
@@ -23,9 +22,9 @@ pytestmark = pytest.mark.asyncio
 
 async def test_load_config():
 
-    camera_system = TestCameraSystem(VirtualCamera, config=TEST_CONFIG_FILE)
+    camera_system = CameraSystemTester(VirtualCamera, config=TEST_CONFIG_FILE)
 
-    assert isinstance(camera_system, TestCameraSystem)
+    assert isinstance(camera_system, CameraSystemTester)
     assert 'test_camera' in camera_system.config
 
 
@@ -113,38 +112,6 @@ async def test_config_from_uid(camera_system):
     assert data['name'] == 'test_camera'
     assert data['uid'] == 'DEV_12345'
     assert data['shutter'] is True
-
-
-async def test_listener(camera_system, event_loop):
-
-    events = []
-
-    async def store_event(event, payload):
-        events.append(event)
-
-    listener = EventListener(event_loop)
-    listener.register_callback(store_event)
-
-    camera_system.notifier.register_listener(listener)
-
-    await camera_system.add_camera('test_camera')
-    await asyncio.sleep(0.1)
-
-    n_events = len(events)
-    assert n_events > 0
-
-    # Stop the listener and check that we don't receive more events
-    await listener.stop_listener()
-    await camera_system.remove_camera('test_camera')
-    assert len(events) == n_events
-
-    # Restart
-
-    await listener.start_listener()
-    await camera_system.add_camera('test_camera')
-    await asyncio.sleep(0.1)
-
-    assert len(events) > n_events
 
 
 @pytest.mark.parametrize('param,value', [('name', 'test_camera'),
