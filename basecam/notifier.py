@@ -141,6 +141,8 @@ class EventListener(asyncio.Queue):
 
         """
 
+        assert asyncio.iscoroutinefunction(callback), 'callback must be a coroutine.'
+
         if callback not in self.callbacks:
             self.callbacks.append(callback)
 
@@ -149,3 +151,5 @@ class EventListener(asyncio.Queue):
 
         if callback in self.callbacks:
             self.callbacks.remove(callback)
+        else:
+            raise ValueError('callback not registered.')
