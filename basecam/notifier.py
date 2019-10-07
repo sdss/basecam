@@ -68,6 +68,9 @@ class EventNotifier(object):
         assert isinstance(event, enum.Enum), 'event is not an enum.'
 
         if self.filter_events is not None:
+            if not isinstance(self.filter_events, (list, tuple)):
+                self.filter_events = [self.filter_events]
+
             if event not in self.filter_events:
                 return False
 
