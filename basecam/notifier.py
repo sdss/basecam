@@ -103,11 +103,11 @@ class EventListener(asyncio.Queue):
             for callback in self.callbacks:
                 self.loop.create_task(callback(event, payload))
 
-    async def start_listener(self):
+    async def start_listening(self):
         """Starts the listener task. The queue will be initially purged."""
 
         if self.listerner_task is not None:
-            await self.stop_listener()
+            await self.stop_listening()
 
         # Purges the queue
         while True:
@@ -118,7 +118,7 @@ class EventListener(asyncio.Queue):
 
         self.listerner_task = self.loop.create_task(self._process_queue())
 
-    async def stop_listener(self):
+    async def stop_listening(self):
         """Stops the listener task."""
 
         if self.listerner_task is None:
