@@ -66,9 +66,6 @@ async def camera_system(config, event_loop):
 
     yield camera_system
 
-    for listener in camera_system.notifier.listeners:
-        await listener.stop_listener()
-
     await camera_system.shutdown()
 
 
