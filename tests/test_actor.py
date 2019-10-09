@@ -31,3 +31,11 @@ async def test_help(actor):
     await command
 
     assert len(actor.mock_replies) > 3
+
+
+async def test_arguments_from_config(actor):
+
+    assert actor._config is not None
+    assert 'default_cameras' in actor._config
+
+    assert actor.default_cameras == ['test_camera']

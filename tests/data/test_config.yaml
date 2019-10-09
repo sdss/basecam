@@ -5,6 +5,8 @@ actor:
     host: localhost
     port: 9999
     log: false
+    default_cameras:
+        - test_camera
 
 cameras:
     test_camera:

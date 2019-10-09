@@ -14,9 +14,11 @@ from .commands import basecam_parser
 class CameraActor(LegacyActor):
     """SDSS-style actor."""
 
-    def __init__(self, camera_system, *args, **kwargs):
+    def __init__(self, camera_system, *args, default_cameras=None, **kwargs):
 
         self.camera_system = camera_system
+
+        self.default_cameras = default_cameras
 
         # Pass the camera system instance as the second argument to each parser
         # command (the first argument is always the actor command).
