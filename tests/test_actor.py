@@ -24,8 +24,8 @@ async def test_actor_basic(actor, config):
 
     actor.write(text='test message')
     assert len(actor.mock_replies) > 0
-    assert 'text' in actor.mock_replies[0].keywords
-    assert actor.mock_replies[0].keywords['text'] == '"test message"'
+    assert 'text' in actor.mock_replies[0]
+    assert actor.mock_replies[0]['text'] == '"test message"'
 
 
 async def test_logger(actor):
@@ -66,6 +66,8 @@ async def test_set_default_cameras(actor):
 
     actor.set_default_cameras('sp1,sp2')
     assert actor.default_cameras == ['sp1', 'sp2']
+    assert len(actor.mock_replies) == 2
+    assert 'made default but is not connected' in actor.mock_replies[0]['text']
 
     actor.set_default_cameras('test_camera')
     assert actor.default_cameras == ['test_camera']
