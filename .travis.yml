@@ -4,12 +4,17 @@ cache:
 
 language: python
 
-python:
-  - 3.7
-  - 3.8-dev
-
 matrix:
   fast_finish: true
+  include:
+    - python: 3.7
+      dist: xenial
+      sudo: true
+      after_success:
+        - coveralls
+    - python: 3.8-dev
+      dist: xenial
+      sudo: true
 
 notifications:
   email: false
@@ -28,6 +33,3 @@ install:
 
 script:
   - pytest --cov basecam --cov-report html
-
-after_success:
-  - coveralls
