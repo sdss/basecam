@@ -39,3 +39,11 @@ async def test_arguments_from_config(actor):
     assert 'default_cameras' in actor._config
 
     assert actor.default_cameras == ['test_camera']
+
+
+async def test_set_default_cameras(actor):
+
+    assert actor.default_cameras == ['test_camera']
+
+    actor.set_default_cameras()
+    assert actor.default_cameras is None
