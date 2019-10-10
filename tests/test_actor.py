@@ -63,3 +63,12 @@ async def test_set_default_cameras(actor):
 
     actor.set_default_cameras()
     assert actor.default_cameras is None
+
+    actor.set_default_cameras('sp1,sp2')
+    assert actor.default_cameras == ['sp1', 'sp2']
+
+    actor.set_default_cameras('test_camera')
+    assert actor.default_cameras == ['test_camera']
+
+    actor.set_default_cameras(['test_camera'])
+    assert actor.default_cameras == ['test_camera']
