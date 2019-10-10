@@ -72,3 +72,6 @@ async def test_set_default_cameras(actor):
 
     actor.set_default_cameras(['test_camera'])
     assert actor.default_cameras == ['test_camera']
+
+    with pytest.raises(ValueError):
+        actor.set_default_cameras({'bad_input': 1})
