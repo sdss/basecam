@@ -6,7 +6,10 @@
 # @Filename: test_actor.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
+import warnings
+
 import pytest
+from clu.misc.logger import ActorHandler
 
 
 pytestmark = pytest.mark.asyncio
@@ -23,6 +26,19 @@ async def test_actor_basic(actor, config):
     assert len(actor.mock_replies) > 0
     assert 'text' in actor.mock_replies[0].keywords
     assert actor.mock_replies[0].keywords['text'] == '"test message"'
+
+
+async def test_logger(actor):
+
+    assert actor.log is not None
+    assert len(actor.log.handlers) == 2
+
+    handler_classes = [handler.__class__ for handler in actor.log.handlers]
+    assert ActorHandler in handler_classes
+
+    assert len(actor.mock_replies) == 0
+    warnings.warn('test warning', UserWarning)
+    assert len(actor.mock_replies) == 2
 
 
 async def test_help(actor):

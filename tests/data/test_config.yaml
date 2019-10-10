@@ -4,7 +4,7 @@ actor:
     name: test_camera
     host: localhost
     port: 9999
-    log: false
+    log_dir: false
     default_cameras:
         - test_camera
 
