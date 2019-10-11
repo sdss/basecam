@@ -64,11 +64,18 @@ def clean(ctx):
 
 
 @task(clean)
-def deploy(ctx):
+def deploy(ctx, test=False):
     """Deploy the project to pypi"""
-    print('Deploying to Pypi!')
+
+    if test is False:
+        print('Deploying to Pypi!')
+        repository_url = 'https://upload.pypi.org/legacy/'
+    else:
+        print('Deploying to Test PyPI!')
+        repository_url = 'https://test.pypi.org/legacy/'
+
     ctx.run('python setup.py sdist bdist_wheel')
-    ctx.run('twine upload dist/*')
+    ctx.run(f'twine upload --repository-url {repository_url} dist/*')
 
 
 @task(name='install-deps')
