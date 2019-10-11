@@ -67,7 +67,7 @@ def clean(ctx):
 def deploy(ctx):
     """Deploy the project to pypi"""
     print('Deploying to Pypi!')
-    ctx.run('python setup.py sdist bdist_wheel --universal')
+    ctx.run('python setup.py sdist bdist_wheel')
     ctx.run('twine upload dist/*')
 
 
