@@ -18,10 +18,6 @@ class CameraActor(LegacyActor):
 
         self.camera_system = camera_system
 
-        # Pass the camera system instance as the second argument to each parser
-        # command (the first argument is always the actor command).
-        self.parser_args = [camera_system]
-
         super().__init__(*args, parser=basecam_parser, **kwargs)
 
         self.default_cameras = None
