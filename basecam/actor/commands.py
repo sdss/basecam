@@ -10,8 +10,15 @@ import clu
 from clu import command_parser as basecam_parser
 
 
-@basecam_parser.command()
-async def status(command, camera_system):
-    """Reports the status of the camera system."""
+@basecam_parser.group()
+def camera():
+    """Camera-related commands."""
+    pass
 
-    command.set_status(clu.CommandStatus.DONE)
+
+@camera.command()
+async def list(command):
+    """Lists cameras connected to the camera system."""
+
+    cameras = [camera.name for camera in command.actor.camera_system.cameras]
+    command.done(cameras=cameras)
