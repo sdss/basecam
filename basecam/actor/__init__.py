@@ -10,3 +10,5 @@
 
 
 from .actor import CameraActor
+from .camera import *
+from .tools import *

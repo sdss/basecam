@@ -3,8 +3,11 @@
 #
 # @Author: José Sánchez-Gallego (gallegoj@uw.edu)
 # @Date: 2019-08-06
-# @Filename: tools.py
+# @Filename: commands.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
+
+
+__all__ = ['get_cameras']
 
 
 def get_cameras(command, cameras=None, check_cameras=True):

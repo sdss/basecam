@@ -8,7 +8,7 @@
 
 from clu.legacy import LegacyActor
 
-from .commands import basecam_parser
+from clu import command_parser as basecam_parser
 
 
 class CameraActor(LegacyActor):
