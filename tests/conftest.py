@@ -12,15 +12,11 @@ import os
 import pytest
 from asynctest import CoroutineMock
 
+import clu.testing
 from basecam.actor import CameraActor
 from basecam.camera import CameraSystem, VirtualCamera
 from basecam.utils import read_yaml_file
-
-
-try:
-    import clu.testing
-except ImportError:
-    clu.testing = None
+from clu.command import Command
 
 
 TEST_CONFIG_FILE = os.path.dirname(__file__) + '/data/test_config.yaml'
@@ -106,3 +102,10 @@ async def actor(actor_setup):
 
     # Clear replies in preparation for next test.
     actor_setup.mock_replies.clear()
+
+
+@pytest.fixture(scope='function')
+async def command(actor):
+
+    command = Command(commander_id=1, actor=actor)
+    yield command
