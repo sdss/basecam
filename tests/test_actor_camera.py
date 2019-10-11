@@ -10,7 +10,7 @@ import asyncio
 
 import pytest
 
-from basecam.actor.commands import get_cameras
+from basecam.actor.tools import get_cameras
 
 
 pytestmark = pytest.mark.asyncio
