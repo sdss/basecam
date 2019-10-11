@@ -43,7 +43,7 @@ async def test_logger(actor):
 
 async def test_help(actor):
 
-    command = actor.receive_mock_command('help')
+    command = actor.invoke_mock_command('help')
     await command
 
     assert len(actor.mock_replies) > 3
