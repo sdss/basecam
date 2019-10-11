@@ -16,7 +16,7 @@ import clu.testing
 from basecam.actor import CameraActor
 from basecam.camera import CameraSystem, VirtualCamera
 from basecam.utils import read_yaml_file
-from clu.command import Command
+from clu.testing import TestCommand
 
 
 TEST_CONFIG_FILE = os.path.dirname(__file__) + '/data/test_config.yaml'
@@ -98,6 +98,8 @@ async def actor_setup(config):
 @pytest.fixture(scope='function')
 async def actor(actor_setup):
 
+    await actor_setup.camera_system.add_camera('test_camera')
+
     yield actor_setup
 
     # Clear replies in preparation for next test.
@@ -107,5 +109,5 @@ async def actor(actor_setup):
 @pytest.fixture(scope='function')
 async def command(actor):
 
-    command = Command(commander_id=1, actor=actor)
+    command = TestCommand(commander_id=1, actor=actor)
     yield command
