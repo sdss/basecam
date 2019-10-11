@@ -18,8 +18,6 @@ pytestmark = pytest.mark.asyncio
 
 async def test_camera_list(actor):
 
-    await actor.camera_system.add_camera('test_camera')
-
     command = await actor.invoke_mock_command('camera list')
 
     await asyncio.sleep(1)
@@ -61,3 +59,28 @@ async def test_get_cameras_check(command):
     command.actor.camera_system.cameras[0].connected = False
 
     assert get_cameras(command, check_cameras=True) is False
+
+
+async def test_camera_set_default(actor):
+
+    actor.set_default_cameras()
+
+    await actor.invoke_mock_command('camera set-default test_camera')
+    assert actor.default_cameras == ['test_camera']
+
+    actor.set_default_cameras()
+
+    command_result = await actor.invoke_mock_command('camera set-default bad_camera')
+    assert command_result.did_fail
+
+    command_result = await actor.invoke_mock_command('camera set-default -f bad_camera')
+    assert command_result.is_done
+    assert actor.default_cameras == ['bad_camera']
+
+    command_result = await actor.invoke_mock_command('camera set-default -f sp1 sp2')
+    assert command_result.is_done
+    assert actor.default_cameras == ['sp1', 'sp2']
+
+    command_result = await actor.invoke_mock_command('camera set-default -f sp1,sp2 sp3')
+    assert command_result.is_done
+    assert actor.default_cameras == ['sp1', 'sp2', 'sp3']
