@@ -10,7 +10,11 @@ Camera
 .. autoclass:: basecam.camera.CameraSystem
     :members:
 
-.. autoclass:: basecam.camera.Camera
+.. autoclass:: basecam.camera.BaseCamera
+    :members:
+    :private-members:
+
+.. autoclass:: basecam.camera.VirtualCamera
     :members:
     :private-members:
 
