@@ -55,3 +55,11 @@ async def set_default(command, cameras, force):
     command.actor.set_default_cameras(camera_names)
 
     command.done(default_cameras=command.actor.default_cameras)
+
+
+@camera.command()
+@click.argument('CAMERAS', nargs=-1, type=str, required=False)
+async def status(command, cameras):
+    """Prints the status of a camera."""
+
+    if len
