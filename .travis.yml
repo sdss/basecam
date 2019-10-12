@@ -30,6 +30,7 @@ install:
   - pip install pytest-coverage
   - pip install coveralls
   - pip install .[dev]
+  - pip git+git://github.com/sdss/clu@master
 
 script:
   - pytest --cov basecam --cov-report html
