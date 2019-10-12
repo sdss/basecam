@@ -9,6 +9,7 @@
 import click
 
 from .actor import basecam_parser
+from .tools import get_cameras
 
 
 @basecam_parser.group()
@@ -62,4 +63,5 @@ async def set_default(command, cameras, force):
 async def status(command, cameras):
     """Prints the status of a camera."""
 
-    if len
+    if len(cameras) == 0:
+        cameras = get_cameras(command)

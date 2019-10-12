@@ -36,7 +36,8 @@ def get_cameras(command, cameras=None, check_cameras=True):
     if cameras is None:
         if default is None or len(default) == 0:
             command.set_status(command.flags.FAILED,
-                               text='no default camera set. Use the --cameras flag.')
+                               text='no default camera(s) set. '
+                                    'Specify cameras manually.')
             return False
         else:
             cameras = default
