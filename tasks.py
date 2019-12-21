@@ -24,7 +24,7 @@ from invoke import Collection, task
 def clean_docs(ctx):
     """Cleans up the docs"""
     print('Cleaning the docs')
-    ctx.run("rm -rf docs/_build")
+    ctx.run('rm -rf docs/_build')
 
 
 @task
@@ -33,11 +33,11 @@ def build_docs(ctx, clean=False):
 
     if clean:
         print('Cleaning the docs')
-        ctx.run("rm -rf docs/_build")
+        ctx.run('rm -rf docs/_build')
 
     print('Building the docs')
     os.chdir('docs')
-    ctx.run("make html", pty=True)
+    ctx.run('make html', pty=True)
 
 
 @task
@@ -53,75 +53,32 @@ def clean(ctx):
     """Cleans up the crap before a Pip build"""
 
     print('Cleaning')
-    ctx.run('rm -rf htmlcov .coverage')
+    ctx.run('rm -rf htmlcov **/htmlcov .coverage **/.coverage')
     ctx.run('rm -rf build')
     ctx.run('rm -rf dist')
-    ctx.run('rm -rf *.egg-info')
-    ctx.run('rm -rf python/*.egg-info')
-    ctx.run('rm -rf **/htmlcov **/.coverage')
-    ctx.run('rm -rf .tox')
-    ctx.run('rm -rf .pytest_cache **/.pytest_cache')
+    ctx.run('rm -rf **/*.egg-info *.egg-info')
+
+
+@task(clean, default=True)
+def deploy(ctx):
+    """Deploy the project to PyPI"""
+    print('Deploying to PyPI!')
+    ctx.run('python setup.py sdist bdist_wheel --universal')
+    ctx.run('twine upload dist/*')
 
 
 @task(clean)
-def deploy(ctx, test=False):
-    """Deploy the project to pypi"""
-
-    if test is False:
-        print('Deploying to Pypi!')
-        repository_url = 'https://upload.pypi.org/legacy/'
-    else:
-        print('Deploying to Test PyPI!')
-        repository_url = 'https://test.pypi.org/legacy/'
-
-    ctx.run('python setup.py sdist bdist_wheel')
-    ctx.run(f'twine upload --repository-url {repository_url} dist/*')
-
-
-@task(name='install-deps')
-def install_deps(ctx, extras=None):
-    """Install only dependencies from setup.cfg."""
-
-    import setuptools
-
-    if not os.path.exists('setup.cfg'):
-        raise RuntimeError('setup.cfg cannot be found. If your project uses '
-                           'requirement files use pip install -r instead.')
-
-    if extras:
-        extras = extras.split(',')
-    else:
-        extras = []
-
-    config = setuptools.config.read_configuration('setup.cfg')
-
-    if not config['options']:
-        return
-
-    options = config['options']
-
-    setup_requires = options.get('setup_requires', [])
-    install_requires = options.get('install_requires', [])
-
-    requires = setup_requires + install_requires
-    requires_str = (' '.join('"' + item + '"' for item in requires))
-    if len(requires) > 0:
-        ctx.run(f'pip install --upgrade {requires_str}', pty=True)
-
-    for extra in extras:
-        print(f'Installing extras={extra}')
-        if 'extras_require' not in options:
-            raise RuntimeError('extras_require is not defined')
-        extra_deps = options['extras_require'].get(extra, [])
-        if len(extra_deps) > 0:
-            extra_deps_str = (' '.join('"' + item + '"' for item in extra_deps))
-            ctx.run(f'pip install --upgrade {extra_deps_str}', pty=True)
+def deploy_test(ctx):
+    """Deploy the project to the test version of  PyPI"""
+    print('Deploying to Test PyPI!')
+    ctx.run('python setup.py sdist bdist_wheel --universal')
+    ctx.run('twine upload --repository-url https://test.pypi.org/legacy/ dist/*')
 
 
 os.chdir(os.path.dirname(__file__))
 
 # create a collection of tasks
-ns = Collection(clean, deploy, install_deps)
+ns = Collection(clean)
 
 # create a sub-collection for the doc tasks
 docs = Collection('docs')
@@ -129,3 +86,8 @@ docs.add_task(build_docs, 'build')
 docs.add_task(clean_docs, 'clean')
 docs.add_task(show_docs, 'show')
 ns.add_collection(docs)
+
+deploy_task = Collection('deploy')
+deploy_task.add_task(deploy, 'pypi')
+deploy_task.add_task(deploy_test, 'test')
+ns.add_collection(deploy_task)

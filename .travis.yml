@@ -9,12 +9,10 @@ matrix:
   include:
     - python: 3.7
       dist: xenial
-      sudo: true
       after_success:
-        - coveralls
-    - python: 3.8-dev
+        - poetry run codecov
+    - python: 3.8
       dist: xenial
-      sudo: true
 
 notifications:
   email: false
@@ -22,15 +20,14 @@ notifications:
 # repo branches to test
 branches:
   - master
+  - develop
+  - testing
+
+before_install:
+  - pip install poetry
 
 install:
-  - pip install -U pip wheel --quiet
-  - pip install --upgrade setuptools --quiet
-  - pip install pytest
-  - pip install pytest-coverage
-  - pip install coveralls
-  - pip install .[dev]
-  - pip install git+git://github.com/sdss/clu@master
+  - poetry install
 
 script:
-  - pytest --cov basecam --cov-report html
+  - poetry run pytest

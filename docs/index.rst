@@ -2,7 +2,7 @@
 basecam's documentation
 ========================
 
-This is the Sphinx documentation for the SDSS Python product ``basecam``.
+This is the Sphinx documentation for the SDSS Python product ``basecam``. This documentation is for version |basecam_version|.
 
 
 Contents

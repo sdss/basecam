@@ -7,10 +7,14 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
 import os
+import sys
 
 from pkg_resources import parse_version
 
 from basecam import __version__
+
+
+sys.path.append(os.path.join(os.path.dirname(__file__), 'releases'))
 
 
 # Are we building in RTD?
@@ -40,7 +44,7 @@ source_parsers = {
 master_doc = 'index'
 
 # General information about the project.
-project = project = 'basecam'
+project = 'basecam'
 copyright = '{0}, {1}'.format('2019', 'José Sánchez-Gallego')
 author = 'José Sánchez-Gallego'
 
@@ -63,7 +67,8 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'releases/**/*.rst',
+                    'releases/README.rst']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -113,7 +118,8 @@ autodoc_default_options = {
 napoleon_use_rtype = False
 napoleon_use_ivar = True
 
-rst_epilog = """
+rst_epilog = f"""
+.. |basecam_version| replace:: {__version__}
 """
 
 

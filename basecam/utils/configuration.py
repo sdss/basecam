@@ -8,11 +8,18 @@
 
 import os
 
-import yaml
-from pkg_resources import parse_version
+import ruamel.yaml
 
 
-__all__ = ['get_config', 'read_yaml_file']
+def read_yaml_file(path):
+    """Read a YAML file and returns a dictionary."""
+
+    yaml = ruamel.yaml.YAML(typ='safe')
+
+    with open(path, 'r') as fp:
+        config = yaml.load(fp)
+
+    return config
 
 
 def merge_config(user, default):
@@ -26,19 +33,6 @@ def merge_config(user, default):
                 user[kk] = merge_config(user[kk], vv)
 
     return user
-
-
-def read_yaml_file(path):
-    """Read a YAML file and returns a dictionary."""
-
-    yaml_kwds = dict()
-    if parse_version(yaml.__version__) >= parse_version('5.1'):
-        yaml_kwds.update(Loader=yaml.FullLoader)
-
-    with open(path, 'r') as fp:
-        config = yaml.load(fp, **yaml_kwds)
-
-    return config
 
 
 def get_config(name, allow_user=True, user_path=None, config_envvar=None,
@@ -83,8 +77,9 @@ def get_config(name, allow_user=True, user_path=None, config_envvar=None,
     assert merge_mode in ['update', 'replace'], 'invalid merge mode.'
 
     # Loads config
-    config_path = os.path.join(os.path.dirname(__file__), '../etc/{0}.yml'.format(name))
-    config = read_yaml_file(config_path)
+    yaml = ruamel.yaml.YAML(typ='safe')
+    config = yaml.load(open(os.path.join(os.path.dirname(__file__),
+                                         '../etc/{0}.yml'.format(name))))
 
     if allow_user is False:
         return config
@@ -103,7 +98,7 @@ def get_config(name, allow_user=True, user_path=None, config_envvar=None,
     else:
         return config
 
-    user_config = read_yaml_file(custom_config_fn)
+    user_config = yaml.load(open(custom_config_fn)) or {}
 
     if merge_mode == 'update':
         return merge_config(user_config, config)

@@ -65,3 +65,5 @@ async def status(command, cameras):
 
     if len(cameras) == 0:
         cameras = get_cameras(command)
+        if not cameras:
+            return
