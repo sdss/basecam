@@ -995,7 +995,7 @@ testing = ["pathlib2", "contextlib2", "unittest2"]
 docs = ["semantic-version", "sphinx", "sphinxcontrib-trio"]
 
 [metadata]
-content-hash = "11b5b34caf144231ebc40b46c359a5985a6f0d5bd6c351688b48ac6a2b05856d"
+content-hash = "6326eacefe69d236fbaff351489bc9b7d21a04f35330df0374fb4e55bbb94de6"
 python-versions = "^3.7"
 
 [metadata.files]
