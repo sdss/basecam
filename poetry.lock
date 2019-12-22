@@ -536,11 +536,10 @@ category = "main"
 description = "Library for building powerful interactive command lines in Python"
 name = "prompt-toolkit"
 optional = false
-python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
-version = "2.0.10"
+python-versions = ">=3.6"
+version = "3.0.2"
 
 [package.dependencies]
-six = ">=1.9.0"
 wcwidth = "*"
 
 [[package]]
@@ -746,26 +745,28 @@ jinja2 = ["ruamel.yaml.jinja2 (>=0.2)"]
 
 [[package]]
 category = "main"
-description = "A new protocol for SDSS actors."
+description = ""
 name = "sdss-clu"
 optional = false
-python-versions = ">=3.7,<4.0"
-version = "0.1.9"
+python-versions = "^3.7"
+version = "0.1.10-alpha.0"
 
 [package.dependencies]
-Click = ">=7.0,<8.0"
-aio_pika = ">=6.4.1,<7.0.0"
-jsonschema = ">=3.0.1,<4.0.0"
-numpy = ">=1.15.1,<2.0.0"
-prompt-toolkit = ">=2.0.9,<3.0.0"
-pygments = ">=2.2.0,<3.0.0"
-"ruamel.yaml" = ">=0.15.61,<0.16.0"
-setuptools = ">=41.6.0,<42.0.0"
-toml = ">=0.10.0,<0.11.0"
+Click = "^7.0"
+aio_pika = "^6.4.1"
+jsonschema = "^3.0.1"
+numpy = "^1.15.1"
+prompt-toolkit = "^3.0.0"
+pygments = "^2.2.0"
+"ruamel.yaml" = "^0.15.61"
 
 [package.extras]
-docs = ["Sphinx (>=2.0,<3.0)", "sphinxcontrib-trio (1.1.0)", "semantic-version (2.8.0)", "asynctest (>=0.13.0,<0.14.0)"]
+docs = ["Sphinx (^2.0)", "sphinxcontrib-trio (1.1.0)", "semantic-version (2.8.0)", "asynctest (^0.13.0)"]
 
+[package.source]
+reference = "2bff0eb9be7e0326061aa007086ed942ec2f53e1"
+type = "git"
+url = "https://github.com/sdss/clu"
 [[package]]
 category = "main"
 description = "A library implementing the 'SemVer' scheme."
@@ -919,7 +920,7 @@ python-versions = "*"
 version = "1.1.0"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Python Library for Tom's Obvious, Minimal Language"
 name = "toml"
 optional = false
@@ -995,7 +996,7 @@ testing = ["pathlib2", "contextlib2", "unittest2"]
 docs = ["semantic-version", "sphinx", "sphinxcontrib-trio"]
 
 [metadata]
-content-hash = "6326eacefe69d236fbaff351489bc9b7d21a04f35330df0374fb4e55bbb94de6"
+content-hash = "e84d73aa91f2f3d0a32d7f211ab3d6a0ede9061b89d3b9c9ca06a31afe591ff8"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -1342,9 +1343,8 @@ pluggy = [
     {file = "pluggy-0.13.1.tar.gz", hash = "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0"},
 ]
 prompt-toolkit = [
-    {file = "prompt_toolkit-2.0.10-py2-none-any.whl", hash = "sha256:e7f8af9e3d70f514373bf41aa51bc33af12a6db3f71461ea47fea985defb2c31"},
-    {file = "prompt_toolkit-2.0.10-py3-none-any.whl", hash = "sha256:46642344ce457641f28fc9d1c9ca939b63dadf8df128b86f1b9860e59c73a5e4"},
-    {file = "prompt_toolkit-2.0.10.tar.gz", hash = "sha256:f15af68f66e664eaa559d4ac8a928111eebd5feda0c11738b5998045224829db"},
+    {file = "prompt_toolkit-3.0.2-py3-none-any.whl", hash = "sha256:0278d2f51b5ceba6ea8da39f76d15684e84c996b325475f6e5720edc584326a7"},
+    {file = "prompt_toolkit-3.0.2.tar.gz", hash = "sha256:63daee79aa8366c8f1c637f1a4876b890da5fc92a19ebd2f7080ebacb901e990"},
 ]
 ptyprocess = [
     {file = "ptyprocess-0.6.0-py2.py3-none-any.whl", hash = "sha256:d7cc528d76e76342423ca640335bd3633420dc1366f258cb31d05e865ef5ca1f"},
@@ -1428,10 +1428,7 @@ restructuredtext-lint = [
     {file = "ruamel.yaml-0.15.100-cp37-cp37m-win_amd64.whl", hash = "sha256:4b1674a936cdae9735578d4fd64bcbc6cfbb77a1a8f7037a50c6e3874ba4c9d8"},
     {file = "ruamel.yaml-0.15.100.tar.gz", hash = "sha256:8e42f3067a59e819935a2926e247170ed93c8f0b2ab64526f888e026854db2e4"},
 ]
-sdss-clu = [
-    {file = "sdss-clu-0.1.9.tar.gz", hash = "sha256:baa74bee71005be420fd6452c895acb6c9dbc9c2e758eb4a08bd4946b32e3004"},
-    {file = "sdss_clu-0.1.9-py3-none-any.whl", hash = "sha256:77a0a8a81f52528c7301c3fe9598451c2a021a443ebec73d615846d4648fd513"},
-]
+sdss-clu = []
 semantic-version = [
     {file = "semantic_version-2.8.0-py2.py3-none-any.whl", hash = "sha256:35f8b1f37e8a1d0b6e476b3b55546d0de572bb345b4ff8e82faddb799d614888"},
     {file = "semantic_version-2.8.0.tar.gz", hash = "sha256:2e28e4d2e2b2a0a102ad7fe5c6912700a35681c94c4b4f628b317853d1ebd179"},
