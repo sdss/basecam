@@ -72,14 +72,6 @@ use_parentheses = true
 
 [tool.coverage.run]
 branch = true
-include = ["basecam/*"]
-omit = [
-    "*/utils/*.py",
-    "*/__init__.py",
-]
-
-[tool.coverage.run]
-branch = true
 include = [
     "basecam/*"
 ]
