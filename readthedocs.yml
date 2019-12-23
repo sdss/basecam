@@ -13,5 +13,5 @@ python:
 
 submodules:
    include:
-     - docs/sphinx/releases
+     - docs/releases
    recursive: true
