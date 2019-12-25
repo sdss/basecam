@@ -53,9 +53,9 @@ toml = "^0.10.0"
 [tool.poetry.extras]
 docs = ["semantic-version", "sphinx", "sphinxcontrib-trio"]
 
-# [build-system]
-# build-backend = "poetry.masonry.api"
-# requires = ["poetry>=1.0.0"]
+[build-system]
+build-backend = "setuptools.build_meta:__legacy__"
+requires = ["setuptools"]
 
 [tool.isort]
 line_length = 79
