@@ -6,9 +6,10 @@
 # @Filename: actor.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
-from clu.legacy import LegacyActor
+import logging
 
 from clu import command_parser as basecam_parser
+from clu.legacy import LegacyActor
 
 
 class CameraActor(LegacyActor):
@@ -19,6 +20,9 @@ class CameraActor(LegacyActor):
         self.camera_system = camera_system
 
         super().__init__(*args, parser=basecam_parser, **kwargs)
+
+        # Output log messages as keywords.
+        self.log.log_to_actor(self, code_mapping={logging.INFO: 'd'})
 
         self.default_cameras = None
         self.set_default_cameras(default_cameras)

@@ -92,13 +92,16 @@ async def actor_setup(config):
     actor = CameraActor.from_config(config, camera_system)
     actor = await clu.testing.setup_test_actor(actor)
 
+    await actor.camera_system.add_camera('test_camera')
+
     yield actor
 
 
 @pytest.fixture(scope='function')
 async def actor(actor_setup):
 
-    await actor_setup.camera_system.add_camera('test_camera')
+    # for handler in actor_setup.log.warnings_logger.handlers:
+    #     actor_setup.log.warnings_logger.removeHandler(actor_setup.log.warnings_logger)
 
     yield actor_setup
 

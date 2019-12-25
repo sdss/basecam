@@ -31,14 +31,19 @@ async def test_actor_basic(actor, config):
 async def test_logger(actor):
 
     assert actor.log is not None
-    assert len(actor.log.handlers) == 2
+    assert len(actor.log.handlers) == 2  # It's 2 because we don't have a file handler for testing.
 
     handler_classes = [handler.__class__ for handler in actor.log.handlers]
     assert ActorHandler in handler_classes
 
     assert len(actor.mock_replies) == 0
-    warnings.warn('test warning', UserWarning)
-    assert len(actor.mock_replies) == 2
+
+    # It seems if we issue a normal warnings.warn warning here it doesn't get
+    # propagated to the actor. That seems to be because something that pytest
+    # does to the warning system. Log messages through the log.warning system
+    # still work fine.
+    actor.log.warning('test')
+    assert len(actor.mock_replies) == 1
 
 
 async def test_help(actor):
