@@ -62,6 +62,14 @@ docs = ["sphinx-astropy"]
 test = ["pytest-astropy", "pytest-xdist", "pytest-mpl", "objgraph", "ipython", "coverage", "skyfield"]
 
 [[package]]
+category = "main"
+description = "Enhance the standard unittest package with features for testing asyncio libraries"
+name = "asynctest"
+optional = false
+python-versions = ">=3.5"
+version = "0.13.0"
+
+[[package]]
 category = "dev"
 description = "Atomic file writes."
 marker = "sys_platform == \"win32\""
@@ -754,6 +762,7 @@ version = "0.1.11-alpha.0"
 [package.dependencies]
 Click = "^7.0"
 aio_pika = "^6.4.1"
+asynctest = "^0.13.0"
 jsonschema = "^3.0.1"
 numpy = "^1.15.1"
 prompt-toolkit = "^3.0.0"
@@ -764,7 +773,7 @@ pygments = "^2.2.0"
 docs = ["Sphinx (^2.0)", "sphinxcontrib-trio (1.1.0)", "semantic-version (2.8.0)", "asynctest (^0.13.0)"]
 
 [package.source]
-reference = "bbd545e21b8c5d61d113e59508bd5808d3a0929f"
+reference = "b03c0bad4c4a086dc9326b99f53f12a01df379e4"
 type = "git"
 url = "https://github.com/sdss/clu"
 [[package]]
@@ -1041,6 +1050,10 @@ astropy = [
     {file = "astropy-3.2.3-cp38-cp38-win32.whl", hash = "sha256:efa49863064bbcb0651eb0f6af9bd439da482e4091764660475b8ff2bcd909b9"},
     {file = "astropy-3.2.3-cp38-cp38-win_amd64.whl", hash = "sha256:bbcaee3527bbc0460a7a46ce31873076312c9b0d9b84ef027b6313b0bb5c26ac"},
     {file = "astropy-3.2.3.tar.gz", hash = "sha256:47f00816c2978fdd10f448c8f0337d6dca7b8cbeaab4bf272b5fd37cb4b890d3"},
+]
+asynctest = [
+    {file = "asynctest-0.13.0-py3-none-any.whl", hash = "sha256:5da6118a7e6d6b54d83a8f7197769d046922a44d2a99c21382f0a6e4fadae676"},
+    {file = "asynctest-0.13.0.tar.gz", hash = "sha256:c27862842d15d83e6a34eb0b2866c323880eb3a75e4485b079ea11748fd77fac"},
 ]
 atomicwrites = [
     {file = "atomicwrites-1.3.0-py2.py3-none-any.whl", hash = "sha256:03472c30eb2c5d1ba9227e4c2ca66ab8287fbfbbda3888aa93dc2e28fc6811b4"},
