@@ -11,6 +11,8 @@ import logging
 from clu import command_parser as basecam_parser
 from clu.legacy import LegacyActor
 
+from basecam.exceptions import CameraWarning
+
 
 class CameraActor(LegacyActor):
     """SDSS-style actor."""
@@ -22,7 +24,8 @@ class CameraActor(LegacyActor):
         super().__init__(*args, parser=basecam_parser, **kwargs)
 
         # Output log messages as keywords.
-        self.log.log_to_actor(self, code_mapping={logging.INFO: 'd'})
+        self.log.log_to_actor(self, code_mapping={logging.INFO: 'd'},
+                              filter_warnings=[CameraWarning, UserWarning])
 
         self.default_cameras = None
         self.set_default_cameras(default_cameras)

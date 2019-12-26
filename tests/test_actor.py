@@ -6,8 +6,6 @@
 # @Filename: test_actor.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
-import warnings
-
 import pytest
 from clu.misc.logger import ActorHandler
 
