@@ -49,13 +49,10 @@ codecov = "^2.0.15"
 coverage = {version = "5.0", extras = ["toml"]}
 ipdb = "^0.12.3"
 toml = "^0.10.0"
+asynctest = "^0.13.0"
 
 [tool.poetry.extras]
 docs = ["semantic-version", "sphinx", "sphinxcontrib-trio"]
-
-[build-system]
-build-backend = "setuptools.build_meta:__legacy__"
-requires = ["setuptools"]
 
 [tool.isort]
 line_length = 79
@@ -114,3 +111,7 @@ commands =
     rm -Rf _build
     sphinx-build . _build --color -W -bhtml {posargs}
 """
+[build-system]
+build-backend = "setuptools.build_meta:__legacy__"
+requires = ["setuptools"]
+
