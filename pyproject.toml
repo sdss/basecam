@@ -74,7 +74,8 @@ include = [
 omit = [
     "*/utils/configuration.py",
     "*/utils/logger.py",
-    "*/utils/color_print.py"
+    "*/utils/color_print.py",
+    "*/__init__.py"
 ]
 
 [tool.coverage.report]
@@ -114,4 +115,3 @@ commands =
 [build-system]
 build-backend = "setuptools.build_meta:__legacy__"
 requires = ["setuptools"]
-
