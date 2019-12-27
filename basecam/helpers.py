@@ -43,6 +43,8 @@ class Poller(object):
 
     Parameters
     ----------
+    name : str
+        The name of the poller.
     callback : function or coroutine
         A function or coroutine to call periodically.
     delay : float
@@ -52,14 +54,15 @@ class Poller(object):
 
     """
 
-    def __init__(self, callback, delay=1, loop=None):
+    def __init__(self, name, callback, delay=1, loop=None):
 
+        self.name = name
         self.callback = callback
 
         self._orig_delay = delay
         self.delay = delay
 
-        self.loop = loop or asyncio.get_running_loop()
+        self.loop = loop or asyncio.get_event_loop()
 
         # Create two tasks, one for the sleep timer and another for the poller
         # itself. We do this because we want to be able to cancell the sleep
@@ -73,25 +76,40 @@ class Poller(object):
         while True:
 
             if asyncio.iscoroutinefunction(self.callback):
-                await asyncio.create_task(self.callback())
+                await self.loop.create_task(self.callback())
             else:
                 self.callback()
 
-            self._sleep_task = asyncio.create_task(asyncio.sleep(self.delay))
+            self._sleep_task = self.loop.create_task(asyncio.sleep(self.delay))
 
             await self._sleep_task
 
-    async def set_delay(self, delay=None):
+    async def set_delay(self, delay=None, immediate=False):
         """Sets the delay for polling.
 
         Parameters
         ----------
         delay : float
             The delay between calls to the callback. If `None`, restores the
-            original delay."""
+            original delay.
+        immediate : bool
+            If `True`, stops the currently running task and sets the
+            new delay. Otherwise waits for the current task to complete.
 
-        await self.stop()
-        self.start(delay)
+        """
+
+        # Only change delay if the difference is significant.
+        if delay and abs(self.delay - delay) < 1e-6:
+            return
+
+        if not self.running:
+            return
+
+        if immediate:
+            await self.stop()
+            self.start(delay)
+        else:
+            self.delay = delay or self._orig_delay
 
     def start(self, delay=None):
         """Starts the poller.
@@ -104,11 +122,12 @@ class Poller(object):
 
         """
 
-        if self.running:
-            raise RuntimeError('poller is already running.')
-
         self.delay = delay or self._orig_delay
-        self._task = asyncio.create_task(self.poller())
+
+        if self.running:
+            return
+
+        self._task = self.loop.create_task(self.poller())
 
         return self
 
@@ -122,6 +141,23 @@ class Poller(object):
 
         with suppress(asyncio.CancelledError):
             await self._task
+
+    async def call_now(self):
+        """Calls the callback immediately."""
+
+        restart = False
+        delay = self.delay
+        if self.running:
+            await self.stop()
+            restart = True
+
+        if asyncio.iscoroutinefunction(self.callback):
+            await self.loop.create_task(self.callback())
+        else:
+            self.callback()
+
+        if restart:
+            self.start(delay=delay)
 
     @property
     def running(self):

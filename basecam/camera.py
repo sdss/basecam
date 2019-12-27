@@ -206,9 +206,9 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
         """
 
         if self._camera_poller is None:
-            self._camera_poller = Poller(self._check_cameras)
+            self._camera_poller = Poller('camera_poller', self._check_cameras)
 
-        await self._camera_poller.set_delay(interval)
+        self._camera_poller.start(delay=interval)
 
         self.log('started camera poller.')
 
