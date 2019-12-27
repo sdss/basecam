@@ -262,7 +262,7 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
         This method should not be confused with `.cameras`, which lists the
         `.BaseCamera` instance currently being handled by the `.CameraSystem`.
         `.get_connected_cameras` returns the cameras that the camera API
-        believes are connected at any given time. While both lists are likely
+        believes are available at any given time. While both lists are likely
         to match if the camera poller or camera event handling is used, it does
         not need to be the case if cameras are being handled manually.
 
