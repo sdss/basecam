@@ -493,11 +493,11 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
                              log_header=f'[{log_header.upper()}]: ')
 
         self.log('camera connected.')
-        self.notify(CameraEvent.CAMERA_OPEN)
+        self._notify(CameraEvent.CAMERA_OPEN)
 
         return self
 
-    def notify(self, event, payload=None):
+    def _notify(self, event, payload=None):
         """Notifies an event."""
 
         payload = payload or self._get_basic_payload()
@@ -578,7 +578,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         if self.has_shutter and self.manual_shutter:
             await self.set_shutter(shutter)
 
-        self.notify(CameraEvent.EXPOSURE_STARTED)
+        self._notify(CameraEvent.EXPOSURE_STARTED)
 
         # Takes the image.
         image = await self._expose_internal(exposure_time)
@@ -593,7 +593,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
             }
         )
 
-        self.notify(CameraEvent.EXPOSURE_DONE)
+        self._notify(CameraEvent.EXPOSURE_DONE)
 
         # Closes the shutter
         if self.has_shutter and self.manual_shutter:
@@ -673,7 +673,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         await self._disconnect_internal()
 
         self.log('camera has been disconnected.')
-        self.notify(CameraEvent.CAMERA_CLOSED)
+        self._notify(CameraEvent.CAMERA_CLOSED)
 
     @abc.abstractmethod
     async def _disconnect_internal(self):
