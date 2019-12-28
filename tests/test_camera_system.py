@@ -12,7 +12,6 @@ import logging
 import pytest
 
 from basecam.camera import VirtualCamera
-from basecam.exceptions import CameraWarning
 
 from .conftest import TEST_CONFIG_FILE, CameraSystemTester
 
@@ -78,8 +77,7 @@ async def test_get_cameras_not_implemented(camera_system, mocker):
 
 async def test_config_bad_name(camera_system):
 
-    with pytest.warns(CameraWarning):
-        data = camera_system.get_camera_config('BAD_CAMERA')
+    data = camera_system.get_camera_config('BAD_CAMERA')
 
     assert data['name'] == 'BAD_CAMERA'
     assert data['uid'] is None
@@ -87,8 +85,7 @@ async def test_config_bad_name(camera_system):
 
 async def test_config_bad_uid(camera_system):
 
-    with pytest.warns(CameraWarning):
-        data = camera_system.get_camera_config(uid='BAD_UID')
+    data = camera_system.get_camera_config(uid='BAD_UID')
 
     assert data['name'] == 'BAD_UID'
     assert data['uid'] == 'BAD_UID'
@@ -98,8 +95,7 @@ async def test_no_config(camera_system):
 
     camera_system.config = None
 
-    with pytest.warns(CameraWarning):
-        data = camera_system.get_camera_config('test_camera')
+    data = camera_system.get_camera_config('test_camera')
 
     assert data['name'] == 'test_camera'
     assert data['uid'] is None

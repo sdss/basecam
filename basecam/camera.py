@@ -9,14 +9,13 @@
 import abc
 import asyncio
 import logging
-import warnings
 
 import astropy.time
 import numpy
 from astropy.io import fits
 
 from .events import CameraEvent, CameraSystemEvent
-from .exceptions import CameraError, CameraWarning
+from .exceptions import CameraError
 from .helpers import LoggerMixIn, Poller
 from .notifier import EventNotifier
 from .utils import create_fits_image, read_yaml_file
@@ -114,7 +113,9 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
         #: .EventNotifier: Notifies of `.CameraSystemEvent` and `.CameraEvent` events.
         self.notifier = EventNotifier()
 
-        if config and not isinstance(config, dict):
+        if config is None:
+            self.config = config
+        elif config and not isinstance(config, dict):
             self.config_file = config
             self.config = read_yaml_file(self.config)
             self.log(f'read configuration file from {self.config_file}')
@@ -156,14 +157,11 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
         assert name or uid, 'either a name or unique identifier are required.'
 
         if not self.config:
-            warnings.warn('no configuration available. Returning empty '
-                          'camera configuration.', CameraWarning)
+            name = name or uid
             return {'name': name or uid, 'uid': uid}
 
         if name:
             if name not in self.config:
-                warnings.warn(f'cannot find configuration for {name!r}.',
-                              CameraWarning)
                 return {'name': name or uid, 'uid': uid}
 
             config_params = {'name': name}
@@ -177,9 +175,7 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
                     config_params.update(self.config[name_])
                     return config_params
 
-            # No camera with this UID found.
-            warnings.warn(f'cannot find configuration for {name!r}.',
-                          CameraWarning)
+            name = name or uid
             return {'name': name or uid, 'uid': uid}
 
     async def start_camera_poller(self, interval=1.):
@@ -254,7 +250,7 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
         for uid in uids:
             if uid not in camera_uids:
                 self.log(f'detected new camera with UID {uid!r}.', logging.INFO)
-                await self.add_camera(uid=uid, use_config=True)
+                await self.add_camera(uid=uid)
 
     def get_connected_cameras(self):
         """Lists the connected cameras as reported by the camera system.
@@ -325,7 +321,7 @@ class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
 
         # If the autoconnect parameter is set, connects the camera.
         connection_params = camera_params.get('connection_params', {})
-        if connection_params.get('autoconnect', True):
+        if connection_params.pop('autoconnect', True):
             await camera.connect()
 
         self.cameras.append(camera)
