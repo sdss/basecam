@@ -60,7 +60,7 @@ class ExposureFlavourMixIn(object):
         return await self.expose(*args, shutter=True, flavour='object', **kwargs)
 
 
-class CameraSystem(LoggerMixIn, ExposureFlavourMixIn):
+class CameraSystem(LoggerMixIn):
     """A base class for the camera system.
 
     Provides an abstract class for the camera system, including camera
