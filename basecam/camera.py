@@ -487,7 +487,9 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         self.camera_system = camera_system
 
         self.connected = False
+
         self.has_shutter = config_params.pop('shutter', False)
+        self.manual_shutter = config_params.pop('manual_shutter', True)
 
         self.force = force
         self.config_params = config_params
@@ -597,7 +599,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         """
 
         # Commands the shutter
-        if self.has_shutter and (await self.get_shutter()) is not shutter:
+        if self.has_shutter and self.manual_shutter:
             await self.set_shutter(shutter)
 
         self.notify(CameraEvent.EXPOSURE_STARTED)
@@ -618,7 +620,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         self.notify(CameraEvent.EXPOSURE_DONE)
 
         # Closes the shutter
-        if self.has_shutter and (await self.get_shutter()):
+        if self.has_shutter and self.manual_shutter:
             await self.set_shutter(False)
 
         return image
@@ -647,20 +649,29 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
 
         raise NotImplementedError
 
-    async def set_shutter(self, shutter_open):
+    async def set_shutter(self, shutter, force=False):
         """Sets the position of the shutter.
 
         Parameters
         ----------
-        shutter_open : bool
+        shutter : bool
             If `True` moves the shutter open, otherwise closes it.
+        force : bool
+            Normally, a call is made to `.get_shutter` to determine if the
+            shutter is already in the commanded position. If it is, the
+            shutter is not commanded to move. ``force=True`` sends the
+            move command regardless of the internal status of the shutter.
 
         """
 
         if not self.has_shutter:
             return
 
-        return await self._set_shutter_internal(shutter_open)
+        current_status = await self.get_shutter()
+        if current_status == shutter and not force:
+            return
+
+        return await self._set_shutter_internal(shutter)
 
     async def open_shutter(self):
         """Opens the shutter (alias for ``set_shutter(True)``)."""
