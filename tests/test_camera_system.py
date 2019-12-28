@@ -162,15 +162,3 @@ async def test_get_camera_no_params(camera_system):
     camera = camera_system.get_camera()
 
     assert camera
-
-
-async def test_expose(camera_system):
-
-    await camera_system.add_camera(name='test_camera')
-
-    exposure = await camera_system.science('test_camera', 5)
-
-    header = exposure[0].header
-    assert header['CAMNAME'] == 'TEST_CAMERA'
-    assert header['EXPTIME'] == 5
-    assert header['IMAGETYP'] == 'OBJECT'
