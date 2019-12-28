@@ -122,7 +122,7 @@ async def test_filter_notifications(camera_system, listener):
     events = camera_system.events
 
     # Only notify of cameras being connected.
-    camera_system.notifier.filter_events = CameraSystemEvent.CAMERA_CONNECTED
+    listener.filter_events = [CameraSystemEvent.CAMERA_CONNECTED]
 
     await camera_system.add_camera('test_camera')
     await camera_system.remove_camera('test_camera')

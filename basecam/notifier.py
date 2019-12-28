@@ -16,18 +16,11 @@ class EventNotifier(object):
 
     Allows to register a listener queue in which to announce events.
 
-    Parameters
-    ----------
-    filter_events : list
-        A list of enum values of which to be notified. If `None`,
-        all events will be notified.
-
     """
 
-    def __init__(self, filter_events=None):
+    def __init__(self):
 
         self.listeners = []
-        self.filter_events = filter_events
 
     def register_listener(self, listener):
         """Registers a listener.
@@ -67,29 +60,38 @@ class EventNotifier(object):
 
         assert isinstance(event, enum.Enum), 'event is not an enum.'
 
-        if self.filter_events is not None:
-            if not isinstance(self.filter_events, (list, tuple)):
-                self.filter_events = [self.filter_events]
+        for listener in self.listeners:
 
-            if event not in self.filter_events:
+            if listener.filter_events and event not in listener.filter_events:
                 return False
 
-        for listener in self.listeners:
             listener.put_nowait((event, payload))
 
         return True
 
 
 class EventListener(asyncio.Queue):
-    """An event queue with callbacks."""
+    """An event queue with callbacks.
 
-    def __init__(self, loop=None):
+    Parameters
+    ----------
+    filter_events : list
+        A list of enum values of which to be notified. If `None`,
+        all events will be notified.
+
+    """
+
+    def __init__(self, loop=None, filter_events=None):
 
         asyncio.Queue.__init__(self)
 
         self.callbacks = []
 
         self.loop = loop or asyncio.get_running_loop()
+
+        self.filter_events = filter_events
+        if self.filter_events and not isinstance(self.filter_events, (list, tuple)):
+            self.filter_events = [self.filter_events]
 
         self.listerner_task = None
         self.listerner_task = self.loop.create_task(self._process_queue())
