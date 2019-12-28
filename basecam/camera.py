@@ -521,6 +521,11 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         This method can be internally overridden to return the UID of the
         camera by calling the internal camera firmware.
 
+        Returns
+        -------
+        uid : str
+            The unique identifier for this camera.
+
         """
 
         return None
@@ -545,6 +550,27 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
             return uid_from_camera
         else:
             return uid_from_config
+
+    async def get_status(self):
+        """Returns a dictionary with the camera status values."""
+
+        return await self._status_internal()
+
+    @abc.abstractmethod
+    async def _status_internal(self):
+        """Gets a dictionary with the status of the camera.
+
+        This method is intended to be overridden by the specific camera.
+
+        Returns
+        -------
+        status : dict
+            A dictionary with status values from the camera (e.g.,
+            temperature, cooling status, firmware information, etc.)
+
+        """
+
+        pass
 
     async def expose(self, exposure_time, flavour='object', shutter=True, header=None):
         """Exposes the camera.
@@ -709,6 +735,10 @@ class VirtualCamera(BaseCamera):
     @property
     def _uid_internal(self):
         return self._uid
+
+    async def _status_internal(self):
+        return {'temperature': 25.,
+                'cooler': 10.}
 
     async def _expose_internal(self, exposure_time):
 

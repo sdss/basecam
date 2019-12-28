@@ -22,6 +22,12 @@ async def test_camera(camera):
     assert isinstance(camera, VirtualCamera)
 
 
+async def test_status(camera):
+
+    status = await camera.get_status()
+    assert status['temperature'] == 25.
+
+
 async def test_expose(camera):
 
     image = await camera.expose(1.0)
