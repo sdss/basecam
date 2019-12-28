@@ -80,6 +80,7 @@ omit = [
 
 [tool.coverage.report]
 exclude_lines = [
+    "class Poller"  # Already tested in jaeger
 ]
 
 [tool.tox]
