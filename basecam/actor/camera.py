@@ -19,7 +19,7 @@ def camera():
 
 
 @camera.command(name='list')
-async def list_command(command):
+async def list_(command):
     """Lists cameras connected to the camera system."""
 
     cameras = [camera.name for camera in command.actor.camera_system.cameras]
