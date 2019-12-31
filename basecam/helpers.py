@@ -10,7 +10,7 @@ import asyncio
 import logging
 from contextlib import suppress
 
-from .utils import get_logger
+from sdsstools import get_logger
 
 
 class LoggerMixIn(object):
