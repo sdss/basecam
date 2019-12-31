@@ -2,7 +2,7 @@
 from setuptools import setup
 
 packages = \
-['basecam', 'basecam.actor', 'basecam.utils']
+['basecam', 'basecam.actor']
 
 package_data = \
 {'': ['*']}
@@ -10,9 +10,8 @@ package_data = \
 install_requires = \
 ['astropy>=3.2.1,<4.0.0',
  'numpy>=1.17,<2.0',
- 'pygments>=2.2.0,<3.0.0',
- 'ruamel.yaml>=0.15.61,<0.16.0',
- 'sdss-clu @ git+https://github.com/sdss/clu@master']
+ 'sdss-clu @ git+https://github.com/sdss/clu@master',
+ 'sdsstools>=0.1.0,<0.2.0']
 
 extras_require = \
 {'docs': ['sphinx>=2.1.0,<3.0.0',
@@ -23,7 +22,7 @@ setup_kwargs = {
     'name': 'sdss-basecam',
     'version': '0.1.0a0',
     'description': 'A base library for camera wrapping and actor.',
-    'long_description': 'basecam\n=======\n\n![Versions](https://img.shields.io/badge/python-3.7%20|%203.8-blue)\n[![Documentation Status](https://readthedocs.org/projects/sdss-basecam/badge/?version=latest)](https://sdss-basecam.readthedocs.io/en/latest/?badge=latest)\n[![Travis (.org)](https://img.shields.io/travis/sdss/basecam)](https://travis-ci.org/sdss/basecam)\n[![Coverage Status](https://coveralls.io/repos/github/sdss/basecam/badge.svg?branch=master)](https://coveralls.io/github/sdss/basecam?branch=master)\n\n``basecam`` provides a wrapper around CCD camera APIs with an SDSS-style TCP/IP actor. The main benefits of using `basecam` are:\n\n- Simplifies the creation of production-level camera libraries by providing all the common boilerplate so that you only need to focus on implementing the parts that are specific to your camera API.\n\n- Provides a common API regardless of the underlying camera being handled.\n\n- Powerful event handling and notification.\n',
+    'long_description': 'basecam\n=======\n\n![Versions](https://img.shields.io/badge/python-3.7%20|%203.8-blue)\n[![Documentation Status](https://readthedocs.org/projects/sdss-basecam/badge/?version=latest)](https://sdss-basecam.readthedocs.io/en/latest/?badge=latest)\n[![Travis (.org)](https://img.shields.io/travis/sdss/basecam)](https://travis-ci.org/sdss/basecam)\n[![Coverage Status](https://codecov.io/gh/sdss/basecam/branch/master/graph/badge.svg)](https://codecov.io/gh/sdss/basecam)\n\n``basecam`` provides a wrapper around CCD camera APIs with an SDSS-style TCP/IP actor. The main benefits of using `basecam` are:\n\n- Simplifies the creation of production-level camera libraries by providing all the common boilerplate so that you only need to focus on implementing the parts that are specific to your camera API.\n\n- Provides a common API regardless of the underlying camera being handled.\n\n- Powerful event handling and notification.\n',
     'author': 'José Sánchez-Gallego',
     'author_email': 'gallegoj@uw.edu',
     'maintainer': None,
