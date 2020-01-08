@@ -14,9 +14,6 @@ from pkg_resources import parse_version
 from basecam import __version__
 
 
-sys.path.append(os.path.join(os.path.dirname(__file__), 'releases'))
-
-
 # Are we building in RTD?
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 
@@ -26,7 +23,7 @@ on_rtd = os.environ.get('READTHEDOCS') == 'True'
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx.ext.autosummary',
               'sphinx.ext.todo', 'sphinx.ext.viewcode', 'sphinx.ext.mathjax',
-              'sphinx.ext.intersphinx', 'sphinxcontrib_trio', 'releases']
+              'sphinx.ext.intersphinx', 'sphinxcontrib_trio', 'sdsstools.releases']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -67,8 +64,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'releases/**/*.rst',
-                    'releases/README.rst']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -97,7 +93,7 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
-releases_github_path = 'sdss/baseCam'
+releases_github_path = 'sdss/basecam'
 releases_document_name = ['changelog']
 releases_unstable_prehistory = True
 
