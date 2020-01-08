@@ -12,7 +12,7 @@ import numpy
 import pytest
 
 from basecam.camera import VirtualCamera
-from basecam.utils import create_fits_image
+from basecam.fits import create_fits_image
 
 
 pytestmark = pytest.mark.asyncio

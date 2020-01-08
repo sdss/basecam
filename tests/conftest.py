@@ -11,11 +11,11 @@ import os
 
 import pytest
 from asynctest import CoroutineMock
+from sdsstools import read_yaml_file
 
 import clu.testing
 from basecam.actor import CameraActor
 from basecam.camera import CameraSystem, VirtualCamera
-from basecam.utils import read_yaml_file
 from clu.testing import TestCommand
 
 

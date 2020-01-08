@@ -7,7 +7,6 @@ from .camera import *
 from .events import *
 from .exceptions import *
 from .notifier import EventListener
-from .utils import get_config, get_logger
 
 
 NAME = 'basecam'

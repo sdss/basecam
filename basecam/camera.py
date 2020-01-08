@@ -13,13 +13,13 @@ import logging
 import astropy.time
 import numpy
 from astropy.io import fits
+from sdsstools import read_yaml_file
 
 from .events import CameraEvent, CameraSystemEvent
 from .exceptions import CameraError
+from .fits import create_fits_image
 from .helpers import LoggerMixIn, Poller
 from .notifier import EventNotifier
-from .utils import create_fits_image, read_yaml_file
-
 
 __all__ = ['CameraSystem', 'BaseCamera', 'VirtualCamera']
 
