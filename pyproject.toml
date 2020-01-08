@@ -67,9 +67,6 @@ include = [
     "basecam/*"
 ]
 omit = [
-    "*/utils/configuration.py",
-    "*/utils/logger.py",
-    "*/utils/color_print.py",
     "*/__init__.py"
 ]
 
