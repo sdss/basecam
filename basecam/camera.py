@@ -459,7 +459,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         self.connected = False
 
         self.has_shutter = config_params.pop('shutter', False)
-        self.manual_shutter = config_params.pop('manual_shutter', True)
+        self.auto_shutter = config_params.pop('auto_shutter', True)
 
         self.force = force
         self.config_params = config_params
@@ -595,7 +595,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         """
 
         # Commands the shutter
-        if self.has_shutter and self.manual_shutter:
+        if self.has_shutter and not self.auto_shutter:
             await self.set_shutter(shutter)
 
         self._notify(CameraEvent.EXPOSURE_STARTED)
@@ -616,7 +616,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         self._notify(CameraEvent.EXPOSURE_DONE)
 
         # Closes the shutter
-        if self.has_shutter and self.manual_shutter:
+        if self.has_shutter and not self.auto_shutter:
             await self.set_shutter(False)
 
         return image
