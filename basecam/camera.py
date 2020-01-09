@@ -500,7 +500,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
     def _get_basic_payload(self):
         """Returns a dictionary with basic payload for notifying events."""
 
-        return {'uid': self.uid, 'name': self.name}
+        return {'uid': self.uid, 'name': self.name, 'camera': self}
 
     @abc.abstractmethod
     async def _connect_internal(self, **config_params):
