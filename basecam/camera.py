@@ -60,7 +60,7 @@ class ExposureFlavourMixIn(object):
         return await self.expose(*args, shutter=True, flavour='object', **kwargs)
 
 
-class CameraSystem(LoggerMixIn):
+class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
     """A base class for the camera system.
 
     Provides an abstract class for the camera system, including camera
@@ -126,6 +126,9 @@ class CameraSystem(LoggerMixIn):
         if isinstance(self.config.get('cameras', None), dict):
             self.config = self.config['cameras']
 
+        uids = [self.config[camera]['uid'] for camera in self.config]
+        assert len(uids) == len(set(uids)), 'repeated UIDs in the configuration data.'
+
     def setup(self):
         """Setup custom camera system.
 
@@ -181,7 +184,7 @@ class CameraSystem(LoggerMixIn):
     async def start_camera_poller(self, interval=1.):
         """Monitors changes in the camera list.
 
-        Issues calls to `.get_connected_cameras` on an interval and compares
+        Issues calls to `.list_available_cameras` on an interval and compares
         the connected cameras with those in `.cameras`. New found cameras
         are added and cameras not present are cleanly removed.
 
@@ -224,7 +227,7 @@ class CameraSystem(LoggerMixIn):
         """
 
         try:
-            uids = self.get_connected_cameras()
+            uids = self.list_available_cameras()
         except NotImplementedError:
             self.log('get_connected cameras is not implemented. '
                      'Stopping camera poller.', logging.ERROR)
@@ -252,25 +255,18 @@ class CameraSystem(LoggerMixIn):
                 self.log(f'detected new camera with UID {uid!r}.', logging.INFO)
                 await self.add_camera(uid=uid)
 
-    def get_connected_cameras(self):
+    @abc.abstractmethod
+    def list_available_cameras(self):
         """Lists the connected cameras as reported by the camera system.
-
-        This method should not be confused with `.cameras`, which lists the
-        `.BaseCamera` instance currently being handled by the `.CameraSystem`.
-        `.get_connected_cameras` returns the cameras that the camera API
-        believes are available at any given time. While both lists are likely
-        to match if the camera poller or camera event handling is used, it does
-        not need to be the case if cameras are being handled manually.
 
         Returns
         -------
         connected_cameras : `list`
-            A list of unique identifiers of the connected cameras. The unique
-            identifiers must match those in the configuration file.
+            A list of unique identifiers of cameras connected to the system.
 
         """
 
-        raise NotImplementedError
+        pass
 
     async def add_camera(self, name=None, uid=None, force=False, **kwargs):
         """Adds a new `.Camera` instance to `.cameras`.
@@ -310,8 +306,7 @@ class CameraSystem(LoggerMixIn):
         camera_params.update(kwargs)
 
         name = camera_params.pop('name')
-        connected_camera = self.get_camera(name)
-        if connected_camera:
+        if connected_camera := self.get_camera(name=name, uid=uid):
             self.log(f'camera {name!r} is already connected.', logging.WARNING)
             return connected_camera
 
@@ -320,8 +315,7 @@ class CameraSystem(LoggerMixIn):
         camera = self.camera_class(name, self, force=force, **camera_params)
 
         # If the autoconnect parameter is set, connects the camera.
-        connection_params = camera_params.get('connection_params', {})
-        if connection_params.pop('autoconnect', True):
+        if camera_params.pop('autoconnect', False):
             await camera.connect()
 
         self.cameras.append(camera)
