@@ -28,6 +28,7 @@ astropy = "^3.2.1"
 numpy = "^1.17"
 sdss-clu = { git = "https://github.com/sdss/clu" }
 sdsstools = "^0.1.0"
+sphinx = {version="^2.3.1", optional=true}
 
 [tool.poetry.dev-dependencies]
 ipython = "^7.9.0"
@@ -44,9 +45,12 @@ codecov = "^2.0.15"
 coverage = {version = "5.0", extras = ["toml"]}
 ipdb = "^0.12.3"
 asynctest = "^0.13.0"
-sphinx = "^2.1.0"
+sphinx = "^2.3.1"
 sdsstools = {version="^0.1.0", extras=["dev"]}
 pycodestyle = {git="https://github.com/PyCQA/pycodestyle"}
+
+[tool.poetry.extras]
+docs = ["sphinx"]
 
 [tool.isort]
 line_length = 79
