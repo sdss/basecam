@@ -327,7 +327,7 @@ class CameraSystem(LoggerMixIn):
         self.cameras.append(camera)
 
         # Notify event
-        self.notifier.notify(CameraSystemEvent.CAMERA_CONNECTED, camera_params)
+        self.notifier.notify(CameraSystemEvent.CAMERA_ADDED, camera_params)
 
         return camera
 
@@ -352,7 +352,7 @@ class CameraSystem(LoggerMixIn):
                 self.log(f'removed camera {name!r}.')
 
                 # Notify event
-                self.notifier.notify(CameraSystemEvent.CAMERA_DISCONNECTED,
+                self.notifier.notify(CameraSystemEvent.CAMERA_REMOVED,
                                      {'uid': camera.uid, 'name': camera.name})
 
                 return

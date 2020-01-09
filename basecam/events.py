@@ -15,8 +15,8 @@ __all__ = ['CameraSystemEvent', 'CameraEvent']
 class CameraSystemEvent(enum.Enum):
     """Enumeration of camera system events."""
 
-    CAMERA_CONNECTED = enum.auto()
-    CAMERA_DISCONNECTED = enum.auto()
+    CAMERA_ADDED = enum.auto()
+    CAMERA_REMOVED = enum.auto()
 
 
 class CameraEvent(enum.Enum):
