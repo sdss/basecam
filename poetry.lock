@@ -1229,7 +1229,7 @@ testing = ["pathlib2", "contextlib2", "unittest2"]
 docs = ["sphinx"]
 
 [metadata]
-content-hash = "fda5018efd0a450d3b4e66ec298f697df2f0dd5ca876f9ad8ba2e82104d36468"
+content-hash = "8d3b09cc7d4560028d164697a01b0dac99e664a8a0f69968d7a88ee39a7d6cf3"
 python-versions = "^3.7"
 
 [metadata.files]
