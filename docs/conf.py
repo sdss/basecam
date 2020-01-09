@@ -7,7 +7,6 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
 import os
-import sys
 
 from pkg_resources import parse_version
 
@@ -23,7 +22,7 @@ on_rtd = os.environ.get('READTHEDOCS') == 'True'
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx.ext.autosummary',
               'sphinx.ext.todo', 'sphinx.ext.viewcode', 'sphinx.ext.mathjax',
-              'sphinx.ext.intersphinx', 'sphinxcontrib_trio', 'sdsstools.releases']
+              'sphinx.ext.intersphinx', 'sdsstools.releases']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
