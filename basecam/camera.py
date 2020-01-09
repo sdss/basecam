@@ -16,7 +16,7 @@ from astropy.io import fits
 from sdsstools import read_yaml_file
 
 from .events import CameraEvent, CameraSystemEvent
-from .exceptions import CameraError
+from .exceptions import CameraConnectionError, CameraError
 from .fits import create_fits_image
 from .helpers import LoggerMixIn, Poller
 from .notifier import EventNotifier
@@ -464,27 +464,41 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         self.force = force
         self.config_params = config_params
 
-    async def connect(self, **user_config_params):
-        """Connects the camera and performs all the necessary setup.
-
-        Parameters
-        ----------
-        user_config_params : dict
-            A series of keyword arguments that override the configuration
-            parameters defined during the object instantiation.
-
-        """
-
-        self.config_params.update(user_config_params)
-
-        await self._connect_internal(**self.config_params)
-        self.connected = True
-
         # Get the same logger as the camera system but uses the UID or name of
         # the camera as prefix for messages from this camera.
         log_header = self.uid or self.name
         LoggerMixIn.__init__(self, self.camera_system.logger.name,
                              log_header=f'[{log_header.upper()}]: ')
+
+    async def connect(self, force=False, **connection_params):
+        """Connects the camera and performs all the necessary setup.
+
+        Parameters
+        ----------
+        force : bool
+            Forces the camera to reconnect even if it's already connected.
+        connection_params : dict
+            A series of keyword arguments to be passed to the internal
+            implementation of ``connect`` for a given camera. If provided,
+            they override the ``connection_params`` settings in the
+            configuration for this camera.
+
+        """
+
+        if self.connected and not force:
+            raise CameraConnectionError('the camera is already connected.')
+
+        camera_connection_params = self.config_params.get('connection_params', {}).copy()
+        camera_connection_params.update(connection_params)
+
+        try:
+            await self._connect_internal(**camera_connection_params)
+            self.connected = True
+            if self.uid is None:
+                raise CameraConnectionError('camera connected but an UID is not available.')
+        except CameraConnectionError as ee:
+            self.connected = False
+            raise
 
         self.log('camera connected.')
         self._notify(CameraEvent.CAMERA_OPEN)
