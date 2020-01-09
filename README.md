@@ -1,7 +1,7 @@
 basecam
 =======
 
-![Versions](https://img.shields.io/badge/python-3.7%20|%203.8-blue)
+![Versions](https://img.shields.io/badge/python-3.8-blue)
 [![Documentation Status](https://readthedocs.org/projects/sdss-basecam/badge/?version=latest)](https://sdss-basecam.readthedocs.io/en/latest/?badge=latest)
 [![Travis (.org)](https://img.shields.io/travis/sdss/basecam)](https://travis-ci.org/sdss/basecam)
 [![Coverage Status](https://codecov.io/gh/sdss/basecam/branch/master/graph/badge.svg)](https://codecov.io/gh/sdss/basecam)
