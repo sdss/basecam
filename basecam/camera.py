@@ -123,7 +123,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
             self.config = self.config.copy()
 
         # If the config has a section named cameras, prefer that.
-        if isinstance(self.config.get('cameras', None), dict):
+        if self.config and isinstance(self.config.get('cameras', None), dict):
             self.config = self.config['cameras']
 
         uids = [self.config[camera]['uid'] for camera in self.config]
