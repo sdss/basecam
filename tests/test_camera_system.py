@@ -66,7 +66,7 @@ async def test_camera_connected(camera_system):
 
 async def test_get_cameras_not_implemented(camera_system, mocker):
 
-    camera_system.get_connected_cameras = mocker.Mock(side_effect=NotImplementedError)
+    camera_system.list_available_cameras = mocker.Mock(side_effect=NotImplementedError)
 
     await camera_system.start_camera_poller(0.1)
     await asyncio.sleep(0.5)

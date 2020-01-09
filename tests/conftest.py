@@ -31,7 +31,7 @@ class CameraSystemTester(CameraSystem):
         self._connected = True
         return self
 
-    def get_connected_cameras(self):
+    def list_available_cameras(self):
         return self._connected_cameras
 
     async def shutdown(self):
