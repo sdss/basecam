@@ -123,11 +123,11 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
             self.config = self.config.copy()
 
         # If the config has a section named cameras, prefer that.
-        if self.config and isinstance(self.config.get('cameras', None), dict):
-            self.config = self.config['cameras']
-
-        uids = [self.config[camera]['uid'] for camera in self.config]
-        assert len(uids) == len(set(uids)), 'repeated UIDs in the configuration data.'
+        if self.config:
+            if isinstance(self.config.get('cameras', None), dict):
+                self.config = self.config['cameras']
+            uids = [self.config[camera]['uid'] for camera in self.config]
+            assert len(uids) == len(set(uids)), 'repeated UIDs in the configuration data.'
 
     def setup(self):
         """Setup custom camera system.
