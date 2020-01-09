@@ -306,7 +306,8 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
         camera_params.update(kwargs)
 
         name = camera_params.pop('name')
-        if connected_camera := self.get_camera(name=name, uid=uid):
+        connected_camera = self.get_camera(name=name, uid=uid)
+        if connected_camera:
             self.log(f'camera {name!r} is already connected.', logging.WARNING)
             return connected_camera
 

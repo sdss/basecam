@@ -13,9 +13,6 @@ install_requires = \
  'sdss-clu @ git+https://github.com/sdss/clu@master',
  'sdsstools>=0.1.0,<0.2.0']
 
-extras_require = \
-{'docs': ['sphinx>=2.1.0,<3.0.0', 'sphinxcontrib-trio>=1.0.1,<2.0.0']}
-
 setup_kwargs = {
     'name': 'sdss-basecam',
     'version': '0.1.0a0',
@@ -29,8 +26,7 @@ setup_kwargs = {
     'packages': packages,
     'package_data': package_data,
     'install_requires': install_requires,
-    'extras_require': extras_require,
-    'python_requires': '>=3.8,<4.0',
+    'python_requires': '>=3.7,<4.0',
 }
 
 
