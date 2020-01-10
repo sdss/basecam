@@ -19,46 +19,11 @@ from .events import CameraEvent, CameraSystemEvent
 from .exceptions import CameraConnectionError, ExposureError
 from .fits import create_fits_image
 from .helpers import LoggerMixIn, Poller
+from .mixins import ExposureTypeMixIn
 from .notifier import EventNotifier
 
 
 __all__ = ['CameraSystem', 'BaseCamera']
-
-
-class ExposureFlavourMixIn(object):
-    """Methods to take exposures with different flavours."""
-
-    async def bias(self, *args, **kwargs):
-        """Take a bias image."""
-
-        kwargs.pop('flavour', None)
-        kwargs.pop('shutter', None)
-
-        return await self.expose(*args, 0.0, shutter=False, flavour='bias', **kwargs)
-
-    async def dark(self, *args, **kwargs):
-        """Take a dark image."""
-
-        kwargs.pop('flavour', None)
-        kwargs.pop('shutter', None)
-
-        return await self.expose(*args, shutter=False, flavour='dark', **kwargs)
-
-    async def flat(self, *args, **kwargs):
-        """Take a flat image."""
-
-        kwargs.pop('flavour', None)
-        kwargs.pop('shutter', None)
-
-        return await self.expose(*args, shutter=True, flavour='flat', **kwargs)
-
-    async def science(self, *args, **kwargs):
-        """Take a science image."""
-
-        kwargs.pop('flavour', None)
-        kwargs.pop('shutter', None)
-
-        return await self.expose(*args, shutter=True, flavour='science', **kwargs)
 
 
 class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
@@ -430,7 +395,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
             await self.stop_camera_poller()
 
 
-class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
+class BaseCamera(LoggerMixIn, ExposureTypeMixIn, metaclass=abc.ABCMeta):
     """A base class for wrapping a camera API in a standard implementation.
 
     Instantiating the `.Camera` class does not open the camera and makes
@@ -582,7 +547,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
 
         pass
 
-    async def expose(self, exposure_time, flavour='science', shutter=True, header=None):
+    async def expose(self, exposure_time, image_type='science', header=None, **kwargs):
         """Exposes the camera.
 
         This is a general method to expose the camera. Other methods such as
@@ -593,14 +558,13 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         ----------
         exposure_time : float
             The exposure time of the image.
-        flavour : str
+        image_type : str
             The type of image.
-        shutter : bool
-            Whether to open the shutter while exposing (`True`) or not
-            (`False`).
         header : ~astropy.io.fits.Header or dict
             Keyword pairs (as a dictionary or astropy
             `~astropy.io.fits.Header`) to be added to the image header.
+        kwargs : dict
+            Other keyword arguments to pass to the internal expose method.
 
         Returns
         -------
@@ -610,14 +574,10 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
 
         """
 
-        # Commands the shutter
-        if self.has_shutter and not self.auto_shutter:
-            await self.set_shutter(shutter)
-
         self._notify(CameraEvent.EXPOSURE_STARTED)
 
         # Takes the image.
-        image = await self._expose_internal(exposure_time)
+        image = await self._expose_internal(exposure_time, image_type=image_type, **kwargs)
 
         if isinstance(image, fits.PrimaryHDU):
             image = fits.HDUList([image])
@@ -628,24 +588,21 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         else:
             raise ExposureError(f'invalid image format {type(image)}')
 
-        imagetype = 'object' if flavour == 'science' else flavour
+        imagetype = 'object' if image_type == 'science' else image_type
         image[0].header.update(
             {
                 'IMAGETYP': (imagetype.upper(), 'Image type'),
                 'CAMNAME': (self.name.upper(), 'Name of the camera'),
+                'CAMUID': (self.uid or 'N/A', 'Unique identifier for the camera')
             }
         )
 
         self._notify(CameraEvent.EXPOSURE_DONE)
 
-        # Closes the shutter
-        if self.has_shutter and not self.auto_shutter:
-            await self.set_shutter(False)
-
         return image
 
     @abc.abstractmethod
-    async def _expose_internal(self, exposure_time, flavour='science'):
+    async def _expose_internal(self, exposure_time, image_type='science', **kwargs):
         """Internal method to handle camera exposures.
 
         Returns

@@ -11,7 +11,7 @@ import abc
 from .exceptions import CameraError
 
 
-__all__ = ['ShutterMixIn']
+__all__ = ['ShutterMixIn', 'ExposureTypeMixIn']
 
 
 class ShutterMixIn(object, metaclass=abc.ABCMeta):
@@ -70,3 +70,35 @@ class ShutterMixIn(object, metaclass=abc.ABCMeta):
             raise CameraError('camera {self.name!r} does not have a shutter.')
 
         return await self._get_shutter_internal()
+
+
+class ExposureTypeMixIn(object):
+    """Methods to take exposures with different image_types."""
+
+    async def bias(self, *args, **kwargs):
+        """Take a bias image."""
+
+        kwargs.pop('image_type', None)
+
+        return await self.expose(*args, 0.0, image_type='bias', **kwargs)
+
+    async def dark(self, *args, **kwargs):
+        """Take a dark image."""
+
+        kwargs.pop('image_type', None)
+
+        return await self.expose(*args, image_type='dark', **kwargs)
+
+    async def flat(self, *args, **kwargs):
+        """Take a flat image."""
+
+        kwargs.pop('image_type', None)
+
+        return await self.expose(*args, image_type='flat', **kwargs)
+
+    async def science(self, *args, **kwargs):
+        """Take a science image."""
+
+        kwargs.pop('image_type', None)
+
+        return await self.expose(*args, image_type='science', **kwargs)

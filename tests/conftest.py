@@ -76,7 +76,12 @@ class VirtualCamera(BaseCamera, ShutterMixIn):
         return {'temperature': 25.,
                 'cooler': 10.}
 
-    async def _expose_internal(self, exposure_time):
+    async def _expose_internal(self, exposure_time, image_type='science', **kwargs):
+
+        if image_type in ['bias', 'dark']:
+            await self.set_shutter(False)
+        else:
+            await self.set_shutter(True)
 
         # Creates a spiral pattern
         xx = numpy.arange(-5, 5, 0.1)
@@ -92,6 +97,8 @@ class VirtualCamera(BaseCamera, ShutterMixIn):
         obstime = astropy.time.Time('2000-01-01 00:00:00')
 
         fits_image = create_fits_image(data, exposure_time, obstime=obstime)
+
+        await self.set_shutter(False)
 
         return fits_image
 
