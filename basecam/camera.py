@@ -532,7 +532,6 @@ class BaseCamera(LoggerMixIn, ExposureTypeMixIn, metaclass=abc.ABCMeta):
 
         return await self._status_internal()
 
-    @abc.abstractmethod
     async def _status_internal(self):
         """Gets a dictionary with the status of the camera.
 
