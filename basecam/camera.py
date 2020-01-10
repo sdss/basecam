@@ -561,7 +561,7 @@ class BaseCamera(LoggerMixIn, ExposureTypeMixIn, metaclass=abc.ABCMeta):
 
         """
 
-        pass
+        return {}
 
     async def expose(self, exposure_time, image_type='science', header=None, **kwargs):
         """Exposes the camera.
