@@ -54,9 +54,10 @@ docs = ["sphinx"]
 
 [tool.isort]
 line_length = 79
-sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "SDSS", "FIRSTPARTY", "LOCALFOLDER"]
 default_section = "THIRDPARTY"
-known_first_party = "basecam"
+known_first_party = ["basecam"]
+known_sdss = ["clu", "sdsstools"]
 balanced_wrapping = true
 include_trailing_comma = false
 lines_after_imports = 2

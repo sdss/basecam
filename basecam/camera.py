@@ -11,18 +11,18 @@ import asyncio
 import logging
 import os
 
-import astropy.time
 import numpy
 from astropy.io import fits
 from sdsstools import read_yaml_file
 
 from .events import CameraEvent, CameraSystemEvent
-from .exceptions import CameraConnectionError, CameraError, ExposureError
+from .exceptions import CameraConnectionError, ExposureError
 from .fits import create_fits_image
 from .helpers import LoggerMixIn, Poller
 from .notifier import EventNotifier
 
-__all__ = ['CameraSystem', 'BaseCamera', 'VirtualCamera']
+
+__all__ = ['CameraSystem', 'BaseCamera']
 
 
 class ExposureFlavourMixIn(object):
@@ -658,58 +658,6 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
 
         pass
 
-    async def _set_shutter_internal(self, shutter_open):
-        """Internal method to set the position of the shutter."""
-
-        raise NotImplementedError
-
-    async def _get_shutter_internal(self):
-        """Internal method to get the position of the shutter."""
-
-        raise NotImplementedError
-
-    async def set_shutter(self, shutter, force=False):
-        """Sets the position of the shutter.
-
-        Parameters
-        ----------
-        shutter : bool
-            If `True` moves the shutter open, otherwise closes it.
-        force : bool
-            Normally, a call is made to `.get_shutter` to determine if the
-            shutter is already in the commanded position. If it is, the
-            shutter is not commanded to move. ``force=True`` sends the
-            move command regardless of the internal status of the shutter.
-
-        """
-
-        if not self.has_shutter:
-            return
-
-        current_status = await self.get_shutter()
-        if current_status == shutter and not force:
-            return
-
-        return await self._set_shutter_internal(shutter)
-
-    async def open_shutter(self):
-        """Opens the shutter (alias for ``set_shutter(True)``)."""
-
-        return await self.set_shutter(True)
-
-    async def close_shutter(self):
-        """Opens the shutter (alias for ``set_shutter(False)``)."""
-
-        return await self.set_shutter(False)
-
-    async def get_shutter(self):
-        """Gets the position of the shutter."""
-
-        if not self.has_shutter:
-            raise CameraError('camera {self.name!r} does not have a shutter.')
-
-        return await self._get_shutter_internal()
-
     async def shutdown(self):
         """Shuts down the camera."""
 
@@ -722,65 +670,4 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
     async def _disconnect_internal(self):
         """Internal method to disconnect a camera."""
 
-        pass
-
-
-class VirtualCamera(BaseCamera):
-    """A virtual camera that does not require hardware.
-
-    This class is mostly intended for testing and development. It behaves
-    in all ways as a real camera with pre-defined responses that depend on the
-    input parameters.
-
-    """
-
-    # Sets the internal UID for the camera.
-    _uid = 'DEV_12345'
-
-    def __init__(self, *args, **kwargs):
-
-        self._shutter_position = False
-
-        self.width = 640
-        self.height = 480
-
-        super().__init__(*args, **kwargs)
-
-    async def _connect_internal(self, **connection_params):
-        return True
-
-    @property
-    def _uid_internal(self):
-        return self._uid
-
-    async def _status_internal(self):
-        return {'temperature': 25.,
-                'cooler': 10.}
-
-    async def _expose_internal(self, exposure_time):
-
-        # Creates a spiral pattern
-        xx = numpy.arange(-5, 5, 0.1)
-        yy = numpy.arange(-5, 5, 0.1)
-        xg, yg = numpy.meshgrid(xx, yy, sparse=True)
-        tile = numpy.sin(xg**2 + yg**2) / (xg**2 + yg**2)
-
-        # Repeats the tile to match the size of the image.
-        data = numpy.tile(tile.astype(numpy.uint16),
-                          (self.height // len(yy) + 1, self.width // len(yy) + 1))
-        data = data[0:self.height, 0:self.width]
-
-        obstime = astropy.time.Time('2000-01-01 00:00:00')
-
-        fits_image = create_fits_image(data, exposure_time, obstime=obstime)
-
-        return fits_image
-
-    async def _set_shutter_internal(self, shutter_open):
-        self._shutter_position = shutter_open
-
-    async def _get_shutter_internal(self):
-        return self._shutter_position
-
-    async def _disconnect_internal(self):
         pass

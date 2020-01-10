@@ -11,8 +11,9 @@ import astropy.io.fits
 import numpy
 import pytest
 
-from basecam.camera import VirtualCamera
 from basecam.fits import create_fits_image
+
+from .conftest import VirtualCamera
 
 
 pytestmark = pytest.mark.asyncio

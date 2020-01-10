@@ -11,9 +11,7 @@ import logging
 
 import pytest
 
-from basecam.camera import VirtualCamera
-
-from .conftest import TEST_CONFIG_FILE, CameraSystemTester
+from .conftest import TEST_CONFIG_FILE, CameraSystemTester, VirtualCamera
 
 
 pytestmark = pytest.mark.asyncio

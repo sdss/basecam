@@ -7,6 +7,7 @@ from .camera import *
 from .events import *
 from .exceptions import *
 from .notifier import EventListener
+from . import mixins
 
 
 NAME = 'basecam'
