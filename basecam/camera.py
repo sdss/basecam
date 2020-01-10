@@ -632,7 +632,6 @@ class BaseCamera(LoggerMixIn, ExposureTypeMixIn, metaclass=abc.ABCMeta):
         self.log('camera has been disconnected.')
         self._notify(CameraEvent.CAMERA_CLOSED)
 
-    @abc.abstractmethod
     async def _disconnect_internal(self):
         """Internal method to disconnect a camera."""
 
