@@ -22,12 +22,15 @@ class LoggerMixIn(object):
         The name of the logger to which to output.
     log_header : str
         A header to prefix to each message.
+    level : int
+        Initial level for logging.
 
     """
 
-    def __init__(self, name, log_header=None):
+    def __init__(self, name, log_header=None, level=logging.CRITICAL):
 
         self.logger = get_logger(name)
+        self.logger.set_level(level)
         self.log_header = log_header
 
     def log(self, message, level=logging.DEBUG, use_header=True):
