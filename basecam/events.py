@@ -24,9 +24,8 @@ class CameraEvent(enum.Enum):
 
     CAMERA_OPEN = enum.auto()
     CAMERA_CLOSED = enum.auto()
-    EXPOSURE_STARTED = enum.auto()
     EXPOSURE_FLUSHING = enum.auto()
-    EXPOSURE_EXPOSING = enum.auto()
+    EXPOSURE_INTEGRATING = enum.auto()
     EXPOSURE_READING = enum.auto()
     EXPOSURE_DONE = enum.auto()
     EXPOSURE_FAILED = enum.auto()

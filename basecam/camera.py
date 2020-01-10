@@ -10,13 +10,14 @@ import abc
 import asyncio
 import logging
 import os
+import warnings
 
 import numpy
 from astropy.io import fits
 from sdsstools import read_yaml_file
 
 from .events import CameraEvent, CameraSystemEvent
-from .exceptions import CameraConnectionError, ExposureError
+from .exceptions import CameraConnectionError, ExposureError, ExposureWarning
 from .fits import create_fits_image
 from .helpers import LoggerMixIn, Poller
 from .mixins import ExposureTypeMixIn
@@ -574,10 +575,17 @@ class BaseCamera(LoggerMixIn, ExposureTypeMixIn, metaclass=abc.ABCMeta):
 
         """
 
-        self._notify(CameraEvent.EXPOSURE_STARTED)
+        if image_type == 'bias':
+            if exposure_time > 0:
+                warnings.warn('setting exposure time for bias to 0', ExposureWarning)
+            exposure_time = 0.
 
         # Takes the image.
-        image = await self._expose_internal(exposure_time, image_type=image_type, **kwargs)
+        try:
+            image = await self._expose_internal(exposure_time, image_type=image_type, **kwargs)
+        except ExposureError:
+            self._notify(CameraEvent.EXPOSURE_FAILED)
+            raise
 
         if isinstance(image, fits.PrimaryHDU):
             image = fits.HDUList([image])
@@ -586,6 +594,7 @@ class BaseCamera(LoggerMixIn, ExposureTypeMixIn, metaclass=abc.ABCMeta):
         elif isinstance(image, fits.HDUList):
             pass
         else:
+            self._notify(CameraEvent.EXPOSURE_FAILED)
             raise ExposureError(f'invalid image format {type(image)}')
 
         imagetype = 'object' if image_type == 'science' else image_type

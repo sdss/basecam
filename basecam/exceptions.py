@@ -17,7 +17,7 @@ class CameraError(Exception):
         stack = inspect.stack()
         camera_name = stack[1][0].f_locals['self'].name
 
-        super().__init__(f'Camera {camera_name} - {message}')
+        super().__init__(f'{camera_name} - {message}')
 
 
 class CameraConnectionError(CameraError):
@@ -30,3 +30,14 @@ class ExposureError(CameraError):
 
 class CameraWarning(UserWarning):
     """Base warning."""
+
+    def __init__(self, message, *args, **kwargs):
+
+        stack = inspect.stack()
+        camera_name = stack[1][0].f_locals['self'].name
+
+        super().__init__(f'{camera_name} - {message}')
+
+
+class ExposureWarning(CameraWarning):
+    """Warning for exposures."""
