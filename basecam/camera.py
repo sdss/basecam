@@ -17,7 +17,8 @@ from astropy.io import fits
 from sdsstools import read_yaml_file
 
 from .events import CameraEvent, CameraSystemEvent
-from .exceptions import CameraConnectionError, ExposureError, ExposureWarning
+from .exceptions import (CameraConnectionError, CameraWarning, ExposureError,
+                         ExposureWarning)
 from .fits import create_fits_image
 from .helpers import LoggerMixIn, Poller
 from .mixins import ExposureTypeMixIn
@@ -463,7 +464,7 @@ class BaseCamera(LoggerMixIn, ExposureTypeMixIn, metaclass=abc.ABCMeta):
             await self._connect_internal(**camera_connection_params)
             self.connected = True
             if self.uid is None:
-                raise CameraConnectionError('camera connected but an UID is not available.')
+                warnings.warn('camera connected but an UID is not available.', CameraWarning)
         except CameraConnectionError:
             self.connected = False
             raise
