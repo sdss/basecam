@@ -9,6 +9,7 @@
 import abc
 import asyncio
 import logging
+import os
 
 import astropy.time
 import numpy
@@ -73,7 +74,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
     ----------
     camera_class : .BaseCamera subclass
         The subclass of `.BaseCamera` to use with this camera system.
-    config : dict or path
+    camera_config : dict or path
         A dictionary with the configuration parameters for the multiple
         cameras that can be present in the system, or the path to a YAML file.
         Refer to the documentation for details on the accepted format.
@@ -87,7 +88,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
     """
 
-    def __init__(self, camera_class, config=None, logger_name=None,
+    def __init__(self, camera_class, camera_config=None, logger_name=None,
                  log_header=None, loop=None):
 
         assert issubclass(camera_class, BaseCamera) and camera_class != BaseCamera, \
@@ -100,8 +101,8 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         LoggerMixIn.__init__(self, logger_name, log_header=log_header)
 
-        self.config = config
-        self.config_file = None
+        self.camera_config = camera_config
+        self.camera_config_file = None
 
         self.loop = loop or asyncio.get_event_loop()
 
@@ -113,20 +114,20 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
         #: .EventNotifier: Notifies of `.CameraSystemEvent` and `.CameraEvent` events.
         self.notifier = EventNotifier()
 
-        if config is None:
-            self.config = config
-        elif config and not isinstance(config, dict):
-            self.config_file = config
-            self.config = read_yaml_file(self.config)
-            self.log(f'read configuration file from {self.config_file}')
+        if camera_config is None:
+            self.camera_config = camera_config
+        elif camera_config and not isinstance(camera_config, dict):
+            self.camera_config_file = os.path.expandvars(os.path.exanduser(camera_config))
+            self.camera_config = read_yaml_file(self.camera_config_file)
+            self.log(f'read configuration file from {self.camera_config_file}')
         else:
-            self.config = self.config.copy()
+            self.camera_config = self.camera_config.copy()
 
         # If the config has a section named cameras, prefer that.
-        if self.config:
-            if isinstance(self.config.get('cameras', None), dict):
-                self.config = self.config['cameras']
-            uids = [self.config[camera]['uid'] for camera in self.config]
+        if self.camera_config:
+            if isinstance(self.camera_config.get('cameras', None), dict):
+                self.camera_config = self.camera_config['cameras']
+            uids = [self.camera_config[camera]['uid'] for camera in self.camera_config]
             assert len(uids) == len(set(uids)), 'repeated UIDs in the configuration data.'
 
     def setup(self):
@@ -159,23 +160,23 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         assert name or uid, 'either a name or unique identifier are required.'
 
-        if not self.config:
+        if not self.camera_config:
             name = name or uid
             return {'name': name or uid, 'uid': uid}
 
         if name:
-            if name not in self.config:
+            if name not in self.camera_config:
                 return {'name': name or uid, 'uid': uid}
 
             config_params = {'name': name}
-            config_params.update(self.config[name])
+            config_params.update(self.camera_config[name])
             return config_params
 
         else:
-            for name_ in self.config:
-                if self.config[name_]['uid'] == uid:
+            for name_ in self.camera_config:
+                if self.camera_config[name_]['uid'] == uid:
                     config_params = {'name': name_}
-                    config_params.update(self.config[name_])
+                    config_params.update(self.camera_config[name_])
                     return config_params
 
             name = name or uid
@@ -313,7 +314,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         self.log(f'adding camera {name!r} with parameters {camera_params!r}')
 
-        camera = self.camera_class(name, self, force=force, **camera_params)
+        camera = self.camera_class(name, self, force=force, camera_config=camera_params)
 
         # If the autoconnect parameter is set, connects the camera.
         if camera_params.pop('autoconnect', False):
@@ -444,14 +445,14 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
     force : bool
         Forces the camera to stay in the `.CameraSystem` list even if it
         does not appear in the system camera list.
-    config_params : dict
+    camera_config : dict
         Parameters used to define how to connect to the camera, its geometry,
         initialisation parameters, etc. The format of the parameters must
         follow the structure of the configuration file.
 
     """
 
-    def __init__(self, name, camera_system, force=False, **config_params):
+    def __init__(self, name, camera_system, force=False, camera_config=None):
 
         self.name = name
 
@@ -459,11 +460,11 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
 
         self.connected = False
 
-        self.has_shutter = config_params.pop('shutter', False)
-        self.auto_shutter = config_params.pop('auto_shutter', True)
+        self.has_shutter = camera_config.pop('shutter', False)
+        self.auto_shutter = camera_config.pop('auto_shutter', True)
 
         self.force = force
-        self.config_params = config_params
+        self.camera_config = camera_config or {}
 
         # Get the same logger as the camera system but uses the UID or name of
         # the camera as prefix for messages from this camera.
@@ -489,7 +490,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         if self.connected and not force:
             raise CameraConnectionError('the camera is already connected.')
 
-        camera_connection_params = self.config_params.get('connection_params', {}).copy()
+        camera_connection_params = self.camera_config.get('connection_params', {}).copy()
         camera_connection_params.update(connection_params)
 
         try:
@@ -497,7 +498,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
             self.connected = True
             if self.uid is None:
                 raise CameraConnectionError('camera connected but an UID is not available.')
-        except CameraConnectionError as ee:
+        except CameraConnectionError:
             self.connected = False
             raise
 
@@ -518,7 +519,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         return {'uid': self.uid, 'name': self.name, 'camera': self}
 
     @abc.abstractmethod
-    async def _connect_internal(self, **config_params):
+    async def _connect_internal(self, **connection_params):
         """Internal method to connect the camera."""
 
         pass
@@ -550,7 +551,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         """
 
         uid_from_camera = self._uid_internal
-        uid_from_config = self.config_params.get('uid', None)
+        uid_from_config = self.camera_config.get('uid', None)
 
         if uid_from_camera and uid_from_config:
             assert uid_from_camera == uid_from_config, 'mismatch between config and camera UID.'
@@ -738,7 +739,7 @@ class VirtualCamera(BaseCamera):
 
         super().__init__(*args, **kwargs)
 
-    async def _connect_internal(self, **config_params):
+    async def _connect_internal(self, **connection_params):
         return True
 
     @property
