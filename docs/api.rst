@@ -14,10 +14,6 @@ Camera
     :members:
     :private-members:
 
-.. autoclass:: basecam.camera.VirtualCamera
-    :members:
-    :private-members:
-
 
 Notifier
 --------

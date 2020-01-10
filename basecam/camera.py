@@ -417,6 +417,21 @@ class BaseCamera(LoggerMixIn, ExposureTypeMixIn, metaclass=abc.ABCMeta):
         initialisation parameters, etc. The format of the parameters must
         follow the structure of the configuration file.
 
+    Attributes
+    ----------
+    connected : bool
+        Whether the camera is open and connected.
+    has_shutter : bool
+        Whether the camera has a shutter system.
+    auto_shutter : bool
+        If `True`, the shutter is automatically handled by the camera firmware
+        and it is not necessary to manually open and close the shutter during
+        exposures.
+    camera_config : dict
+        A dictionary with with configuration parameters for the camera. Among
+        other, it may contain a section ``connection_params`` which is used by
+        `.connect` to open the camera connection.
+
     """
 
     def __init__(self, name, camera_system, force=False, camera_config=None):
@@ -615,6 +630,29 @@ class BaseCamera(LoggerMixIn, ExposureTypeMixIn, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     async def _expose_internal(self, exposure_time, image_type='science', **kwargs):
         """Internal method to handle camera exposures.
+
+        This method handles the entire process of exposing and reading the
+        camera and return an array or FITS object with the exposed frame.
+        If necessary, it must handle the correct operation of the shutter
+        before and after the exposure, for example ::
+
+            if self.has_shutter and not self.auto_shutter:
+                if image_type in ['bias', 'dark']:
+                    await self.set_shutter(False)
+                else:
+                    await self.set_shutter(True)
+
+        Other parameters that need to be set before the exposure begins (e.g.,
+        image area, binning) can be passed via the ``kwargs`` arguments.
+
+        Parameters
+        ----------
+        exposure_time : float
+            The exposure time of the image.
+        image_type : str
+            The type of image.
+        kwargs : dict
+            Other keyword arguments to configure the exposure.
 
         Returns
         -------
