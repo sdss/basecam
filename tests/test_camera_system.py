@@ -21,10 +21,10 @@ pytestmark = pytest.mark.asyncio
 
 async def test_load_config():
 
-    camera_system = CameraSystemTester(VirtualCamera, config=TEST_CONFIG_FILE)
+    camera_system = CameraSystemTester(VirtualCamera, camera_config=TEST_CONFIG_FILE)
 
     assert isinstance(camera_system, CameraSystemTester)
-    assert 'test_camera' in camera_system.config
+    assert 'test_camera' in camera_system.camera_config
 
 
 async def test_system(camera_system):
@@ -93,7 +93,7 @@ async def test_config_bad_uid(camera_system):
 
 async def test_no_config(camera_system):
 
-    camera_system.config = None
+    camera_system.camera_config = None
 
     data = camera_system.get_camera_config('test_camera')
 

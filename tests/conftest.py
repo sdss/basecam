@@ -57,7 +57,7 @@ def event_loop(request):
 async def camera_system(config, event_loop):
 
     camera_system = CameraSystemTester(VirtualCamera,
-                                       config=config,
+                                       camera_config=config,
                                        loop=event_loop).setup()
 
     yield camera_system
@@ -87,7 +87,7 @@ async def actor_setup(config):
 
     """
 
-    camera_system = CameraSystemTester(VirtualCamera, config=config).setup()
+    camera_system = CameraSystemTester(VirtualCamera, camera_config=config).setup()
 
     actor = CameraActor.from_config(config, camera_system)
     actor = await clu.testing.setup_test_actor(actor)
