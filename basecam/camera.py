@@ -575,9 +575,11 @@ class BaseCamera(LoggerMixIn, ExposureTypeMixIn, metaclass=abc.ABCMeta):
 
         """
 
-        if image_type == 'bias':
-            if exposure_time > 0:
-                warnings.warn('setting exposure time for bias to 0', ExposureWarning)
+        if exposure_time < 0:
+            raise ExposureError('exposure time cannot be < 0')
+
+        if image_type == 'bias' and exposure_time > 0:
+            warnings.warn('setting exposure time for bias to 0', ExposureWarning)
             exposure_time = 0.
 
         # Takes the image.
