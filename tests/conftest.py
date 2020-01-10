@@ -21,7 +21,7 @@ from sdsstools import read_yaml_file
 from basecam.actor import CameraActor
 from basecam.camera import BaseCamera, CameraSystem
 from basecam.fits import create_fits_image
-from basecam.mixins import ShutterMixIn
+from basecam.mixins import ExposureTypeMixIn, ShutterMixIn
 
 
 TEST_CONFIG_FILE = os.path.dirname(__file__) + '/data/test_config.yaml'
@@ -44,7 +44,7 @@ class CameraSystemTester(CameraSystem):
         await super().shutdown()
 
 
-class VirtualCamera(BaseCamera, ShutterMixIn):
+class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
     """A virtual camera that does not require hardware.
 
     This class is mostly intended for testing and development. It behaves

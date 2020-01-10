@@ -21,7 +21,6 @@ from .exceptions import (CameraConnectionError, CameraWarning, ExposureError,
                          ExposureWarning)
 from .fits import create_fits_image
 from .helpers import LoggerMixIn, Poller
-from .mixins import ExposureTypeMixIn
 from .notifier import EventNotifier
 
 
@@ -397,7 +396,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
             await self.stop_camera_poller()
 
 
-class BaseCamera(LoggerMixIn, ExposureTypeMixIn, metaclass=abc.ABCMeta):
+class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
     """A base class for wrapping a camera API in a standard implementation.
 
     Instantiating the `.Camera` class does not open the camera and makes
