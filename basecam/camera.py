@@ -17,7 +17,7 @@ from astropy.io import fits
 from sdsstools import read_yaml_file
 
 from .events import CameraEvent, CameraSystemEvent
-from .exceptions import CameraConnectionError, CameraError
+from .exceptions import CameraConnectionError, CameraError, ExposureError
 from .fits import create_fits_image
 from .helpers import LoggerMixIn, Poller
 from .notifier import EventNotifier
@@ -58,7 +58,7 @@ class ExposureFlavourMixIn(object):
         kwargs.pop('flavour', None)
         kwargs.pop('shutter', None)
 
-        return await self.expose(*args, shutter=True, flavour='object', **kwargs)
+        return await self.expose(*args, shutter=True, flavour='science', **kwargs)
 
 
 class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
@@ -582,7 +582,7 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
 
         pass
 
-    async def expose(self, exposure_time, flavour='object', shutter=True, header=None):
+    async def expose(self, exposure_time, flavour='science', shutter=True, header=None):
         """Exposes the camera.
 
         This is a general method to expose the camera. Other methods such as
@@ -619,12 +619,19 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         # Takes the image.
         image = await self._expose_internal(exposure_time)
 
-        if not isinstance(image, fits.HDUList):
+        if isinstance(image, fits.PrimaryHDU):
+            image = fits.HDUList([image])
+        elif isinstance(image, numpy.ndarray):
             image = create_fits_image(image, exposure_time)
+        elif isinstance(image, fits.HDUList):
+            pass
+        else:
+            raise ExposureError(f'invalid image format {type(image)}')
 
+        imagetype = 'object' if flavour == 'science' else flavour
         image[0].header.update(
             {
-                'IMAGETYP': (flavour.upper(), 'Image type'),
+                'IMAGETYP': (imagetype.upper(), 'Image type'),
                 'CAMNAME': (self.name.upper(), 'Name of the camera'),
             }
         )
@@ -638,14 +645,14 @@ class BaseCamera(LoggerMixIn, ExposureFlavourMixIn, metaclass=abc.ABCMeta):
         return image
 
     @abc.abstractmethod
-    async def _expose_internal(self, exposure_time):
+    async def _expose_internal(self, exposure_time, flavour='science'):
         """Internal method to handle camera exposures.
 
         Returns
         -------
-        fits : `~astropy.io.fits.HDUList`
+        fits : `~astropy.io.fits.HDUList` or `~numpy.array`
             An HDU list with a single extension containing the image data
-            and header.
+            and header, or a 2D Numpy array.
 
         """
 
