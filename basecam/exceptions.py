@@ -6,9 +6,18 @@
 # @Filename: exceptions.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
+import inspect
+
 
 class CameraError(Exception):
     """A custom core exception"""
+
+    def __init__(self, message=''):
+
+        stack = inspect.stack()
+        camera_name = stack[1][0].f_locals['self'].name
+
+        super().__init__(f'Camera {camera_name} - {message}')
 
 
 class CameraConnectionError(CameraError):
