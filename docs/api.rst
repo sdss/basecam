@@ -14,6 +14,17 @@ Camera
     :members:
     :private-members:
 
+Exposure
+--------
+
+.. automodule:: basecam.exposure
+    :members:
+
+FITS
+----
+
+.. automodule:: basecam.model.fits
+    :members:
 
 Notifier
 --------
