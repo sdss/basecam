@@ -377,7 +377,7 @@ class Card(object):
         self._fargs = fargs
         self._evaluate = evaluate
 
-        self.context = context
+        self.context = context or {}
 
     def __repr__(self):
 
