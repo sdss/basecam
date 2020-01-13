@@ -12,15 +12,14 @@ import logging
 import os
 import warnings
 
-import numpy
-from astropy.io import fits
 from sdsstools import read_yaml_file
 
 from .events import CameraEvent, CameraSystemEvent
-from .exceptions import (CameraConnectionError, CameraWarning, ExposureError,
-                         ExposureWarning)
-from .fits import create_fits_image
+from .exceptions import (CameraConnectionError, CameraWarning,
+                         ExposureError, ExposureWarning)
+from .exposure import Exposure
 from .helpers import LoggerMixIn, Poller
+from .model.basic import basic_fits_model
 from .notifier import EventNotifier
 
 
@@ -395,6 +394,13 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
         if self._camera_poller and self._camera_poller.running:
             await self.stop_camera_poller()
 
+    @property
+    @abc.abstractmethod
+    def __version__(self):
+        """The version of the camera library."""
+
+        raise NotImplementedError
+
 
 class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
     """A base class for wrapping a camera API in a standard implementation.
@@ -430,8 +436,13 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         A dictionary with with configuration parameters for the camera. Among
         other, it may contain a section ``connection_params`` which is used by
         `.connect` to open the camera connection.
+    fits_model : .FITSModel
+        An instance of `.FITSModel` defining the data model of the images
+        taken by the camera. If not defined, a basic model will be used.
 
     """
+
+    fits_model = basic_fits_model
 
     def __init__(self, name, camera_system, force=False, camera_config=None):
 
@@ -446,6 +457,10 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         self.force = force
         self.camera_config = camera_config or {}
+
+        self._status = {}
+
+        self.__version__ = self.camera_system.__version__
 
         # Get the same logger as the camera system but uses the UID or name of
         # the camera as prefix for messages from this camera.
@@ -491,7 +506,9 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
     def _notify(self, event, payload=None):
         """Notifies an event."""
 
-        payload = payload or self._get_basic_payload()
+        payload = self._get_basic_payload()
+        payload.update(payload or {})
+
         self.camera_system.notifier.notify(event, payload)
 
     def _get_basic_payload(self):
@@ -542,10 +559,21 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         else:
             return uid_from_config
 
-    async def get_status(self):
-        """Returns a dictionary with the camera status values."""
+    async def get_status(self, update=False):
+        """Returns a dictionary with the camera status values.
 
-        return await self._status_internal()
+        Parameters
+        ----------
+        update : bool
+            If `True`, retrieves the status from the camera; otherwise returns
+            the last cached status.
+
+        """
+
+        if update:
+            self._status = await self._status_internal()
+
+        return self._status
 
     async def _status_internal(self):
         """Gets a dictionary with the status of the camera.
@@ -562,72 +590,76 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         pass
 
-    async def expose(self, exposure_time, image_type='science', header=None, **kwargs):
+    async def expose(self, exptime, image_type='science',
+                     fits_model=None, filename=None, write=False, **kwargs):
         """Exposes the camera.
 
-        This is a general method to expose the camera. Other methods such as
-        `.bias` or `.dark` ultimately call `.expose` with the appropriate
-        parameters.
+        This is the general method to expose the camera. It receives the
+        exposure time and type of exposure, along with other necessary
+        arguments, and returns an `.Exposure` instance with the data and
+        metadata for the image.
+
+        The `.Exposure` object is created and populated by `.expose` and passed
+        to the parent mixins for the camera class. It is also passed to the
+        internal expose method where the concrete implementation of the camera
+        expose system happens.
 
         Parameters
         ----------
-        exposure_time : float
-            The exposure time of the image.
+        exptime : float
+            The exposure time for the image, in seconds.
         image_type : str
-            The type of image.
-        header : ~astropy.io.fits.Header or dict
-            Keyword pairs (as a dictionary or astropy
-            `~astropy.io.fits.Header`) to be added to the image header.
+            The type of image (``{'bias', 'dark', 'science', 'flat'}``).
+        fits_model : .FITSModel
+            A `.FITSModel` that can be used to override the default model
+            for the camera.
+        filename : str
+            The path where to write the image.
+        write : bool
+            If `True`, writes the image to disk immediately.
         kwargs : dict
             Other keyword arguments to pass to the internal expose method.
 
         Returns
         -------
-        fits : `astropy.io.fits.HDUList`
-            An `astropy.io.fits.HDUList` object with a single extension
-            containing the image data and header.
+        exposure : `.Exposure`
+            An `.Exposure` object containing the image data, exposure time,
+            and header datamodel.
 
         """
 
-        if exposure_time < 0:
+        if exptime < 0:
             raise ExposureError('exposure time cannot be < 0')
 
-        if image_type == 'bias' and exposure_time > 0:
+        if image_type == 'bias' and exptime > 0:
             warnings.warn('setting exposure time for bias to 0', ExposureWarning)
-            exposure_time = 0.
+            exptime = 0.
 
-        # Takes the image.
+        exposure = Exposure(self, fits_model=(fits_model or self.fits_model))
+        exposure.exptime = exptime
+        exposure.image_type = image_type
+        exposure.filename = filename
+
         try:
-            image = await self._expose_internal(exposure_time, image_type=image_type, **kwargs)
-        except ExposureError:
-            self._notify(CameraEvent.EXPOSURE_FAILED)
+            await self._expose_internal(exposure, **kwargs)
+        except ExposureError as e:
+            self._notify(CameraEvent.EXPOSURE_FAILED, {'error': str(e)})
             raise
 
-        if isinstance(image, fits.PrimaryHDU):
-            image = fits.HDUList([image])
-        elif isinstance(image, numpy.ndarray):
-            image = create_fits_image(image, exposure_time)
-        elif isinstance(image, fits.HDUList):
-            pass
-        else:
-            self._notify(CameraEvent.EXPOSURE_FAILED)
-            raise ExposureError(f'invalid image format {type(image)}')
-
-        imagetype = 'object' if image_type == 'science' else image_type
-        image[0].header.update(
-            {
-                'IMAGETYP': (imagetype.upper(), 'Image type'),
-                'CAMNAME': (self.name.upper(), 'Name of the camera'),
-                'CAMUID': (self.uid or 'N/A', 'Unique identifier for the camera')
-            }
-        )
+        if not exposure.data:
+            error = 'data was not taken.'
+            self._notify(CameraEvent.EXPOSURE_FAILED, {'error': error})
+            raise Exposure(error)
 
         self._notify(CameraEvent.EXPOSURE_DONE)
 
-        return image
+        if write:
+            exposure.write()
+
+        return exposure
 
     @abc.abstractmethod
-    async def _expose_internal(self, exposure_time, image_type='science', **kwargs):
+    async def _expose_internal(self, exposure, **kwargs):
         """Internal method to handle camera exposures.
 
         This method handles the entire process of exposing and reading the
@@ -641,23 +673,25 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
                 else:
                     await self.set_shutter(True)
 
-        Other parameters that need to be set before the exposure begins (e.g.,
-        image area, binning) can be passed via the ``kwargs`` arguments.
+        It receives an `.Exposure` instance in which the exposure time,
+        image type, and other parameters have been set by `.expose`.
+        Additional parameters can be passed via the ``kwargs`` arguments.
+        The camera instance can be accessed via the ``Exposure.camera``
+        attribute.
+
+        The method is responsible for adding any relevant attributes in the
+        exposure instance. The time of the start of the exposure is initially
+        set just before `._expose_internal` is called, but if necessary it
+        must be updated when the camera is actually commanded to expose (or,
+        if flushing occurs, when the integration starts). Finally, it must
+        set ``Exposure.data`` with the image as a Numpy array.
 
         Parameters
         ----------
-        exposure_time : float
-            The exposure time of the image.
-        image_type : str
-            The type of image.
+        exposure : .Exposure
+            The exposure being taken.
         kwargs : dict
             Other keyword arguments to configure the exposure.
-
-        Returns
-        -------
-        fits : `~astropy.io.fits.HDUList` or `~numpy.array`
-            An HDU list with a single extension containing the image data
-            and header, or a 2D Numpy array.
 
         """
 
