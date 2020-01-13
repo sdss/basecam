@@ -6,6 +6,7 @@ from sdsstools import get_package_version
 from .camera import *
 from .events import *
 from .exceptions import *
+from .exposure import *
 from .notifier import EventListener
 from . import mixins
 
