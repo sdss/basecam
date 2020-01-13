@@ -9,6 +9,7 @@ from .exceptions import *
 from .exposure import *
 from .notifier import EventListener
 from . import mixins
+from . import models
 
 
 NAME = 'basecam'

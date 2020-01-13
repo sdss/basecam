@@ -3,17 +3,17 @@
 #
 # @Author: José Sánchez-Gallego (gallegoj@uw.edu)
 # @Date: 2020-01-12
-# @Filename: test_model.py
+# @Filename: test_models.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
 import astropy.io.fits
 import astropy.table
 import pytest
 
-from basecam import model
+from basecam import models
 
 
-class MacroCardTest(model.MacroCard):
+class MacroCardTest(models.MacroCard):
 
     def macro(self, exposure, **kwargs):
 
@@ -23,7 +23,7 @@ class MacroCardTest(model.MacroCard):
 
 def test_fits_model():
 
-    fits_model = model.FITSModel()
+    fits_model = models.FITSModel()
 
     assert len(fits_model) == 1
     assert fits_model[0].data == 'raw'
@@ -32,7 +32,7 @@ def test_fits_model():
 
 def test_fits_model_to_hdu(exposure):
 
-    fits_model = model.FITSModel()
+    fits_model = models.FITSModel()
 
     hdulist = fits_model.to_hdu(exposure)
 
@@ -45,8 +45,8 @@ def test_fits_model_to_hdu(exposure):
 @pytest.mark.parametrize('compressed', [True, 'GZIP_1'])
 def test_model_compressed(exposure, compressed):
 
-    fits_model = model.FITSModel([model.Extension(data=None,
-                                                  compressed=compressed)])
+    fits_model = models.FITSModel([models.Extension(data=None,
+                                                    compressed=compressed)])
 
     exposure.fits_model = fits_model
     hdulist = exposure.to_hdu()
@@ -60,9 +60,9 @@ def test_model_compressed(exposure, compressed):
 
 def test_fits_model_multi_extension(exposure):
 
-    fits_model = model.FITSModel([model.Extension(data='none'),
-                                  model.Extension(data=None),
-                                  model.Extension(data='raw')])
+    fits_model = models.FITSModel([models.Extension(data='none'),
+                                  models.Extension(data=None),
+                                  models.Extension(data='raw')])
 
     exposure.fits_model = fits_model
     hdulist = exposure.to_hdu()
@@ -81,8 +81,8 @@ def test_fits_model_multi_extension(exposure):
 
 def test_fits_model_multi_extension_compressed(exposure):
 
-    fits_model = model.FITSModel([model.Extension(data=None, compressed=True),
-                                  model.Extension(data=None, compressed=True)])
+    fits_model = models.FITSModel([models.Extension(data=None, compressed=True),
+                                   models.Extension(data=None, compressed=True)])
 
     exposure.fits_model = fits_model
     hdulist = exposure.to_hdu()
@@ -101,7 +101,7 @@ def test_fits_model_multi_extension_compressed(exposure):
 
 def test_basic_header_model(exposure):
 
-    basic_header_model = model.models.basic_header_model
+    basic_header_model = models.models.basic_header_model
     basic_header_model.append(MacroCardTest())
 
     header = basic_header_model.to_header(exposure)
@@ -142,13 +142,13 @@ def test_macro_with_group_title(exposure):
 
 def test_card_group(exposure):
 
-    card_group = model.CardGroup([('KEYW1', 1, 'The first card'),
-                                  model.Card(('KEYW2', 2))],
-                                 name='card_group')
+    card_group = models.CardGroup([('KEYW1', 1, 'The first card'),
+                                   models.Card(('KEYW2', 2))],
+                                  name='card_group')
 
     assert len(card_group) == 2
-    assert isinstance(card_group[0], model.Card)
-    assert isinstance(card_group[1], model.Card)
+    assert isinstance(card_group[0], models.Card)
+    assert isinstance(card_group[1], models.Card)
 
     assert card_group[0].name == 'KEYW1'
 
@@ -159,7 +159,7 @@ def test_card_group(exposure):
 
 def test_card_group_append(exposure):
 
-    card_group = model.CardGroup([('KEYW1', 1, 'The first card')])
+    card_group = models.CardGroup([('KEYW1', 1, 'The first card')])
     card_group.append(('KEYW2', 2))
 
     assert len(card_group) == 2
@@ -168,7 +168,7 @@ def test_card_group_append(exposure):
 
 def test_card_group_insert(exposure):
 
-    card_group = model.CardGroup([('KEYW1', 1, 'The first card')])
+    card_group = models.CardGroup([('KEYW1', 1, 'The first card')])
     card_group.insert(0, ('KEYW2', 2))
 
     assert len(card_group) == 2
@@ -177,7 +177,7 @@ def test_card_group_insert(exposure):
 
 def test_evaluate_callable(exposure):
 
-    card = model.Card('testcall', value=lambda x, y: x + y, fargs=(1, 2))
+    card = models.Card('testcall', value=lambda x, y: x + y, fargs=(1, 2))
 
     name, value, comment = card.evaluate(exposure)
 

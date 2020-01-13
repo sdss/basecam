@@ -20,13 +20,13 @@ Exposure
 .. automodule:: basecam.exposure
     :members:
 
-Model
------
+Models
+------
 
-.. automodule:: basecam.model.base
+.. automodule:: basecam.models.base
     :members:
 
-.. automodule:: basecam.model.models
+.. automodule:: basecam.models.models
     :members:
 
 

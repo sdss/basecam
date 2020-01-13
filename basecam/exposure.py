@@ -9,7 +9,7 @@
 import astropy
 
 from .exceptions import ExposureError
-from .model import Extension, FITSModel
+from .models import FITSModel
 
 
 __all__ = ['Exposure']
