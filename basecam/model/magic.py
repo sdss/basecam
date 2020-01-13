@@ -15,7 +15,7 @@ _MAGIC_CARDS = {
     'OBSTIME': ('{__exposure__.obstime.tai}',
                 'Time of the start of the exposure [TAI]'),
 
-    'IMAGETYP': ('{__exposure__.imagetyp}',
+    'IMAGETYP': ('{__exposure__.image_type}',
                  'The image type of the file, e.g. bias, dark, flat, object'),
 
     'CAMNAME': ('{__camera__.name}',
