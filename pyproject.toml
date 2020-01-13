@@ -107,6 +107,7 @@ commands =
     rm -Rf _build
     sphinx-build . _build --color -W -bhtml {posargs}
 """
+
 [build-system]
 build-backend = "setuptools.build_meta:__legacy__"
 requires = ["setuptools"]
