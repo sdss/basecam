@@ -559,7 +559,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         else:
             return uid_from_config
 
-    async def get_status(self, update=False):
+    def get_status(self, update=False):
         """Returns a dictionary with the camera status values.
 
         Parameters
@@ -571,11 +571,11 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         """
 
         if update or not self._status:
-            self._status = await self._status_internal()
+            self._status = self._status_internal()
 
         return self._status
 
-    async def _status_internal(self):
+    def _status_internal(self):
         """Gets a dictionary with the status of the camera.
 
         This method is intended to be overridden by the specific camera.
