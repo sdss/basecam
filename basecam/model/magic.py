@@ -9,22 +9,11 @@
 
 _MAGIC_CARDS = {
 
-    'EXPTIME': ('{__exposure__.exptime}',
-                'Exposure time of single integration'),
-
-    'OBSTIME': ('{__exposure__.obstime.tai}',
-                'Time of the start of the exposure [TAI]'),
-
-    'IMAGETYP': ('{__exposure__.image_type}',
-                 'The image type of the file, e.g. bias, dark, flat, object'),
-
-    'CAMNAME': ('{__camera__.name}',
-                'Camera name'),
-
-    'CAMUID': ('{__camera__.uid}',
-               'Camera UID'),
-
-    'VCAM': ('{__camera__.__version__}',
-             'The version of camera library at the time the image was written')
+    'EXPTIME': ('{__exposure__.exptime}', 'Exposure time of single integration'),
+    'OBSTIME': ('{__exposure__.obstime.tai}', 'Time of the start of the exposure [TAI]'),
+    'IMAGETYP': ('{__exposure__.image_type}', 'The image type of the file'),
+    'CAMNAME': ('{__camera__.name}', 'Camera name'),
+    'CAMUID': ('{__camera__.uid}', 'Camera UID'),
+    'VCAM': ('{__camera__.__version__}', 'The version of camera library')
 
 }
