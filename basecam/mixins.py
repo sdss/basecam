@@ -96,9 +96,9 @@ class ExposureTypeMixIn(object):
 
         return await self.expose(*args, image_type='flat', **kwargs)
 
-    async def science(self, *args, **kwargs):
+    async def object(self, *args, **kwargs):
         """Take a science image."""
 
         kwargs.pop('image_type', None)
 
-        return await self.expose(*args, image_type='science', **kwargs)
+        return await self.expose(*args, image_type='object', **kwargs)

@@ -18,10 +18,9 @@ import clu.testing
 from clu.testing import TestCommand
 from sdsstools import read_yaml_file
 
+from basecam import BaseCamera, CameraSystem, Exposure
 from basecam.actor import CameraActor
-from basecam.camera import BaseCamera, CameraSystem
-from basecam.fits import create_fits_image
-from basecam.mixins import ShutterMixIn
+from basecam.mixins import ExposureTypeMixIn, ShutterMixIn
 
 
 TEST_CONFIG_FILE = os.path.dirname(__file__) + '/data/test_config.yaml'
@@ -31,6 +30,7 @@ class CameraSystemTester(CameraSystem):
 
     _connected_cameras = []
     _connected = False
+    __version__ = '0.1.0'
 
     def setup(self):
         self._connected = True
@@ -44,7 +44,7 @@ class CameraSystemTester(CameraSystem):
         await super().shutdown()
 
 
-class VirtualCamera(BaseCamera, ShutterMixIn):
+class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
     """A virtual camera that does not require hardware.
 
     This class is mostly intended for testing and development. It behaves
@@ -76,7 +76,9 @@ class VirtualCamera(BaseCamera, ShutterMixIn):
         return {'temperature': 25.,
                 'cooler': 10.}
 
-    async def _expose_internal(self, exposure_time, image_type='science', **kwargs):
+    async def _expose_internal(self, exposure, **kwargs):
+
+        image_type = exposure.image_type
 
         if image_type in ['bias', 'dark']:
             await self.set_shutter(False)
@@ -94,13 +96,10 @@ class VirtualCamera(BaseCamera, ShutterMixIn):
                           (self.height // len(yy) + 1, self.width // len(yy) + 1))
         data = data[0:self.height, 0:self.width]
 
-        obstime = astropy.time.Time('2000-01-01 00:00:00')
-
-        fits_image = create_fits_image(data, exposure_time, obstime=obstime)
+        exposure.data = data
+        exposure.obstime = astropy.time.Time('2000-01-01 00:00:00')
 
         await self.set_shutter(False)
-
-        return fits_image
 
     async def _set_shutter_internal(self, shutter_open):
         self._shutter_position = shutter_open
@@ -187,3 +186,15 @@ async def command(actor):
 
     command = TestCommand(commander_id=1, actor=actor)
     yield command
+
+
+@pytest.fixture(scope='function')
+def exposure(camera):
+
+    exp = Exposure(camera)
+
+    exp.data = numpy.zeros((10, 10), dtype=numpy.uint16)
+    exp.obstime = astropy.time.Time.now()
+    exp.image_type = 'object'
+
+    yield exp

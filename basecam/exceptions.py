@@ -24,8 +24,16 @@ class CameraConnectionError(CameraError):
     """An error to be raised if the camera fails to connect/disconnect."""
 
 
-class ExposureError(CameraError):
+class ExposureError(Exception):
     """The exposure failed."""
+
+
+class FITSModelError(Exception):
+    """An error related to the FITS model."""
+
+
+class CardError(FITSModelError):
+    """Error raised by a FITS `.Card`."""
 
 
 class CameraWarning(UserWarning):
@@ -39,5 +47,13 @@ class CameraWarning(UserWarning):
         super().__init__(f'{camera_name} - {message}')
 
 
-class ExposureWarning(CameraWarning):
+class ExposureWarning(UserWarning):
     """Warning for exposures."""
+
+
+class FITSModelWarning(UserWarning):
+    """A warnings related to the FITS model."""
+
+
+class CardWarning(FITSModelWarning):
+    """Warning raised by a FITS `.Card`."""

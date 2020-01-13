@@ -47,7 +47,6 @@ ipdb = "^0.12.3"
 asynctest = "^0.13.0"
 sphinx = "^2.3.1"
 sdsstools = {version="^0.1.0", extras=["dev"]}
-pycodestyle = {git="https://github.com/PyCQA/pycodestyle"}
 
 [tool.poetry.extras]
 docs = ["sphinx"]
@@ -74,7 +73,8 @@ omit = [
 
 [tool.coverage.report]
 exclude_lines = [
-    "class Poller"  # Already tested in jaeger
+    "class Poller",  # Already tested in jaeger
+    "def __repr__"
 ]
 
 [tool.tox]
@@ -107,6 +107,7 @@ commands =
     rm -Rf _build
     sphinx-build . _build --color -W -bhtml {posargs}
 """
+
 [build-system]
 build-backend = "setuptools.build_meta:__legacy__"
 requires = ["setuptools"]
