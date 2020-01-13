@@ -37,8 +37,8 @@ Notifier
     :members:
 
 
-Helpers
--------
+Utils
+-----
 
-.. automodule:: basecam.helpers
+.. automodule:: basecam.utils
     :members:

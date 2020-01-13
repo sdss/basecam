@@ -18,7 +18,7 @@ from .events import CameraEvent, CameraSystemEvent
 from .exceptions import (CameraConnectionError, CameraWarning,
                          ExposureError, ExposureWarning)
 from .exposure import Exposure
-from .helpers import LoggerMixIn, Poller
+from .utils import LoggerMixIn, Poller
 from .model.models import basic_fits_model
 from .notifier import EventNotifier
 
