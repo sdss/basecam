@@ -13,11 +13,12 @@ basic_header_model = HeaderModel(
     [
         'VCAM',
         'CAMNAME',
-        'CAMUID'
+        'CAMUID',
         'IMAGETYP',
         'EXPTIME',
         ('TIMESYS', 'TAI', 'All systems at APO operate on the TAI time system'),
-        'OBSTIME'
+        ('DATE-OBS', '{__exposure__.obstime.tai.isot}',
+         'Date and time (in TIMESYS system) that the exposure started.')
     ]
 )
 
