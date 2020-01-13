@@ -24,7 +24,7 @@ class CameraConnectionError(CameraError):
     """An error to be raised if the camera fails to connect/disconnect."""
 
 
-class ExposureError(CameraError):
+class ExposureError(Exception):
     """The exposure failed."""
 
 
@@ -47,7 +47,7 @@ class CameraWarning(UserWarning):
         super().__init__(f'{camera_name} - {message}')
 
 
-class ExposureWarning(CameraWarning):
+class ExposureWarning(UserWarning):
     """Warning for exposures."""
 
 

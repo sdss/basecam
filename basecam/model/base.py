@@ -90,7 +90,8 @@ class Extension(object):
     data : str or numpy.array
         The data for this FITS extension. Can be an array or a macro string
         indicating the type of data to store in the extension. Available macros
-        are: ``'raw'`` for the raw image.
+        are: ``'raw'`` for the raw image, or ``'none'`` for empty data. If
+        `None`, the raw data will only be added to the primary HDU.
     header_model : .HeaderModel
         A `.HeaderModel` for this extension.
     name : str
@@ -102,16 +103,15 @@ class Extension(object):
 
     """
 
-    __VALID_DATA_VALUES = ['raw']
+    __VALID_DATA_VALUES = ['raw', 'none']
 
     def __init__(self, data=None, header_model=None, name=None, compressed=False):
 
         if isinstance(data, numpy.ndarray):
             self.data = data
         else:
-            data = data or 'raw'
-            assert data and data.lower() in self.__VALID_DATA_VALUES, 'invalid data'
-            self.data = data.lower()
+            assert data is None or data in self.__VALID_DATA_VALUES, 'invalid data'
+            self.data = data
 
         self.header_model = header_model
 
@@ -157,7 +157,7 @@ class Extension(object):
         if not primary:
             HDUClass = functools.partial(HDUClass, name=self.name)
 
-        data = self.get_data(exposure)
+        data = self.get_data(exposure, primary=primary)
 
         if self.header_model:
             header = self.header_model.to_header(exposure, context=context)
@@ -166,11 +166,15 @@ class Extension(object):
 
         return HDUClass(data=data, header=header)
 
-    def get_data(self, exposure):
+    def get_data(self, exposure, primary=False):
         """Returns the data as a numpy array."""
 
         if self.data == 'raw':
             data = exposure.data
+        elif self.data == 'none':
+            data = None
+        elif self.data is None:
+            data = exposure.data if primary else None
         else:
             data = self.data
 
@@ -613,7 +617,7 @@ class MacroCard(object, metaclass=abc.ABCMeta):
         pass
 
     def evaluate(self, exposure, context={}):
-        """Evaluates the macro and returns a list of `.CardGroup`.
+        """Evaluates the macro. Equivalent to calling `.macro` directly.
 
         Parameters
         ----------
@@ -622,19 +626,25 @@ class MacroCard(object, metaclass=abc.ABCMeta):
         context : dict
             A dictionary of parameters that can be used by the macro.
 
+        Returns
+        -------
+        cards : `list`
+            A list of tuples with the format ``(keyword, value, comment)``
+            or ``(keyword, value)``.
+
         """
 
         return self.macro(exposure, context=context)
 
     def to_header(self, exposure, context={}, use_group_title=None):
-        """Evaluates all the cards and returns a header.
+        """Evaluates the macro and returns a header.
 
         Parameters
         ----------
         exposure : .Exposure
-            The exposure for which we want to evaluate the cards.
+            The exposure for which we want to evaluate the macro.
         context : dict
-            A dictionary of arguments used to evaluate the cards.
+            A dictionary of arguments used to evaluate the macro.
         use_group_title : bool
             Whether to prepend a COMMENT card with the macro title when
             creating the header.

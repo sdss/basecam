@@ -98,7 +98,7 @@ class Exposure(object):
         fits_model = self.fits_model
 
         if not fits_model:
-            fits_model = FITSModel([Extension()])
+            fits_model = FITSModel()
 
         return fits_model.to_hdu(self, context=context)
 

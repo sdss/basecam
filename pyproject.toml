@@ -74,7 +74,8 @@ omit = [
 
 [tool.coverage.report]
 exclude_lines = [
-    "class Poller"  # Already tested in jaeger
+    "class Poller",  # Already tested in jaeger
+    "def __repr__"
 ]
 
 [tool.tox]

@@ -18,8 +18,8 @@ import clu.testing
 from clu.testing import TestCommand
 from sdsstools import read_yaml_file
 
+from basecam import BaseCamera, CameraSystem, Exposure
 from basecam.actor import CameraActor
-from basecam.camera import BaseCamera, CameraSystem
 from basecam.mixins import ExposureTypeMixIn, ShutterMixIn
 
 
@@ -186,3 +186,15 @@ async def command(actor):
 
     command = TestCommand(commander_id=1, actor=actor)
     yield command
+
+
+@pytest.fixture(scope='function')
+def exposure(camera):
+
+    exp = Exposure(camera)
+
+    exp.data = numpy.zeros((10, 10), dtype=numpy.uint16)
+    exp.obstime = astropy.time.Time.now()
+    exp.image_type = 'object'
+
+    yield exp
