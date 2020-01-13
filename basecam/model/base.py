@@ -31,7 +31,7 @@ class FITSModel(list):
 
     Parameters
     ----------
-    extension : list of .Extension
+    extension : list of `.Extension`
         A list of HDU extensions defined as `.Extension` objects. If none is
         defined, a single, basic extension is added.
 
@@ -87,7 +87,7 @@ class Extension(object):
 
     Parameters
     ----------
-    data : str or numpy.array
+    data : str or numpy.ndarray
         The data for this FITS extension. Can be an array or a macro string
         indicating the type of data to store in the extension. Available macros
         are: ``'raw'`` for the raw image, or ``'none'`` for empty data. If
@@ -296,15 +296,14 @@ class Card(object):
 
     - A string using Python's :ref:`python:formatstrings`. As with normal
       strings, the replacement fields are surrounded by ``{`` and ``}`` and
-      filled when `.evaluate` or `.to_card` are called. The replacement
-      fields can point to an attribute, function, method, or property. In
-      addition, it is possible to use the string ``__exposure__`` and
-      ``__camera__`` to refer to the `.Exposure` instance for which this card
-      will be evaluated, and the instance of `.BaseCamera` that took the
-      image, respectively. For example, ``value='{__camera__.name}'`` will be
-      replaced with the name of the camera, and
-      ``value='{__exposure__.obstime}'`` will retrieve the time of the start
-      of the exposure.
+      filled when `.evaluate` is called. The replacement fields can point to an
+      attribute, function, method, or property. In addition, it is possible to
+      use the string ``__exposure__`` and ``__camera__`` to refer to the
+      `.Exposure` instance for which this card will be evaluated, and the
+      instance of `.BaseCamera` that took the image, respectively. For example,
+      ``value='{__camera__.name}'`` will be replaced with the name of the
+      camera, and ``value='{__exposure__.obstime}'`` will retrieve the time of
+      the start of the exposure.
 
     - A string to be evaluated using Python's `eval` function. For example,
       ``value='__camera__.get_temperature()'``.

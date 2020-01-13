@@ -20,11 +20,15 @@ Exposure
 .. automodule:: basecam.exposure
     :members:
 
-FITS
-----
+Model
+-----
 
-.. automodule:: basecam.model.fits
+.. automodule:: basecam.model.base
     :members:
+
+.. automodule:: basecam.model.models
+    :members:
+
 
 Notifier
 --------

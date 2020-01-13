@@ -37,7 +37,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
     Parameters
     ----------
-    camera_class : .BaseCamera subclass
+    camera_class : `.BaseCamera` subclass
         The subclass of `.BaseCamera` to use with this camera system.
     camera_config : dict or path
         A dictionary with the configuration parameters for the multiple
@@ -235,7 +235,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
         pass
 
     async def add_camera(self, name=None, uid=None, force=False, **kwargs):
-        """Adds a new `.Camera` instance to `.cameras`.
+        """Adds a new `camera <.BaseCamera>` instance to `.cameras`.
 
         The configuration values (if any) found in the configuration that
         match the ``name`` or ``uid`` of the camera will be used. These
@@ -405,7 +405,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
     """A base class for wrapping a camera API in a standard implementation.
 
-    Instantiating the `.Camera` class does not open the camera and makes
+    Instantiating the `.BaseCamera` class does not open the camera and makes
     it ready to be used. To do that, call and await `.connect`.
 
     Parameters
@@ -582,7 +582,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        status : dict
+        status : `dict`
             A dictionary with status values from the camera (e.g.,
             temperature, cooling status, firmware information, etc.)
 
