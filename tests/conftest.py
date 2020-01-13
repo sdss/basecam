@@ -20,7 +20,6 @@ from sdsstools import read_yaml_file
 
 from basecam.actor import CameraActor
 from basecam.camera import BaseCamera, CameraSystem
-from basecam.fits import create_fits_image
 from basecam.mixins import ExposureTypeMixIn, ShutterMixIn
 
 
@@ -31,6 +30,7 @@ class CameraSystemTester(CameraSystem):
 
     _connected_cameras = []
     _connected = False
+    __version__ = '0.1.0'
 
     def setup(self):
         self._connected = True
@@ -76,7 +76,9 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
         return {'temperature': 25.,
                 'cooler': 10.}
 
-    async def _expose_internal(self, exposure_time, image_type='science', **kwargs):
+    async def _expose_internal(self, exposure, **kwargs):
+
+        image_type = exposure.image_type
 
         if image_type in ['bias', 'dark']:
             await self.set_shutter(False)
@@ -94,13 +96,10 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
                           (self.height // len(yy) + 1, self.width // len(yy) + 1))
         data = data[0:self.height, 0:self.width]
 
-        obstime = astropy.time.Time('2000-01-01 00:00:00')
-
-        fits_image = create_fits_image(data, exposure_time, obstime=obstime)
+        exposure.data = data
+        exposure.obstime = astropy.time.Time('2000-01-01 00:00:00')
 
         await self.set_shutter(False)
-
-        return fits_image
 
     async def _set_shutter_internal(self, shutter_open):
         self._shutter_position = shutter_open

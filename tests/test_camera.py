@@ -11,7 +11,7 @@ import astropy.io.fits
 import numpy
 import pytest
 
-from basecam.fits import create_fits_image
+from basecam import Exposure
 
 from .conftest import VirtualCamera
 
@@ -31,31 +31,23 @@ async def test_status(camera):
 
 async def test_expose(camera):
 
-    image = await camera.expose(1.0)
-    assert isinstance(image, astropy.io.fits.HDUList)
+    exposure = await camera.expose(1.0)
+    assert isinstance(exposure, Exposure)
 
-    data = image[0].data
+    hdu = exposure.to_hdu()
+
+    data = hdu[0].data
     assert data.dtype == numpy.dtype('uint16')
     assert numpy.any(data > 0)
 
-    header = image[0].header
+    tai_time = astropy.time.Time('2000-01-01 00:00:00').tai.isot
+
+    header = hdu[0].header
     assert isinstance(header, astropy.io.fits.Header)
-    assert header['EXPTIME'] == 1.0
-    assert header['IMAGETYP'] == 'OBJECT'
-    assert header['DATE-OBS'] == '2000-01-01T00:00:00.000'
-    assert header['CAMNAME'] == camera.name.upper()
-
-
-async def test_fits_no_obstime():
-
-    data = numpy.zeros((10, 10))
-
-    now = astropy.time.Time.now()
-
-    fits = create_fits_image(data, 1.0)
-    image_date = astropy.time.Time(fits[0].header['DATE-OBS'], format='isot')
-
-    assert (image_date - now).sec < 10
+    assert header['EXPTIME'] == '1.0'
+    assert header['IMAGETYP'] == 'object'
+    assert header['DATE-OBS'] == tai_time
+    assert header['CAMNAME'] == camera.name
 
 
 async def test_shutter(camera):
@@ -76,9 +68,10 @@ async def test_bias(camera):
     await camera.open_shutter()
 
     exposure = await camera.bias()
+    hdu = exposure.to_hdu()
 
-    assert exposure[0].header['EXPTIME'] == 0
-    assert exposure[0].header['IMAGETYP'] == 'BIAS'
+    assert hdu[0].header['EXPTIME'] == '0.0'
+    assert hdu[0].header['IMAGETYP'] == 'bias'
 
     calls = camera._set_shutter_internal.mock_calls
     assert len(calls) == 2
@@ -88,9 +81,10 @@ async def test_bias(camera):
 async def test_dark(camera):
 
     exposure = await camera.dark(5)
+    hdu = exposure.to_hdu()
 
-    assert exposure[0].header['EXPTIME'] == 5
-    assert exposure[0].header['IMAGETYP'] == 'DARK'
+    assert hdu[0].header['EXPTIME'] == '5'
+    assert hdu[0].header['IMAGETYP'] == 'dark'
 
     calls = camera._set_shutter_internal.mock_calls
     assert len(calls) == 0
@@ -99,9 +93,10 @@ async def test_dark(camera):
 async def test_flat(camera):
 
     exposure = await camera.flat(5)
+    hdu = exposure.to_hdu()
 
-    assert exposure[0].header['EXPTIME'] == 5
-    assert exposure[0].header['IMAGETYP'] == 'FLAT'
+    assert hdu[0].header['EXPTIME'] == '5'
+    assert hdu[0].header['IMAGETYP'] == 'flat'
 
     calls = camera._set_shutter_internal.mock_calls
     assert len(calls) == 2
@@ -109,12 +104,13 @@ async def test_flat(camera):
     assert calls[1][1][0] is False
 
 
-async def test_science(camera):
+async def test_object(camera):
 
-    exposure = await camera.science(5)
+    exposure = await camera.object(5)
+    hdu = exposure.to_hdu()
 
-    assert exposure[0].header['EXPTIME'] == 5
-    assert exposure[0].header['IMAGETYP'] == 'OBJECT'
+    assert hdu[0].header['EXPTIME'] == '5'
+    assert hdu[0].header['IMAGETYP'] == 'object'
 
     calls = camera._set_shutter_internal.mock_calls
     assert len(calls) == 2
