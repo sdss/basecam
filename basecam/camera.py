@@ -646,7 +646,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             self._notify(CameraEvent.EXPOSURE_FAILED, {'error': str(e)})
             raise
 
-        if not exposure.data:
+        if exposure.data is None:
             error = 'data was not taken.'
             self._notify(CameraEvent.EXPOSURE_FAILED, {'error': error})
             raise Exposure(error)
