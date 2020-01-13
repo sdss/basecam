@@ -570,7 +570,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         """
 
-        if update:
+        if update or not self._status:
             self._status = await self._status_internal()
 
         return self._status
