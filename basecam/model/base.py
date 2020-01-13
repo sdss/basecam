@@ -154,6 +154,9 @@ class Extension(object):
             else:
                 HDUClass = astropy.io.fits.ImageHDU
 
+        if not primary:
+            HDUClass = functools.partial(HDUClass, name=self.name)
+
         data = self.get_data(exposure)
 
         if self.header_model:
@@ -161,7 +164,7 @@ class Extension(object):
         else:
             header = None
 
-        return HDUClass(data=data, header=header, name=self.name)
+        return HDUClass(data=data, header=header)
 
     def get_data(self, exposure):
         """Returns the data as a numpy array."""
@@ -172,7 +175,6 @@ class Extension(object):
             data = self.data
 
         return data
-
 
 
 class HeaderModel(list):
