@@ -28,6 +28,14 @@ class ExposureError(CameraError):
     """The exposure failed."""
 
 
+class FITSModelError(Exception):
+    """An error related to the FITS model."""
+
+
+class CardError(FITSModelError):
+    """Error raised by a FITS `.Card`."""
+
+
 class CameraWarning(UserWarning):
     """Base warning."""
 
@@ -41,3 +49,11 @@ class CameraWarning(UserWarning):
 
 class ExposureWarning(CameraWarning):
     """Warning for exposures."""
+
+
+class FITSModelWarning(UserWarning):
+    """A warnings related to the FITS model."""
+
+
+class CardWarning(FITSModelWarning):
+    """Warning raised by a FITS `.Card`."""
