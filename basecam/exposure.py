@@ -8,9 +8,11 @@
 
 import astropy
 
-from .camera import BaseCamera
 from .exceptions import ExposureError
 from .model import Extension, FITSModel
+
+
+__all__ = ['Exposure']
 
 
 class Exposure(object):
@@ -35,7 +37,7 @@ class Exposure(object):
     Attributes
     ----------
     image_type : str
-        The type of image, one of ``bias``, ``flat``, ``dark``, ``science``.
+        The type of image, one of ``bias``, ``flat``, ``dark``, ``object``.
     exptime : float
         The exposure time, in seconds.
     filename : str
@@ -45,9 +47,7 @@ class Exposure(object):
 
     def __init__(self, camera, filename=None, data=None, fits_model=None):
 
-        assert isinstance(camera, BaseCamera), \
-            'camera is not an instance of a subclass of BaseCamera.'
-
+        self.camera = camera
         self.data = data
         self.fits_model = fits_model
         self.filename = filename
