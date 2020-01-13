@@ -464,7 +464,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         # Get the same logger as the camera system but uses the UID or name of
         # the camera as prefix for messages from this camera.
-        log_header = self.uid or self.name
+        log_header = self.name
         LoggerMixIn.__init__(self, self.camera_system.logger.name,
                              log_header=f'[{log_header.upper()}]: ')
 
