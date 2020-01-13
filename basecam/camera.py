@@ -590,7 +590,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         pass
 
-    async def expose(self, exptime, image_type='science',
+    async def expose(self, exptime, image_type='object',
                      fits_model=None, filename=None, write=False, **kwargs):
         """Exposes the camera.
 
@@ -609,7 +609,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         exptime : float
             The exposure time for the image, in seconds.
         image_type : str
-            The type of image (``{'bias', 'dark', 'science', 'flat'}``).
+            The type of image (``{'bias', 'dark', 'object', 'flat'}``).
         fits_model : .FITSModel
             A `.FITSModel` that can be used to override the default model
             for the camera.
