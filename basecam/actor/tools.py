@@ -25,9 +25,9 @@ def get_cameras(command, cameras=None, check_cameras=True):
     cameras : list of `.Camera` instances
         A list of `.Camera` instances that match the input ``cameras`` or,
         if ``cameras=None``, the default cameras. If ``cameras=None`` and
-        there are no default cameras defined; or if ``check_cameras=True`` and
-        any of the selected cameras is not connected, the command is failed
-        and returns `False`.
+        there are no default cameras defined, returns all the connected
+        camera. If ``check_cameras=True`` and any of the selected cameras
+        is not connected, the command is failed and returns `False`.
 
     """
 
@@ -35,10 +35,7 @@ def get_cameras(command, cameras=None, check_cameras=True):
 
     if cameras is None:
         if default is None or len(default) == 0:
-            command.set_status(command.flags.FAILED,
-                               text='no default camera(s) set. '
-                                    'Specify cameras manually.')
-            return False
+            cameras = command.actor.camera_system.cameras
         else:
             cameras = default
 
@@ -58,5 +55,9 @@ def get_cameras(command, cameras=None, check_cameras=True):
                                    text=f'camera {camera_instance.name} '
                                         'has not been initialised.')
                 return False
+
+    if len(cameras) == 0:
+        command.failed(text='no cameras connected.')
+        return False
 
     return camera_instances
