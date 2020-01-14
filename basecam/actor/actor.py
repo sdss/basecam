@@ -8,17 +8,41 @@
 
 import logging
 
+from clu import BaseActor, JSONActor
 from clu import command_parser as basecam_parser
-from clu.legacy import LegacyActor
 
 from basecam.exceptions import CameraWarning
 
 
-class CameraActor(LegacyActor):
-    """SDSS-style actor."""
+__all__ = ['BaseCameraActor', 'CameraActor']
+
+
+class BaseCameraActor:
+    """Creates a CLU-like actor class.
+
+    Creates a `CLU <https://clu.readthedocs.io/en/latest/>`__ actor that is
+    able to receive commands, interact with the camera system, and reply to
+    the commander. The type of actor can be set by subclassing `.CameraActor`
+    and setting ``__actor_class__`` to the desired actor class. Defaults to
+    `~clu.actor.JSONActor`.
+
+    Parameters
+    ----------
+    camera_system : .CameraSystem
+        The camera system, already instantiated.
+    default_cameras : list of `str`
+        A list of camera names or UIDs that define what cameras to use by
+        default in most command.
+    args,kwars
+        Arguments and keyword arguments to be passed to the actor class.
+
+    """
 
     def __init__(self, camera_system, *args, default_cameras=None, **kwargs):
 
+        self._check_is_subclass()
+
+        assert camera_system is not None
         self.camera_system = camera_system
 
         super().__init__(*args, parser=basecam_parser, **kwargs)
@@ -29,6 +53,21 @@ class CameraActor(LegacyActor):
 
         self.default_cameras = None
         self.set_default_cameras(default_cameras)
+
+    def _check_is_subclass(self):
+        """Checks if the object is a subclass of a CLU actor."""
+
+        error = 'BaseCameraActor must be sub-classed along with a CLU actor class.'
+        bases = self.__class__.__bases__
+
+        assert issubclass(self.__class__, BaseCameraActor), error
+
+        # Check that at least one of the bases is a sublass of BaseActor
+        for base in bases:
+            if issubclass(base, BaseActor):
+                return
+
+        raise RuntimeError(error)
 
     def set_default_cameras(self, cameras=None):
         """Sets the camera(s) that will be used by default.
@@ -60,3 +99,9 @@ class CameraActor(LegacyActor):
         for camera in self.default_cameras:
             if camera not in connected_cameras:
                 self.log.warning(f'camera {camera!r} made default but is not connected.')
+
+
+class CameraActor(BaseCameraActor, JSONActor):
+    """A camera actor that replies with JSONs using `.JSONActor`"""
+
+    pass

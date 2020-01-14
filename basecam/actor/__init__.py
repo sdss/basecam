@@ -9,6 +9,6 @@
 # flake8: noqa
 
 
-from .actor import CameraActor
-from .camera import *
+from . import commands
+from .actor import *
 from .tools import *

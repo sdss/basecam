@@ -15,11 +15,12 @@ import pytest
 from asynctest import CoroutineMock
 
 import clu.testing
+from clu.legacy import LegacyActor
 from clu.testing import TestCommand
 from sdsstools import read_yaml_file
 
 from basecam import BaseCamera, CameraSystem, Exposure
-from basecam.actor import CameraActor
+from basecam.actor import BaseCameraActor
 from basecam.mixins import ExposureTypeMixIn, ShutterMixIn
 
 
@@ -159,9 +160,12 @@ async def actor_setup(config):
 
     """
 
+    class LegacyCameraActor(BaseCameraActor, LegacyActor):
+        pass
+
     camera_system = CameraSystemTester(VirtualCamera, camera_config=config).setup()
 
-    actor = CameraActor.from_config(config, camera_system)
+    actor = LegacyCameraActor.from_config(config, camera_system)
     actor = await clu.testing.setup_test_actor(actor)
 
     await actor.camera_system.add_camera('test_camera')

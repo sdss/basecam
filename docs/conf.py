@@ -99,9 +99,8 @@ releases_unstable_prehistory = True
 # Intersphinx mappings
 intersphinx_mapping = {'python': ('https://docs.python.org/3', None),
                        'numpy': ('http://docs.scipy.org/doc/numpy/', None),
-                       'astropy': ('http://docs.astropy.org/en/latest', None)}
-# 'matplotlib': ('https://matplotlib.org/', None),
-# 'scipy': ('https://docs.scipy.org/doc/scipy/reference', None)}
+                       'astropy': ('http://docs.astropy.org/en/latest', None),
+                       'clu': ('https://clu.readthedocs.io/en/latest/', None)}
 
 autodoc_mock_imports = ['_tkinter']
 autodoc_member_order = 'groupwise'

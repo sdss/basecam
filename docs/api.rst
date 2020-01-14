@@ -42,3 +42,10 @@ Utils
 
 .. automodule:: basecam.utils
     :members:
+
+
+Actor
+-----
+
+.. automodule:: basecam.actor.actor
+    :members:
