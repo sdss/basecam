@@ -18,13 +18,17 @@ __all__ = ['BaseCameraActor', 'CameraActor']
 
 
 class BaseCameraActor:
-    """Creates a CLU-like actor class.
+    """Base class for a camera CLU-like actor class.
 
-    Creates a `CLU <https://clu.readthedocs.io/en/latest/>`__ actor that is
-    able to receive commands, interact with the camera system, and reply to
-    the commander. The type of actor can be set by subclassing `.CameraActor`
-    and setting ``__actor_class__`` to the desired actor class. Defaults to
-    `~clu.actor.JSONActor`.
+    Expands a `CLU <https://clu.readthedocs.io/en/latest/>`__ actor
+    to receive commands, interact with the camera system, and reply to
+    the commander. This base class needs to be subclassed along with the
+    desired implementation of CLU `~clu.actor.BaseActor`. For example ::
+
+        from clu.actor import AMQPActor
+
+        class MyCameraActor(BaseCameraActor, AMQPActor):
+            pass
 
     Parameters
     ----------
@@ -102,6 +106,6 @@ class BaseCameraActor:
 
 
 class CameraActor(BaseCameraActor, JSONActor):
-    """A camera actor that replies with JSONs using `.JSONActor`"""
+    """A camera actor that replies with JSONs using `~clu.actor.JSONActor`."""
 
     pass
