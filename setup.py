@@ -2,7 +2,7 @@
 from setuptools import setup
 
 packages = \
-['basecam', 'basecam.actor', 'basecam.model']
+['basecam', 'basecam.actor', 'basecam.models']
 
 package_data = \
 {'': ['*']}
