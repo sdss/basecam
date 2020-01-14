@@ -12,6 +12,6 @@ from . import mixins
 from . import models
 
 
-NAME = 'basecam'
+NAME = 'sdss-basecam'
 
 __version__ = get_package_version(__file__, 'sdss-basecam') or 'dev'
