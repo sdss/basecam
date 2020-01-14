@@ -24,7 +24,7 @@ async def test_camera_list(actor):
 
     assert command.is_done
     assert len(actor.mock_replies) == 2
-    assert actor.mock_replies[1]['cameras'] == 'test_camera'
+    assert actor.mock_replies[1]['cameras'] == ['test_camera']
 
 
 async def test_get_cameras(command):

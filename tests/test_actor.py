@@ -23,7 +23,7 @@ async def test_actor_basic(actor, config):
     actor.write(text='test message')
     assert len(actor.mock_replies) > 0
     assert 'text' in actor.mock_replies[0]
-    assert actor.mock_replies[0]['text'] == '"test message"'
+    assert actor.mock_replies[0]['text'] == 'test message'
 
 
 async def test_logger(actor):
