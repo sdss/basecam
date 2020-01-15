@@ -95,9 +95,10 @@ async def reconnect(command, cameras):
 
         disconnect_task = asyncio.create_task(disconnect(camera))
         disconnect_result = await command.actor.listener.wait_for(
-            CameraEvent.CAMERA_CLOSED, timeout=5)
+            [CameraEvent.CAMERA_DISCONNECTED,
+             CameraEvent.CAMERA_DISCONNECT_FAILED], timeout=5)
 
-        if disconnect_result:
+        if CameraEvent.CAMERA_DISCONNECTED in disconnect_result:
             command.info(text=f'camera {camera.name!r} was disconnected.')
         else:
             command.warning(text=f'camera {camera.name!r} failed to disconnect. '
@@ -109,9 +110,10 @@ async def reconnect(command, cameras):
 
         connect_task = asyncio.create_task(connect(camera))
         connect_result = await command.actor.listener.wait_for(
-            CameraEvent.CAMERA_OPEN, timeout=5)
+            [CameraEvent.CAMERA_CONNECTED,
+             CameraEvent.CAMERA_CONNECT_FAILED], timeout=5)
 
-        if connect_result:
+        if CameraEvent.CAMERA_CONNECTED in connect_result:
             command.info(text=f'camera {camera.name!r} was reconnected.')
         else:
             command.warning(text=f'camera {camera.name!r} failed to reconnect.')
