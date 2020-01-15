@@ -108,11 +108,23 @@ def test_basic_header_model(exposure):
     assert isinstance(header, astropy.io.fits.Header)
     assert 'IMAGETYP' in header
 
+
+def test_header_describe(exposure):
+
+    basic_header_model = models.models.basic_header_model
+    basic_header_model.append(MacroCardTest())
+    basic_header_model.append(models.CardGroup(
+        [('PARAM1', 'A parameter'),
+         ('PARAM2', '{__camera__.uid}', 'Camera UID'),
+         'VCAM']))
+
     description = basic_header_model.describe()
     assert isinstance(description, astropy.table.Table)
     assert len(description) > 0
 
     assert '### MACRO' in description['name']
+    assert 'PARAM2' in description['name']
+    assert description[description['name'] == 'PARAM2']['value'] != ''
 
 
 def test_macro(exposure):

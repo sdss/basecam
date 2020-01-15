@@ -11,7 +11,7 @@ import astropy.io.fits
 import numpy
 import pytest
 
-from basecam import CameraConnectionError, Exposure
+from basecam import CameraConnectionError, CameraWarning, Exposure
 
 from .conftest import VirtualCamera
 
@@ -133,3 +133,18 @@ async def test_object(camera):
     assert len(calls) == 2
     assert calls[0][1][0] is True
     assert calls[1][1][0] is False
+
+
+async def test_reconnect_fails(camera):
+
+    with pytest.raises(CameraConnectionError):
+        await camera.connect()
+
+
+async def test_connect_uid_warning(camera):
+
+    camera._uid = None
+    camera.camera_config['uid'] = None
+
+    with pytest.warns(CameraWarning):
+        await camera.connect(force=True)

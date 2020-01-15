@@ -270,7 +270,7 @@ class HeaderModel(list):
                 rows.append((card.name.upper(), card.value, card.comment))
             elif isinstance(card, CardGroup):
                 for card_ in card:
-                    rows.append((card.name.upper(), card.value, card.comment))
+                    rows.append((card_.name.upper(), card_.value, card_.comment))
             elif isinstance(card, MacroCard):
                 rows.append(('### MACRO', card.__class__.__name__, ''))
             else:
@@ -508,7 +508,7 @@ class CardGroup(list):
 
         if isinstance(card, Card):
             return card
-        elif isinstance(card, (list, tuple)):
+        elif isinstance(card, (list, tuple, str)):
             return Card(card)
         else:
             raise CardError(f'invalid card {card}')
