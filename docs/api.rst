@@ -49,3 +49,10 @@ Actor
 
 .. automodule:: basecam.actor.actor
     :members:
+
+
+Exceptions
+----------
+
+.. automodule:: basecam.exceptions
+    :members:

@@ -496,6 +496,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
                 warnings.warn('camera connected but an UID is not available.', CameraWarning)
         except CameraConnectionError:
             self.connected = False
+            self._notify(CameraEvent.CAMERA_CONNECT_FAILED)
             raise
 
         self.log('camera connected.')
@@ -700,12 +701,20 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
     async def shutdown(self):
         """Shuts down the camera."""
 
-        await self._disconnect_internal()
+        try:
+            await self._disconnect_internal()
+        except CameraConnectionError:
+            self._notify(CameraEvent.CAMERA_DISCONNECT_FAILED)
+            raise
 
         self.log('camera has been disconnected.')
         self._notify(CameraEvent.CAMERA_DISCONNECTED)
 
     async def _disconnect_internal(self):
-        """Internal method to disconnect a camera."""
+        """Internal method to disconnect a camera.
+
+        Must raise a `.CameraConnectionError` if the shutdown fails.
+
+        """
 
         pass

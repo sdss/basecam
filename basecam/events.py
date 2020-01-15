@@ -23,7 +23,10 @@ class CameraEvent(enum.Enum):
     """Enumeration of camera events."""
 
     CAMERA_CONNECTED = enum.auto()
+    CAMERA_CONNECT_FAILED = enum.auto()
     CAMERA_DISCONNECTED = enum.auto()
+    CAMERA_DISCONNECT_FAILED = enum.auto()
+
     EXPOSURE_FLUSHING = enum.auto()
     EXPOSURE_INTEGRATING = enum.auto()
     EXPOSURE_READING = enum.auto()
