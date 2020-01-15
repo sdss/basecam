@@ -10,15 +10,19 @@
 __all__ = ['get_cameras']
 
 
-def get_cameras(command, cameras=None, check_cameras=True):
+def get_cameras(command, cameras=None, check_cameras=True, fail_command=False):
     """A helper to determine what cameras to use.
 
     Parameters
     ----------
     command
         The command that wants to access the cameras.
-    cameras:
+    cameras : list
         The output of the ``--cameras`` flag passed to the command.
+    check_cameras : bool
+        If any of the cameras is not connected, returns `False`.
+    fail_command : bool
+        Fails the command before returning `False`.
 
     Returns
     -------
@@ -43,17 +47,17 @@ def get_cameras(command, cameras=None, check_cameras=True):
     for camera in cameras:
         camera_instance = command.actor.camera_system.get_camera(name=camera)
         if camera_instance is False:
-            command.set_status(command.flags.FAILED,
-                               text=f'camera {camera} is not connected.')
+            if fail_command:
+                command.fail(text=f'camera {camera} is not connected.')
             return False
         camera_instances.append(camera_instance)
 
     if check_cameras:
         for camera_instance in camera_instances:
             if not camera_instance.connected:
-                command.set_status(command.flags.FAILED,
-                                   text=f'camera {camera_instance.name} '
-                                        'has not been initialised.')
+                if fail_command:
+                    command.fail(text=f'camera {camera_instance.name} '
+                                      'has not been initialised.')
                 return False
 
     if len(cameras) == 0:

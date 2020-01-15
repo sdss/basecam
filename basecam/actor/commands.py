@@ -61,7 +61,7 @@ async def set_default(command, cameras, force):
 async def status(command, cameras):
     """Returns the status of a camera."""
 
-    cameras = get_cameras(command)
+    cameras = get_cameras(command, fail_command=True)
     if not cameras:
         return
 
@@ -85,7 +85,7 @@ async def reconnect(command, cameras):
     async def connect(camera):
         await camera.connect(force=True)
 
-    cameras = get_cameras(command)
+    cameras = get_cameras(command, fail_command=True)
     if not cameras:
         return
 
