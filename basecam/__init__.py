@@ -7,7 +7,7 @@ from .camera import *
 from .events import *
 from .exceptions import *
 from .exposure import *
-from .notifier import EventListener
+from .notifier import *
 from . import mixins
 from . import models
 
