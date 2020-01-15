@@ -499,7 +499,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             raise
 
         self.log('camera connected.')
-        self._notify(CameraEvent.CAMERA_OPEN)
+        self._notify(CameraEvent.CAMERA_CONNECTED)
 
         return self
 
@@ -703,7 +703,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         await self._disconnect_internal()
 
         self.log('camera has been disconnected.')
-        self._notify(CameraEvent.CAMERA_CLOSED)
+        self._notify(CameraEvent.CAMERA_DISCONNECTED)
 
     async def _disconnect_internal(self):
         """Internal method to disconnect a camera."""
