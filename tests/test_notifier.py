@@ -130,3 +130,31 @@ async def test_filter_notifications(camera_system, listener):
     await asyncio.sleep(0.2)
 
     assert len(events) == 1
+
+
+async def test_listener_wait_for(camera_system, listener, event_loop):
+
+    async def add_camera_delayed():
+        await asyncio.sleep(0.1)
+        await camera_system.add_camera('test_camera')
+
+    task = event_loop.create_task(add_camera_delayed())
+
+    result = await listener.wait_for(CameraSystemEvent.CAMERA_ADDED)
+    assert result is True
+
+    await task
+
+
+async def test_listener_wait_for_timeout(camera_system, listener, event_loop):
+
+    async def add_camera_delayed():
+        await asyncio.sleep(0.2)
+        await camera_system.add_camera('test_camera')
+
+    task = event_loop.create_task(add_camera_delayed())
+
+    result = await listener.wait_for(CameraSystemEvent.CAMERA_ADDED, 0.1)
+    assert result is False
+
+    await task
