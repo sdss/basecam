@@ -3,7 +3,7 @@
 #
 # @Author: José Sánchez-Gallego (gallegoj@uw.edu)
 # @Date: 2019-10-04
-# @Filename: test_actor.py
+# @Filename: test_actor_commands.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
 import asyncio
@@ -16,9 +16,9 @@ from basecam.actor.tools import get_cameras
 pytestmark = pytest.mark.asyncio
 
 
-async def test_camera_list(actor):
+async def test_list(actor):
 
-    command = await actor.invoke_mock_command('camera list')
+    command = await actor.invoke_mock_command('list')
 
     await asyncio.sleep(1)
 
@@ -61,26 +61,26 @@ async def test_get_cameras_check(command):
     assert get_cameras(command, check_cameras=True) is False
 
 
-async def test_camera_set_default(actor):
+async def test_set_default(actor):
 
     actor.set_default_cameras()
 
-    await actor.invoke_mock_command('camera set-default test_camera')
+    await actor.invoke_mock_command('set-default test_camera')
     assert actor.default_cameras == ['test_camera']
 
     actor.set_default_cameras()
 
-    command_result = await actor.invoke_mock_command('camera set-default bad_camera')
+    command_result = await actor.invoke_mock_command('set-default bad_camera')
     assert command_result.did_fail
 
-    command_result = await actor.invoke_mock_command('camera set-default -f bad_camera')
+    command_result = await actor.invoke_mock_command('set-default -f bad_camera')
     assert command_result.is_done
     assert actor.default_cameras == ['bad_camera']
 
-    command_result = await actor.invoke_mock_command('camera set-default -f sp1 sp2')
+    command_result = await actor.invoke_mock_command('set-default -f sp1 sp2')
     assert command_result.is_done
     assert actor.default_cameras == ['sp1', 'sp2']
 
-    command_result = await actor.invoke_mock_command('camera set-default -f sp1,sp2 sp3')
+    command_result = await actor.invoke_mock_command('set-default -f sp1,sp2 sp3')
     assert command_result.is_done
     assert actor.default_cameras == ['sp1', 'sp2', 'sp3']

@@ -12,13 +12,7 @@ from .actor import basecam_parser
 from .tools import get_cameras
 
 
-@basecam_parser.group()
-def camera():
-    """Camera-related commands."""
-    pass
-
-
-@camera.command(name='list')
+@basecam_parser.command(name='list')
 async def list_(command):
     """Lists cameras connected to the camera system."""
 
@@ -26,7 +20,7 @@ async def list_(command):
     command.done(cameras=cameras, default_cameras=command.actor.default_cameras)
 
 
-@camera.command()
+@basecam_parser.command()
 @click.argument('CAMERAS', nargs=-1, type=str)
 @click.option('-f', '--force', is_flag=True, default=False,
               help='forces a camera to be set as default '
@@ -58,7 +52,7 @@ async def set_default(command, cameras, force):
     command.done(default_cameras=command.actor.default_cameras)
 
 
-@camera.command()
+@basecam_parser.command()
 @click.argument('CAMERAS', nargs=-1, type=str, required=False)
 async def status(command, cameras):
     """Prints the status of a camera."""
