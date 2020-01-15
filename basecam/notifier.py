@@ -101,7 +101,7 @@ class EventListener(asyncio.Queue):
         self.listerner_task = None
 
         self._event_waiter = None
-        self.__events = []  # A list of events received to be used by wait_for
+        self.__events = set()  # A list of events received to be used by wait_for
 
         if autostart:
             self.listerner_task = self.loop.create_task(self._process_queue())
@@ -119,7 +119,7 @@ class EventListener(asyncio.Queue):
                 self.loop.create_task(callback(event, payload))
 
             if self._event_waiter:
-                self.__events.append(event)
+                self.__events.add(event)
                 self._event_waiter.set()
 
     async def start_listening(self):
@@ -173,31 +173,37 @@ class EventListener(asyncio.Queue):
         else:
             raise ValueError('callback not registered.')
 
-    async def wait_for(self, event, timeout=None):
+    async def wait_for(self, events, timeout=None):
         """Blocks until a certain event happens.
 
         Parameters
         ----------
-        event
-            The event to wait for.
+        events
+            The event to wait for. It can be a list of events, in which case
+            it returns when any of the events has been seen.
         timeout : float or None
             Timeout in seconds. If `None`, blocks until the event is received.
 
         Returns
         -------
         result : bool
-            `True` if the event was received. `False` if the routine timed
-            out before receiving the event.
+            Returns a `set` of events received that intersects with the
+            ``events`` that were being waited for. Normally this is a single
+            event, the first one to be seen, but it can be more than one if
+            multiple events that were being waited for happen at the same time.
+            Returns `False` if the routine timed out before receiving the event.
 
         """
 
         # We need __events to be a list because if two events arrive too close
         # we may miss some of them.
         self._event_waiter = asyncio.Event()
-        self.__events = []
+        self.__events = set()
+
+        events = set(events) if isinstance(events, (list, tuple)) else set([events])
 
         async def _waiter():
-            while event not in self.__events:
+            while not events.intersection(self.__events):
                 await self._event_waiter.wait()
                 # Clear the event waiter. If __last_event == event
                 # then it doesn't matter. If _last_event != event,
@@ -207,10 +213,11 @@ class EventListener(asyncio.Queue):
 
         try:
             await asyncio.wait_for(_waiter(), timeout)
-            return True
+            event_inters = events.intersection(self.__events)
+            return event_inters
         except asyncio.TimeoutError:
             return False
         finally:
             self._event_waiter.set()
             self._event_waiter = None
-            self.__events = []
+            self.__events = set()

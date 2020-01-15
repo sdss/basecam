@@ -141,7 +141,7 @@ async def test_listener_wait_for(camera_system, listener, event_loop):
     task = event_loop.create_task(add_camera_delayed())
 
     result = await listener.wait_for(CameraSystemEvent.CAMERA_ADDED)
-    assert result is True
+    assert CameraSystemEvent.CAMERA_ADDED in result
 
     await task
 
