@@ -102,7 +102,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         """
 
-        pass
+        raise NotImplementedError
 
     def get_camera_config(self, name=None, uid=None):
         """Gets camera parameters from the configuration.
@@ -232,7 +232,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         """
 
-        pass
+        raise NotImplementedError
 
     async def add_camera(self, name=None, uid=None, force=False, **kwargs):
         """Adds a new `camera <.BaseCamera>` instance to `.cameras`.
@@ -525,7 +525,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         """
 
-        pass
+        raise NotImplementedError
 
     @property
     def _uid_internal(self):
@@ -700,7 +700,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         """
 
-        pass
+        raise NotImplementedError
 
     async def shutdown(self):
         """Shuts down the camera."""
@@ -723,4 +723,4 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         """
 
-        pass
+        raise NotImplementedError

@@ -613,7 +613,7 @@ class MacroCard(object, metaclass=abc.ABCMeta):
 
         """
 
-        pass
+        raise NotImplementedError
 
     def evaluate(self, exposure, context={}):
         """Evaluates the macro. Equivalent to calling `.macro` directly.
