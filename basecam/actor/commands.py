@@ -6,8 +6,12 @@
 # @Filename: camera.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
+import asyncio
+import contextlib
+
 import click
 
+from ..events import CameraEvent
 from .actor import basecam_parser
 from .tools import get_cameras
 
@@ -55,7 +59,7 @@ async def set_default(command, cameras, force):
 @basecam_parser.command()
 @click.argument('CAMERAS', nargs=-1, type=str, required=False)
 async def status(command, cameras):
-    """Prints the status of a camera."""
+    """Returns the status of a camera."""
 
     cameras = get_cameras(command)
     if not cameras:
@@ -66,5 +70,54 @@ async def status(command, cameras):
                              'uid': camera.uid},
                   'status': await camera.get_status(update=True)}
         command.info(status)
+
+    command.done()
+
+
+@basecam_parser.command()
+@click.argument('CAMERAS', nargs=-1, type=str, required=False)
+async def reconnect(command, cameras):
+    """Reconnects a camera."""
+
+    async def disconnect(camera):
+        await camera.shutdown()
+
+    async def connect(camera):
+        await camera.connect(force=True)
+
+    cameras = get_cameras(command)
+    if not cameras:
+        return
+
+    for camera in cameras:
+
+        command.warning(text=f'reconnecting camera {camera.name!r}')
+
+        disconnect_task = asyncio.create_task(disconnect(camera))
+        disconnect_result = await command.actor.listener.wait_for(
+            CameraEvent.CAMERA_CLOSED, timeout=5)
+
+        if disconnect_result:
+            command.info(text=f'camera {camera.name!r} was disconnected.')
+        else:
+            command.warning(text=f'camera {camera.name!r} failed to disconnect. '
+                                 'Will try to reconnect.')
+            disconnect_task.cancel()
+
+        with contextlib.suppress(asyncio.CancelledError):
+            await disconnect_task
+
+        connect_task = asyncio.create_task(connect(camera))
+        connect_result = await command.actor.listener.wait_for(
+            CameraEvent.CAMERA_OPEN, timeout=5)
+
+        if connect_result:
+            command.info(text=f'camera {camera.name!r} was reconnected.')
+        else:
+            command.warning(text=f'camera {camera.name!r} failed to reconnect.')
+            connect_task.cancel()
+
+        with contextlib.suppress(asyncio.CancelledError):
+            await connect_task
 
     command.done()

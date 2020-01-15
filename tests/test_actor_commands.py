@@ -94,5 +94,11 @@ async def test_status(actor):
 
     assert command.is_done
     assert len(actor.mock_replies) == 3  # Running, status reply, and done reply.
-    print(actor.mock_replies[1])
     assert actor.mock_replies[1]['status'] == {'temperature': 25., 'cooler': 10.}
+
+
+async def test_reconnect(actor):
+
+    command = await actor.invoke_mock_command('reconnect')
+
+    assert command.is_done
