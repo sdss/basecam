@@ -11,7 +11,7 @@ import astropy.io.fits
 import numpy
 import pytest
 
-from basecam import Exposure
+from basecam import CameraConnectionError, Exposure
 
 from .conftest import VirtualCamera
 
@@ -27,6 +27,23 @@ async def test_status(camera):
 
     status = await camera.get_status()
     assert status['temperature'] == 25.
+
+
+async def test_connect_fails(camera):
+
+    camera.raise_on_connect = True
+
+    with pytest.raises(CameraConnectionError):
+        # Force reconnect.
+        await camera.connect(force=True)
+
+
+async def test_disconnect_fails(camera):
+
+    camera.raise_on_disconnect = True
+
+    with pytest.raises(CameraConnectionError):
+        await camera.shutdown()
 
 
 async def test_expose(camera):

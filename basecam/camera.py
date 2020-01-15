@@ -519,7 +519,11 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     async def _connect_internal(self, **connection_params):
-        """Internal method to connect the camera."""
+        """Internal method to connect the camera.
+
+        Must raise `.CameraConnectionError` if the connection fails.
+
+        """
 
         pass
 
@@ -709,6 +713,8 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         self.log('camera has been disconnected.')
         self._notify(CameraEvent.CAMERA_DISCONNECTED)
+
+        return True
 
     async def _disconnect_internal(self):
         """Internal method to disconnect a camera.

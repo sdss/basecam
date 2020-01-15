@@ -18,7 +18,7 @@ import clu.testing
 from clu.testing import TestCommand
 from sdsstools import read_yaml_file
 
-from basecam import BaseCamera, CameraSystem, Exposure
+from basecam import BaseCamera, CameraConnectionError, CameraSystem, Exposure
 from basecam.actor import CameraActor
 from basecam.mixins import ExposureTypeMixIn, ShutterMixIn
 
@@ -63,9 +63,16 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
         self.width = 640
         self.height = 480
 
+        self.raise_on_connect = False
+        self.raise_on_disconnect = False
+
         super().__init__(*args, **kwargs)
 
     async def _connect_internal(self, **connection_params):
+
+        if self.raise_on_connect:
+            raise CameraConnectionError
+
         return True
 
     @property
@@ -108,7 +115,11 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
         return self._shutter_position
 
     async def _disconnect_internal(self):
-        pass
+
+        if self.raise_on_disconnect:
+            raise CameraConnectionError
+
+        return True
 
 
 @pytest.fixture(scope='module')
