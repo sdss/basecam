@@ -628,7 +628,7 @@ version = ">=0.12"
 dev = ["pre-commit", "tox"]
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Library for building powerful interactive command lines in Python"
 name = "prompt-toolkit"
 optional = false
@@ -883,35 +883,20 @@ docutils = ">=0.11,<1.0"
 
 [[package]]
 category = "main"
-description = "ruamel.yaml is a YAML parser/emitter that supports roundtrip preservation of comments, seq/map flow style, and map key order"
-name = "ruamel.yaml"
-optional = false
-python-versions = "*"
-version = "0.15.100"
-
-[package.extras]
-docs = ["ryd"]
-jinja2 = ["ruamel.yaml.jinja2 (>=0.2)"]
-
-[[package]]
-category = "main"
 description = "A new protocol for SDSS actors."
 name = "sdss-clu"
 optional = false
 python-versions = ">=3.7,<4.0"
-version = "0.1.10"
+version = "0.1.11"
 
 [package.dependencies]
 Click = ">=7.0,<8.0"
 aio_pika = ">=6.4.1,<7.0.0"
 jsonschema = ">=3.0.1,<4.0.0"
-numpy = ">=1.15.1,<2.0.0"
-prompt-toolkit = ">=3.0.0,<4.0.0"
-pygments = ">=2.2.0,<3.0.0"
-"ruamel.yaml" = ">=0.15.61,<0.16.0"
+sdsstools = ">=0.1.0,<0.2.0"
 
 [package.extras]
-docs = ["Sphinx (>=2.0,<3.0)", "sphinxcontrib-trio (1.1.0)", "semantic-version (2.8.0)", "asynctest (>=0.13.0,<0.14.0)"]
+docs = ["Sphinx (>=2.3,<3.0)"]
 
 [[package]]
 category = "main"
@@ -1165,7 +1150,7 @@ secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "cer
 socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7,<2.0)"]
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Measures number of Terminal column cells of wide-character codes"
 name = "wcwidth"
 optional = false
@@ -1223,7 +1208,7 @@ testing = ["pathlib2", "contextlib2", "unittest2"]
 docs = ["sphinx"]
 
 [metadata]
-content-hash = "029d2b89e85b14c271377557df4b341560773d3964f8a433c86d1f98fa4499c0"
+content-hash = "2afa33aca6fc3e34c3881205194aad0ba7f66b76fceed462ea3fe010ed60ce69"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -1740,29 +1725,9 @@ requests-toolbelt = [
 restructuredtext-lint = [
     {file = "restructuredtext_lint-1.3.0.tar.gz", hash = "sha256:97b3da356d5b3a8514d8f1f9098febd8b41463bed6a1d9f126cf0a048b6fd908"},
 ]
-"ruamel.yaml" = [
-    {file = "ruamel.yaml-0.15.100-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:fc6471ef15b69e454cca82433ac5f84929d9f3e2d72b9e54b06850b6b7133cc0"},
-    {file = "ruamel.yaml-0.15.100-cp27-cp27m-manylinux1_x86_64.whl", hash = "sha256:ab8eeca4de4decf0d0a42cb6949d354da9fc70a2d9201f0dd55186c599b2e3a5"},
-    {file = "ruamel.yaml-0.15.100-cp27-cp27m-win32.whl", hash = "sha256:847177699994f9c31adf78d1ef1ff8f069ef0241e744a3ee8b30fbdaa914cc1e"},
-    {file = "ruamel.yaml-0.15.100-cp27-cp27m-win_amd64.whl", hash = "sha256:92a8ca79f9173cca29ca9663b49d9c936aefc4c8a76f39318b0218c8f3626438"},
-    {file = "ruamel.yaml-0.15.100-cp27-cp27mu-manylinux1_x86_64.whl", hash = "sha256:63dc8c6147a4cf77efadf2ae0f34e89e03de79289298bb941b7ae333d5d4020b"},
-    {file = "ruamel.yaml-0.15.100-cp35-cp35m-macosx_10_6_intel.whl", hash = "sha256:ffc89770339191acbe5a15041950b5ad9daec7d659619b0ed9dad8c9c80c26f3"},
-    {file = "ruamel.yaml-0.15.100-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:7b750252e3d1ec5b53d03be508796c04a907060900c7d207280b7456650ebbfc"},
-    {file = "ruamel.yaml-0.15.100-cp35-cp35m-win32.whl", hash = "sha256:44da2be1153e173f90ad8775d4ac4237a3c06cfbb9660c1c1980271621833faa"},
-    {file = "ruamel.yaml-0.15.100-cp35-cp35m-win_amd64.whl", hash = "sha256:bd4b60b649f4a81086f70cd56eff4722018ef36a28094c396f1a53bf450bd579"},
-    {file = "ruamel.yaml-0.15.100-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:38718e69270141c403b5fc539f774ed394568f8a5195b507991f5b690356facb"},
-    {file = "ruamel.yaml-0.15.100-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:51d49c870aca850e652e2cd1c9bea9b52b77d13ad52b0556de496c1d264ea65f"},
-    {file = "ruamel.yaml-0.15.100-cp36-cp36m-win32.whl", hash = "sha256:922d9e483c05d9000256640026f277fcc0c2e1e9271d05acada8e6cfb4c8b721"},
-    {file = "ruamel.yaml-0.15.100-cp36-cp36m-win_amd64.whl", hash = "sha256:6b6025f9b6a557e15e9fdfda4d9af0b57cd8d59ff98e23a0097ab2d7c0540f07"},
-    {file = "ruamel.yaml-0.15.100-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:6672798c6b52a976a7b24e20665055852388c83198d88029d3c76e2197ac221a"},
-    {file = "ruamel.yaml-0.15.100-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:08aaaa74ff66565024ecabf9ba2db212712382a21c0458f9a91c623a1fa83b34"},
-    {file = "ruamel.yaml-0.15.100-cp37-cp37m-win32.whl", hash = "sha256:23f2efb872d2ebe3d5428b4f1a8f30cbf59f56e780c4981c155411ee65572673"},
-    {file = "ruamel.yaml-0.15.100-cp37-cp37m-win_amd64.whl", hash = "sha256:4b1674a936cdae9735578d4fd64bcbc6cfbb77a1a8f7037a50c6e3874ba4c9d8"},
-    {file = "ruamel.yaml-0.15.100.tar.gz", hash = "sha256:8e42f3067a59e819935a2926e247170ed93c8f0b2ab64526f888e026854db2e4"},
-]
 sdss-clu = [
-    {file = "sdss-clu-0.1.10.tar.gz", hash = "sha256:832c9bb766d348c13a6cc33df82adf59016f5ba872c5065a1e56b40c6ef231d4"},
-    {file = "sdss_clu-0.1.10-py3-none-any.whl", hash = "sha256:9c4e803da15a948bf14b2fa6c3b55aa8f33200ff4300ee42a48e0f0cb0a258ab"},
+    {file = "sdss-clu-0.1.11.tar.gz", hash = "sha256:aa5f39cfda4e470682c32ba45993a878b276efc16fce802d4b2d267485fe99c1"},
+    {file = "sdss_clu-0.1.11-py3-none-any.whl", hash = "sha256:b5f3f4879db6a20e40500715d244fcff6ef9beea47a93f5b730f8f4793219d69"},
 ]
 sdsstools = [
     {file = "sdsstools-0.1.3-py3-none-any.whl", hash = "sha256:d79b7641a6a02787b3237c78f34580e960cc788cbc6f34a0d1e464ab450d462e"},
