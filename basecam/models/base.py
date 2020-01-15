@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # @Author: José Sánchez-Gallego (gallegoj@uw.edu)
-# @Date: 2010-01-10
+# @Date: 2020-01-10
 # @Filename: base.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
