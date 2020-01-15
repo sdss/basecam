@@ -11,6 +11,7 @@ import logging
 from clu import BaseActor, JSONActor
 from clu import command_parser as basecam_parser
 
+from basecam import EventListener
 from basecam.exceptions import CameraWarning
 
 
@@ -48,6 +49,10 @@ class BaseCameraActor:
 
         assert camera_system is not None
         self.camera_system = camera_system
+
+        #: An `.EventListener` that can be used to wait or respond to events.
+        self.listener = EventListener()
+        self.camera_system.notifier.register_listener(self.listener)
 
         super().__init__(*args, parser=basecam_parser, **kwargs)
 
