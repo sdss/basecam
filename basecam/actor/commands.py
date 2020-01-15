@@ -57,7 +57,14 @@ async def set_default(command, cameras, force):
 async def status(command, cameras):
     """Prints the status of a camera."""
 
-    if len(cameras) == 0:
-        cameras = get_cameras(command)
-        if not cameras:
-            return
+    cameras = get_cameras(command)
+    if not cameras:
+        return
+
+    for camera in cameras:
+        status = {'camera': {'name': camera.name,
+                             'uid': camera.uid},
+                  'status': await camera.get_status(update=True)}
+        command.info(status)
+
+    command.done()

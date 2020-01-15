@@ -164,6 +164,8 @@ async def actor_setup(config):
     actor = CameraActor.from_config(config, camera_system)
     actor = await clu.testing.setup_test_actor(actor)
 
+    actor._default_cameras = actor.default_cameras
+
     await actor.camera_system.add_camera('test_camera')
 
     yield actor
@@ -176,6 +178,8 @@ async def actor(actor_setup):
 
     # Clear replies in preparation for next test.
     actor_setup.mock_replies.clear()
+
+    actor_setup.default_cameras = actor_setup._default_cameras
 
 
 @pytest.fixture(scope='function')

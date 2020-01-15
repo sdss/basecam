@@ -60,6 +60,8 @@ async def test_get_cameras_check(command):
 
     assert get_cameras(command, check_cameras=True) is False
 
+    command.actor.camera_system.cameras[0].connected = True
+
 
 async def test_set_default(actor):
 
@@ -84,3 +86,13 @@ async def test_set_default(actor):
     command_result = await actor.invoke_mock_command('set-default -f sp1,sp2 sp3')
     assert command_result.is_done
     assert actor.default_cameras == ['sp1', 'sp2', 'sp3']
+
+
+async def test_status(actor):
+
+    command = await actor.invoke_mock_command('status')
+
+    assert command.is_done
+    assert len(actor.mock_replies) == 3  # Running, status reply, and done reply.
+    print(actor.mock_replies[1])
+    assert actor.mock_replies[1]['status'] == {'temperature': 25., 'cooler': 10.}
