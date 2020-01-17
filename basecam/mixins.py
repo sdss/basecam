@@ -21,13 +21,13 @@ class ShutterMixIn(object, metaclass=abc.ABCMeta):
     async def _set_shutter_internal(self, shutter_open):
         """Internal method to set the position of the shutter."""
 
-        pass
+        raise NotImplementedError
 
     @abc.abstractmethod
     async def _get_shutter_internal(self):
         """Internal method to get the position of the shutter."""
 
-        pass
+        raise NotImplementedError
 
     async def set_shutter(self, shutter, force=False):
         """Sets the position of the shutter.
