@@ -38,13 +38,21 @@ async def test_get_cameras(command):
 async def test_get_cameras_no_default(command):
 
     command.actor.set_default_cameras()
-    assert get_cameras(command) is False
+    assert get_cameras(command, fail_command=True) is False
+
+
+async def test_get_cameras_no_cameras(command):
+
+    command.actor.default_cameras = []
+    assert get_cameras(command, cameras=[], fail_command=True) is False
+    assert command.failed
 
 
 async def test_get_cameras_bad_default(command):
 
     command.actor.set_default_cameras('bad_camera')
-    assert get_cameras(command) is False
+    assert get_cameras(command, fail_command=True) is False
+    assert command.failed
 
 
 async def test_get_cameras_pass_cameras(command):
@@ -58,7 +66,8 @@ async def test_get_cameras_check(command):
     assert command.actor.camera_system.cameras[0].name == 'test_camera'
     command.actor.camera_system.cameras[0].connected = False
 
-    assert get_cameras(command, check_cameras=True) is False
+    assert get_cameras(command, check_cameras=True, fail_command=True) is False
+    assert command.failed
 
     command.actor.camera_system.cameras[0].connected = True
 
