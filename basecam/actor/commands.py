@@ -11,7 +11,7 @@ import contextlib
 
 import click
 
-from ..events import CameraEvent
+from ..exceptions import CameraConnectionError
 from .actor import basecam_parser
 from .tools import get_cameras
 
@@ -76,14 +76,10 @@ async def status(command, cameras):
 
 @basecam_parser.command()
 @click.argument('CAMERAS', nargs=-1, type=str, required=False)
-async def reconnect(command, cameras):
+@click.option('--timeout', '-t', type=float, default=5., show_default=True,
+              help='seconds to wait until disconnect or reconnect command times out.')
+async def reconnect(command, cameras, timeout):
     """Reconnects a camera."""
-
-    async def disconnect(camera):
-        await camera.shutdown()
-
-    async def connect(camera):
-        await camera.connect(force=True)
 
     cameras = get_cameras(command, fail_command=True)
     if not cameras:
@@ -93,33 +89,20 @@ async def reconnect(command, cameras):
 
         command.warning(text=f'reconnecting camera {camera.name!r}')
 
-        disconnect_task = asyncio.create_task(disconnect(camera))
-        disconnect_result = await command.actor.listener.wait_for(
-            [CameraEvent.CAMERA_DISCONNECTED,
-             CameraEvent.CAMERA_DISCONNECT_FAILED], timeout=5)
-
-        if CameraEvent.CAMERA_DISCONNECTED in disconnect_result:
+        try:
+            await asyncio.wait_for(camera.shutdown(), timeout=timeout)
             command.info(text=f'camera {camera.name!r} was disconnected.')
-        else:
-            command.warning(text=f'camera {camera.name!r} failed to disconnect. '
+        except CameraConnectionError as ee:
+            command.warning(text=f'camera {camera.name!r} failed to disconnect: {ee} '
                                  'Will try to reconnect.')
-            disconnect_task.cancel()
+        except asyncio.TimeoutError:
+            command.warning(text=f'camera {camera.name!r} timed out disconnecting. '
+                                 'Will try to reconnect.')
 
-        with contextlib.suppress(asyncio.CancelledError):
-            await disconnect_task
-
-        connect_task = asyncio.create_task(connect(camera))
-        connect_result = await command.actor.listener.wait_for(
-            [CameraEvent.CAMERA_CONNECTED,
-             CameraEvent.CAMERA_CONNECT_FAILED], timeout=5)
-
-        if CameraEvent.CAMERA_CONNECTED in connect_result:
-            command.info(text=f'camera {camera.name!r} was reconnected.')
-        else:
-            command.warning(text=f'camera {camera.name!r} failed to reconnect.')
-            connect_task.cancel()
-
-        with contextlib.suppress(asyncio.CancelledError):
-            await connect_task
-
-    command.done()
+        try:
+            await asyncio.wait_for(camera.connect(force=True), timeout=timeout)
+            command.done(text=f'camera {camera.name!r} was reconnected.')
+        except CameraConnectionError as ee:
+            command.failed(text=f'camera {camera.name!r} failed to reconnect: {ee}')
+        except asyncio.TimeoutError:
+            command.failed(text=f'camera {camera.name!r} timed out reconnecting.')

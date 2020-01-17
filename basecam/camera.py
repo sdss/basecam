@@ -494,10 +494,10 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             self.connected = True
             if self.uid is None:
                 warnings.warn('camera connected but an UID is not available.', CameraWarning)
-        except CameraConnectionError:
+        except CameraConnectionError as ee:
             self.connected = False
             self._notify(CameraEvent.CAMERA_CONNECT_FAILED)
-            raise
+            raise CameraConnectionError(f'failed to connect: {ee}')
 
         self.log('camera connected.')
         self._notify(CameraEvent.CAMERA_CONNECTED)
@@ -707,9 +707,9 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         try:
             await self._disconnect_internal()
-        except CameraConnectionError:
+        except CameraConnectionError as ee:
             self._notify(CameraEvent.CAMERA_DISCONNECT_FAILED)
-            raise
+            raise CameraConnectionError(f'failed to disconnect: {ee}')
 
         self.log('camera has been disconnected.')
         self._notify(CameraEvent.CAMERA_DISCONNECTED)
