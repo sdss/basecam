@@ -102,7 +102,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         """
 
-        raise NotImplementedError
+        pass
 
     def get_camera_config(self, name=None, uid=None):
         """Gets camera parameters from the configuration.
@@ -307,7 +307,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
         for camera in self.cameras:
             if camera.name == name or camera.uid == uid:
 
-                await camera.shutdown()
+                await camera.disconnect()
                 self.cameras.remove(camera)
 
                 self.log(f'removed camera {name!r}.')
@@ -388,7 +388,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         return self.loop.create_task(self.remove_camera(uid=uid))
 
-    async def shutdown(self):
+    async def disconnect(self):
         """Shuts down the system."""
 
         if self._camera_poller and self._camera_poller.running:
@@ -702,7 +702,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         raise NotImplementedError
 
-    async def shutdown(self):
+    async def disconnect(self):
         """Shuts down the camera."""
 
         try:

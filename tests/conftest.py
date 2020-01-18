@@ -39,9 +39,9 @@ class CameraSystemTester(CameraSystem):
     def list_available_cameras(self):
         return self._connected_cameras
 
-    async def shutdown(self):
+    async def disconnect(self):
         self._connected = False
-        await super().shutdown()
+        await super().disconnect()
 
 
 class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
