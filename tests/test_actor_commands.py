@@ -7,6 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
 import asyncio
+import types
 
 import pytest
 
@@ -118,10 +119,7 @@ async def test_reconnect_disconnect_fails(actor):
     actor.camera_system.cameras[0].raise_on_disconnect = True
     command = await actor.invoke_mock_command('reconnect')
 
-    text_in_replies = ['failed to disconnect' in reply['text']
-                       for reply in actor.mock_replies if 'text' in reply]
-
-    assert any(text_in_replies)
+    assert 'failed to disconnect' in actor.mock_replies
     assert command.status.is_done
 
 
@@ -130,8 +128,21 @@ async def test_reconnect_connect_fails(actor):
     actor.camera_system.cameras[0].raise_on_connect = True
     command = await actor.invoke_mock_command('reconnect')
 
-    text_in_replies = ['failed to connect' in reply['text']
-                       for reply in actor.mock_replies if 'text' in reply]
-
-    assert any(text_in_replies)
+    assert 'failed to connect' in actor.mock_replies
     assert command.status.did_fail
+
+
+async def test_reconnect_timesout(actor):
+
+    async def _sleeper(self, *args, **kwargs):
+        await asyncio.sleep(1)
+        return True
+
+    camera = actor.camera_system.cameras[0]
+    camera._disconnect_internal = types.MethodType(_sleeper, camera)
+    camera._connect_internal = types.MethodType(_sleeper, camera)
+
+    command = await actor.invoke_mock_command('reconnect --timeout 0.05')
+
+    assert command.status.did_fail
+    assert 'timed out' in actor.mock_replies
