@@ -210,3 +210,9 @@ def test_card_magic_evaluate(exposure):
 
     card = models.Card('TESTCARD')
     assert card.evaluate(exposure)[1] == 4
+
+
+def test_magic_card_raises():
+
+    with pytest.raises(ValueError):
+        models.Card('VCAM', value='a value')

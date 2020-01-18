@@ -362,7 +362,7 @@ class Card(object):
         if self.is_magic():
 
             if value:
-                raise ValueError(f'magic card {self.name} cannot define a value.')
+                raise ValueError(f'cannot override value of magic card {self.name!r}')
 
             magic_params = _MAGIC_CARDS[self.name.upper()]
             self.value, magic_comment = magic_params[0:2]
