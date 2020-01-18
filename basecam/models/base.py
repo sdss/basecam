@@ -365,7 +365,7 @@ class Card(object):
                 raise ValueError(f'magic card {self.name} cannot define a value.')
 
             magic_params = _MAGIC_CARDS[self.name.upper()]
-            self.value, magic_comment = magic_params
+            self.value, magic_comment = magic_params[0:2]
 
             self.comment = comment or magic_comment
 

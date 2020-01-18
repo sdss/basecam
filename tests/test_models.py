@@ -196,3 +196,17 @@ def test_evaluate_callable(exposure):
     assert name == 'testcall'
     assert comment is None
     assert value == 3
+
+
+def test_card_evaluate(exposure):
+
+    card = models.Card('TESTCARD', value='2+2', evaluate=True)
+    assert card.evaluate(exposure)[1] == 4
+
+
+def test_card_magic_evaluate(exposure):
+
+    models.magic._MAGIC_CARDS['TESTCARD'] = ('2+2', '', {'evaluate': True})
+
+    card = models.Card('TESTCARD')
+    assert card.evaluate(exposure)[1] == 4
