@@ -177,19 +177,19 @@ async def actor_setup(config):
 
     actor._default_cameras = actor.default_cameras
 
-    await actor.camera_system.add_camera('test_camera')
-
     yield actor
 
 
 @pytest.fixture(scope='function')
 async def actor(actor_setup):
 
+    cam = await actor_setup.camera_system.add_camera('test_camera')
+
     yield actor_setup
 
     # Clear replies in preparation for next test.
     actor_setup.mock_replies.clear()
-
+    actor_setup.camera_system.cameras.remove(cam)
     actor_setup.default_cameras = actor_setup._default_cameras
 
 
