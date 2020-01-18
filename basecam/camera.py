@@ -98,11 +98,11 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
     def setup(self):
         """Setup custom camera system.
 
-        To be overridden by the subclass if needed.
+        To be overridden by the subclass if needed. Must return ``self``.
 
         """
 
-        pass
+        return self
 
     def get_camera_config(self, name=None, uid=None):
         """Gets camera parameters from the configuration.

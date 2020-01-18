@@ -89,7 +89,7 @@ async def reconnect(command, cameras, timeout):
         command.warning(text=f'reconnecting camera {camera.name!r}')
 
         try:
-            await asyncio.wait_for(camera.shutdown(), timeout=timeout)
+            await asyncio.wait_for(camera.disconnect(), timeout=timeout)
             command.info(text=f'camera {camera.name!r} was disconnected.')
         except CameraConnectionError as ee:
             command.warning(text=f'camera {camera.name!r} fail to disconnect: {ee} '

@@ -29,19 +29,10 @@ TEST_CONFIG_FILE = os.path.dirname(__file__) + '/data/test_config.yaml'
 class CameraSystemTester(CameraSystem):
 
     _connected_cameras = []
-    _connected = False
     __version__ = '0.1.0'
-
-    def setup(self):
-        self._connected = True
-        return self
 
     def list_available_cameras(self):
         return self._connected_cameras
-
-    async def disconnect(self):
-        self._connected = False
-        await super().disconnect()
 
 
 class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
@@ -145,7 +136,7 @@ async def camera_system(config, event_loop):
 
     yield camera_system
 
-    await camera_system.shutdown()
+    await camera_system.disconnect()
 
 
 @pytest.fixture

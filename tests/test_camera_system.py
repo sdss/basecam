@@ -25,10 +25,6 @@ async def test_load_config():
     assert 'test_camera' in camera_system.camera_config
 
 
-async def test_system(camera_system):
-    assert camera_system._connected is True
-
-
 async def test_discover(camera_system):
 
     await camera_system.start_camera_poller(0.1)

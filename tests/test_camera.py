@@ -43,7 +43,7 @@ async def test_disconnect_fails(camera):
     camera.raise_on_disconnect = True
 
     with pytest.raises(CameraConnectionError):
-        await camera.shutdown()
+        await camera.disconnect()
 
 
 async def test_expose(camera):
