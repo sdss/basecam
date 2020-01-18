@@ -11,6 +11,7 @@ import astropy.table
 import pytest
 
 from basecam import models
+from basecam.exceptions import CardWarning
 
 
 class MacroCardTest(models.MacroCard):
@@ -216,3 +217,11 @@ def test_magic_card_raises():
 
     with pytest.raises(ValueError):
         models.Card('VCAM', value='a value')
+
+
+def test_card_name_trimming():
+
+    with pytest.warns(CardWarning):
+        card = models.Card('AVERYLARGENAME', 'value')
+
+    assert card.name == 'AVERYLAR'
