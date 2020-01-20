@@ -32,6 +32,7 @@ async def test_help(actor):
 
     assert command.status == command.status.DONE
     assert len(actor.mock_replies) > 2
+    assert 'expose' in actor.mock_replies
 
 
 async def test_list(actor):
