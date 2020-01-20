@@ -13,7 +13,7 @@ from clu import BaseActor, JSONActor
 from basecam import EventListener
 from basecam.exceptions import CameraWarning
 
-from .commands import camera_parser
+from . import commands
 
 
 __all__ = ['BaseCameraActor', 'CameraActor']
@@ -39,12 +39,17 @@ class BaseCameraActor:
     default_cameras : list of `str`
         A list of camera names or UIDs that define what cameras to use by
         default in most command.
+    command_parser : ~clu.parser.CluGroup
+        The list of commands to use. It must be a command group deriving from
+        `~clu.parser.CluGroup` containing all the commands to use. If
+        ``commands=None``, uses the internal command set.
     args,kwars
         Arguments and keyword arguments to be passed to the actor class.
 
     """
 
-    def __init__(self, camera_system, *args, default_cameras=None, **kwargs):
+    def __init__(self, camera_system, *args, default_cameras=None,
+                 command_parser=None, **kwargs):
 
         self._check_is_subclass()
 
@@ -55,7 +60,14 @@ class BaseCameraActor:
         self.listener = EventListener()
         self.camera_system.notifier.register_listener(self.listener)
 
-        super().__init__(*args, parser=camera_parser, **kwargs)
+        command_parser = command_parser or commands.camera_parser
+
+        super().__init__(*args, parser=command_parser, **kwargs)
+
+        # Add commands that depend on what mixins the base camera has
+        # been subclassed with.
+        if command_parser == commands.camera_parser:
+            self._add_optional_commands()
 
         # Output log messages as keywords.
         self.log.log_to_actor(self, code_mapping={logging.INFO: 'd'},
@@ -78,6 +90,17 @@ class BaseCameraActor:
                 return
 
         raise RuntimeError(error)
+
+    def _add_optional_commands(self):
+        """Adds commands and groups based on the mixins present."""
+
+        camera_class = self.camera_system.camera_class
+
+        for mixin in camera_class.__bases__:
+            mixin_name = mixin.__name__
+            if mixin_name in commands._MIXIN_TO_COMMANDS:
+                for command in commands._MIXIN_TO_COMMANDS[mixin_name]:
+                    self.command_parser.add_command(command)
 
     def set_default_cameras(self, cameras=None):
         """Sets the camera(s) that will be used by default.

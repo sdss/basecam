@@ -175,3 +175,7 @@ async def expose(command, cameras, exptime, image_type, filename):
             command.actor.listener.remove_callback(stage)
 
     return command.finish()
+
+_MIXIN_TO_COMMANDS = {
+    'ShutterMixIn': [shutter]
+}
