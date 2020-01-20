@@ -116,7 +116,9 @@ class EventListener(asyncio.Queue):
                 continue
 
             for callback in self.callbacks:
-                self.loop.create_task(callback(event, payload))
+                cb = callback(event, payload)
+                if asyncio.iscoroutine(cb):
+                    self.loop.create_task(cb)
 
             if self._event_waiter:
                 self.__events.add(event)
@@ -157,10 +159,9 @@ class EventListener(asyncio.Queue):
             A function or coroutine function to be called. The callback
             receives the event (an enumeration value) as the first argument
             and the payload associated with that event as a dictionary.
+            If the callback is a coroutine, it is scheduled as a task.
 
         """
-
-        assert asyncio.iscoroutinefunction(callback), 'callback must be a coroutine.'
 
         if callback not in self.callbacks:
             self.callbacks.append(callback)

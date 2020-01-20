@@ -8,6 +8,7 @@
 
 import asyncio
 
+import asynctest
 import pytest
 
 from basecam.events import CameraSystemEvent
@@ -74,13 +75,16 @@ async def test_listener(camera_system, listener):
     assert len(events) > n_events
 
 
-async def test_bad_callback(listener):
+async def test_callback_function(camera_system, listener):
 
-    def bad_callback(event, payload):
-        return
+    func_callback = asynctest.MagicMock()
 
-    with pytest.raises(AssertionError):
-        listener.register_callback(bad_callback)
+    listener.register_callback(func_callback)
+
+    await camera_system.add_camera('test_camera')
+    await asyncio.sleep(0.1)
+
+    func_callback.assert_called()
 
 
 async def test_remove_callback(camera_system, listener):
