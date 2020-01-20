@@ -11,7 +11,9 @@ import types
 
 import astropy.io.fits
 import pytest
+from asynctest import patch
 
+from basecam import CameraConnectionError, CameraError, ExposureError
 from basecam.actor.tools import get_cameras
 
 
@@ -135,20 +137,26 @@ async def test_reconnect(actor):
 
 async def test_reconnect_disconnect_fails(actor):
 
-    actor.camera_system.cameras[0].raise_on_disconnect = True
-    command = await actor.invoke_mock_command('reconnect')
+    camera = actor.camera_system.cameras[0]
 
-    assert 'failed to disconnect' in actor.mock_replies
-    assert command.status.did_succeed
+    with patch.object(camera, '_disconnect_internal', side_effect=CameraConnectionError):
+
+        command = await actor.invoke_mock_command('reconnect')
+
+        assert 'failed to disconnect' in actor.mock_replies
+        assert command.status.did_succeed
 
 
 async def test_reconnect_connect_fails(actor):
 
-    actor.camera_system.cameras[0].raise_on_connect = True
-    command = await actor.invoke_mock_command('reconnect')
+    camera = actor.camera_system.cameras[0]
 
-    assert 'failed to connect' in actor.mock_replies
-    assert command.status.did_fail
+    with patch.object(camera, '_connect_internal', side_effect=CameraConnectionError):
+
+        command = await actor.invoke_mock_command('reconnect')
+
+        assert 'failed to connect' in actor.mock_replies
+        assert command.status.did_fail
 
 
 async def test_reconnect_timesout(actor):
@@ -196,11 +204,13 @@ async def test_expose(actor, tmp_path, image_type):
 
 async def test_expose_fails(actor):
 
-    actor.camera_system.cameras[0].raise_on_expose = True
+    camera = actor.camera_system.cameras[0]
 
-    command = await actor.invoke_mock_command('expose 1')
+    with patch.object(camera, '_expose_internal', side_effect=ExposureError):
 
-    assert command.status.did_fail
+        command = await actor.invoke_mock_command('expose 1')
+
+        assert command.status.did_fail
 
 
 async def test_expose_filename_fails(actor, tmp_path):
@@ -239,6 +249,9 @@ async def test_set_shutter(actor, shutter_position):
 
 async def test_set_shutter_fails(actor):
 
-    actor.camera_system.cameras[0].raise_on_set_shutter = True
-    command = await actor.invoke_mock_command(f'shutter --open')
-    assert command.status.did_fail
+    camera = actor.camera_system.cameras[0]
+
+    with patch.object(camera, '_set_shutter_internal', side_effect=CameraError):
+
+        command = await actor.invoke_mock_command(f'shutter --open')
+        assert command.status.did_fail

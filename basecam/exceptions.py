@@ -15,7 +15,12 @@ class CameraError(Exception):
     def __init__(self, message=''):
 
         stack = inspect.stack()
-        camera_name = stack[1][0].f_locals['self'].name
+        f_locals = stack[1][0].f_locals
+
+        if 'self' in f_locals:
+            camera_name = f_locals['self'].name
+        else:
+            camera_name = 'UNKNOWN'
 
         super().__init__(f'{camera_name} - {message}')
 
@@ -42,7 +47,12 @@ class CameraWarning(UserWarning):
     def __init__(self, message, *args, **kwargs):
 
         stack = inspect.stack()
-        camera_name = stack[1][0].f_locals['self'].name
+        f_locals = stack[1][0].f_locals
+
+        if 'self' in f_locals:
+            camera_name = f_locals['self'].name
+        else:
+            camera_name = 'UNKNOWN'
 
         super().__init__(f'{camera_name} - {message}')
 

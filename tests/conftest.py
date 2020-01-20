@@ -56,17 +56,9 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
         self.width = 640
         self.height = 480
 
-        self.raise_on_connect = False
-        self.raise_on_disconnect = False
-        self.raise_on_expose = False
-        self.raise_on_set_shutter = False
-
         super().__init__(*args, **kwargs)
 
     async def _connect_internal(self, **connection_params):
-
-        if self.raise_on_connect:
-            raise CameraConnectionError
 
         return True
 
@@ -79,9 +71,6 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
                 'cooler': 10.}
 
     async def _expose_internal(self, exposure, **kwargs):
-
-        if self.raise_on_expose:
-            raise ExposureError('the exposure failed.')
 
         image_type = exposure.image_type
 
@@ -117,18 +106,12 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
 
     async def _set_shutter_internal(self, shutter_open):
 
-        if self.raise_on_set_shutter:
-            raise CameraError
-
         self._shutter_position = shutter_open
 
     async def _get_shutter_internal(self):
         return self._shutter_position
 
     async def _disconnect_internal(self):
-
-        if self.raise_on_disconnect:
-            raise CameraConnectionError
 
         return True
 
@@ -163,10 +146,6 @@ async def camera_system(config, event_loop):
 async def camera(camera_system):
 
     camera = await camera_system.add_camera('test_camera')
-
-    # We don't really want to mock _set_shutter_internal, just provide
-    # a method to track the calls received.
-    camera._set_shutter_internal = CoroutineMock(wraps=camera._set_shutter_internal)
 
     yield camera
 

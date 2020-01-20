@@ -7,6 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
 import pytest
+from asynctest import patch
 
 
 pytestmark = pytest.mark.asyncio
@@ -14,58 +15,70 @@ pytestmark = pytest.mark.asyncio
 
 async def test_bias(camera):
 
-    # Open the shutter
-    await camera.open_shutter()
+    with patch.object(camera, '_set_shutter_internal',
+                      wraps=camera._set_shutter_internal) as mock:
 
-    exposure = await camera.bias()
-    hdu = exposure.to_hdu()
+        # Open the shutter
+        await camera.open_shutter()
 
-    assert hdu[0].header['EXPTIME'] == '0.0'
-    assert hdu[0].header['IMAGETYP'] == 'bias'
+        exposure = await camera.bias()
+        hdu = exposure.to_hdu()
 
-    calls = camera._set_shutter_internal.mock_calls
-    assert len(calls) == 2
-    assert calls[1][1][0] is False
+        assert hdu[0].header['EXPTIME'] == '0.0'
+        assert hdu[0].header['IMAGETYP'] == 'bias'
+
+        calls = mock.mock_calls
+        assert len(calls) == 2
+        assert calls[1][1][0] is False
 
 
 async def test_dark(camera):
 
-    exposure = await camera.dark(5)
-    hdu = exposure.to_hdu()
+    with patch.object(camera, '_set_shutter_internal',
+                      wraps=camera._set_shutter_internal) as mock:
 
-    assert hdu[0].header['EXPTIME'] == '5'
-    assert hdu[0].header['IMAGETYP'] == 'dark'
+        exposure = await camera.dark(5)
+        hdu = exposure.to_hdu()
 
-    calls = camera._set_shutter_internal.mock_calls
-    assert len(calls) == 0
+        assert hdu[0].header['EXPTIME'] == '5'
+        assert hdu[0].header['IMAGETYP'] == 'dark'
+
+        calls = mock.mock_calls
+        assert len(calls) == 0
 
 
 async def test_flat(camera):
 
-    exposure = await camera.flat(5)
-    hdu = exposure.to_hdu()
+    with patch.object(camera, '_set_shutter_internal',
+                      wraps=camera._set_shutter_internal) as mock:
 
-    assert hdu[0].header['EXPTIME'] == '5'
-    assert hdu[0].header['IMAGETYP'] == 'flat'
+        exposure = await camera.flat(5)
+        hdu = exposure.to_hdu()
 
-    calls = camera._set_shutter_internal.mock_calls
-    assert len(calls) == 2
-    assert calls[0][1][0] is True
-    assert calls[1][1][0] is False
+        assert hdu[0].header['EXPTIME'] == '5'
+        assert hdu[0].header['IMAGETYP'] == 'flat'
+
+        calls = mock.mock_calls
+        assert len(calls) == 2
+        assert calls[0][1][0] is True
+        assert calls[1][1][0] is False
 
 
 async def test_object(camera):
 
-    exposure = await camera.object(5)
-    hdu = exposure.to_hdu()
+    with patch.object(camera, '_set_shutter_internal',
+                      wraps=camera._set_shutter_internal) as mock:
 
-    assert hdu[0].header['EXPTIME'] == '5'
-    assert hdu[0].header['IMAGETYP'] == 'object'
+        exposure = await camera.object(5)
+        hdu = exposure.to_hdu()
 
-    calls = camera._set_shutter_internal.mock_calls
-    assert len(calls) == 2
-    assert calls[0][1][0] is True
-    assert calls[1][1][0] is False
+        assert hdu[0].header['EXPTIME'] == '5'
+        assert hdu[0].header['IMAGETYP'] == 'object'
+
+        calls = mock.mock_calls
+        assert len(calls) == 2
+        assert calls[0][1][0] is True
+        assert calls[1][1][0] is False
 
 
 async def test_shutter(camera):

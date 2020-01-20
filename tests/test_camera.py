@@ -10,6 +10,7 @@ import astropy
 import astropy.io.fits
 import numpy
 import pytest
+from asynctest import patch
 
 from basecam import (CameraConnectionError, CameraWarning,
                      Exposure, ExposureError, ExposureWarning)
@@ -32,19 +33,21 @@ async def test_status(camera):
 
 async def test_connect_fails(camera):
 
-    camera.raise_on_connect = True
+    with patch.object(camera, '_connect_internal',
+                      side_effect=CameraConnectionError):
 
-    with pytest.raises(CameraConnectionError):
-        # Force reconnect.
-        await camera.connect(force=True)
+        with pytest.raises(CameraConnectionError):
+            # Force reconnect.
+            await camera.connect(force=True)
 
 
 async def test_disconnect_fails(camera):
 
-    camera.raise_on_disconnect = True
+    with patch.object(camera, '_disconnect_internal',
+                      side_effect=CameraConnectionError):
 
-    with pytest.raises(CameraConnectionError):
-        await camera.disconnect()
+        with pytest.raises(CameraConnectionError):
+            await camera.disconnect()
 
 
 async def test_expose(camera):
