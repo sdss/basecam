@@ -67,7 +67,7 @@ async def set_default(command, cameras, force):
 async def status(command, cameras):
     """Returns the status of a camera."""
 
-    cameras = get_cameras(command, fail_command=True)
+    cameras = get_cameras(command, cameras=cameras, fail_command=True)
     if not cameras:  # pragma: no cover
         return
 
@@ -87,7 +87,7 @@ async def status(command, cameras):
 async def reconnect(command, cameras, timeout):
     """Reconnects a camera."""
 
-    cameras = get_cameras(command, fail_command=True)
+    cameras = get_cameras(command, cameras=cameras, fail_command=True)
     if not cameras:  # pragma: no cover
         return
 
