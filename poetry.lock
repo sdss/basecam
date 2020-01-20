@@ -900,7 +900,7 @@ sdsstools = "^0.1.0"
 docs = ["Sphinx (^2.3)"]
 
 [package.source]
-reference = "149be3f5ac849b2d2fd55839554dbf380f48c8aa"
+reference = "eacc94b3cbb8ed38052b7da819c23b1de407066b"
 type = "git"
 url = "https://github.com/sdss/clu"
 [[package]]

@@ -10,10 +10,10 @@ import asyncio
 
 import click
 
-from clu.parser import CluGroup
+from clu.parser import CluCommand, CluGroup
 
 from ..events import CameraEvent
-from ..exceptions import CameraConnectionError, ExposureError
+from ..exceptions import CameraConnectionError, CameraError, ExposureError
 from .tools import get_cameras
 
 
@@ -175,6 +175,39 @@ async def expose(command, cameras, exptime, image_type, filename):
             command.actor.listener.remove_callback(stage)
 
     return command.finish()
+
+
+@click.command(cls=CluCommand)
+@click.argument('CAMERAS', nargs=-1, type=str, required=False)
+@click.option('--open', 'shutter_position', flag_value='open',
+              help='Open the shutter.')
+@click.option('--close', 'shutter_position', flag_value='close',
+              help='Close the shutter.')
+async def shutter(command, cameras, shutter_position):
+    """Controls the camera shutter.
+
+    If called without a shutter position flag, returns the current position
+    of the shutter.
+
+    """
+
+    cameras = get_cameras(command, cameras=cameras, fail_command=True)
+    if not cameras:  # pragma: no cover
+        return
+
+    for camera in cameras:
+        if shutter_position is None:
+            shutter_now = await camera.get_shutter()
+            command.info(camera=camera.name, shutter=shutter_now)
+        else:
+            try:
+                await camera.set_shutter(shutter_position == 'open')
+                command.info(camera=camera.name, shutter=shutter_position)
+            except CameraError as ee:
+                return command.fail(text=f'failed commanding shutter: {ee!s}')
+
+    return command.finish()
+
 
 _MIXIN_TO_COMMANDS = {
     'ShutterMixIn': [shutter]

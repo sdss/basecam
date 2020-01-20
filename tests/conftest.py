@@ -18,7 +18,7 @@ import clu.testing
 from clu.testing import TestCommand
 from sdsstools import read_yaml_file
 
-from basecam import (BaseCamera, CameraConnectionError,
+from basecam import (BaseCamera, CameraConnectionError, CameraError,
                      CameraSystem, Exposure, ExposureError)
 from basecam.actor import CameraActor
 from basecam.events import CameraEvent
@@ -59,6 +59,7 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
         self.raise_on_connect = False
         self.raise_on_disconnect = False
         self.raise_on_expose = False
+        self.raise_on_set_shutter = False
 
         super().__init__(*args, **kwargs)
 
@@ -111,6 +112,10 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
         await self.set_shutter(False)
 
     async def _set_shutter_internal(self, shutter_open):
+
+        if self.raise_on_set_shutter:
+            raise CameraError
+
         self._shutter_position = shutter_open
 
     async def _get_shutter_internal(self):

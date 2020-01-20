@@ -215,3 +215,30 @@ async def test_expose_filename_fails(actor, tmp_path):
 
     assert command.status.did_fail
     assert '-filename can only be used when exposing a single camera' in actor.mock_replies
+
+
+async def test_shutter_command_exists(actor):
+
+    assert 'shutter' in actor.command_parser.commands
+
+
+async def test_get_shutter(actor):
+
+    command = await actor.invoke_mock_command('shutter')
+    assert command.status.did_succeed
+    assert actor.mock_replies[1]['shutter'] is False
+
+
+@pytest.mark.parametrize('shutter_position', ('open', 'close'))
+async def test_set_shutter(actor, shutter_position):
+
+    command = await actor.invoke_mock_command(f'shutter --{shutter_position}')
+    assert command.status.did_succeed
+    assert actor.camera_system.cameras[0]._shutter_position == (shutter_position == 'open')
+
+
+async def test_set_shutter_fails(actor):
+
+    actor.camera_system.cameras[0].raise_on_set_shutter = True
+    command = await actor.invoke_mock_command(f'shutter --open')
+    assert command.status.did_fail
