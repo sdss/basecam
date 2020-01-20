@@ -10,13 +10,19 @@ import asyncio
 
 import click
 
+from clu.parser import CluGroup
+
 from ..events import CameraEvent
 from ..exceptions import CameraConnectionError, ExposureError
-from .actor import basecam_parser
 from .tools import get_cameras
 
 
-@basecam_parser.command(name='list')
+@click.group(cls=CluGroup)
+def camera_parser():
+    pass
+
+
+@camera_parser.command(name='list')
 async def list_(command):
     """Lists cameras connected to the camera system."""
 
@@ -24,7 +30,7 @@ async def list_(command):
     command.finish(cameras=cameras, default_cameras=command.actor.default_cameras)
 
 
-@basecam_parser.command()
+@camera_parser.command()
 @click.argument('CAMERAS', nargs=-1, type=str)
 @click.option('-f', '--force', is_flag=True, default=False,
               help='Forces a camera to be set as default '
@@ -56,7 +62,7 @@ async def set_default(command, cameras, force):
     command.finish(default_cameras=command.actor.default_cameras)
 
 
-@basecam_parser.command()
+@camera_parser.command()
 @click.argument('CAMERAS', nargs=-1, type=str, required=False)
 async def status(command, cameras):
     """Returns the status of a camera."""
@@ -74,7 +80,7 @@ async def status(command, cameras):
     command.finish()
 
 
-@basecam_parser.command()
+@camera_parser.command()
 @click.argument('CAMERAS', nargs=-1, type=str, required=False)
 @click.option('--timeout', '-t', type=float, default=5., show_default=True,
               help='Seconds to wait until disconnect or reconnect command times out.')
@@ -108,7 +114,7 @@ async def reconnect(command, cameras, timeout):
             command.fail(text=f'camera {camera.name!r} timed out reconnecting.')
 
 
-@basecam_parser.command()
+@camera_parser.command()
 @click.argument('CAMERAS', nargs=-1, type=str, required=False)
 @click.argument('EXPTIME', type=float, required=False)
 @click.option('--object', 'image_type', flag_value='object', default=True,

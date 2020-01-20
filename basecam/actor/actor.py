@@ -9,10 +9,11 @@
 import logging
 
 from clu import BaseActor, JSONActor
-from clu import command_parser as basecam_parser
 
 from basecam import EventListener
 from basecam.exceptions import CameraWarning
+
+from .commands import camera_parser
 
 
 __all__ = ['BaseCameraActor', 'CameraActor']
@@ -54,7 +55,7 @@ class BaseCameraActor:
         self.listener = EventListener()
         self.camera_system.notifier.register_listener(self.listener)
 
-        super().__init__(*args, parser=basecam_parser, **kwargs)
+        super().__init__(*args, parser=camera_parser, **kwargs)
 
         # Output log messages as keywords.
         self.log.log_to_actor(self, code_mapping={logging.INFO: 'd'},

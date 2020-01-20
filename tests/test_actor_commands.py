@@ -18,6 +18,22 @@ from basecam.actor.tools import get_cameras
 pytestmark = pytest.mark.asyncio
 
 
+async def test_ping(actor):
+
+    command = await actor.invoke_mock_command('ping')
+
+    assert command.status == command.status.DONE
+    assert 'Pong' in actor.mock_replies
+
+
+async def test_help(actor):
+
+    command = await actor.invoke_mock_command('help')
+
+    assert command.status == command.status.DONE
+    assert len(actor.mock_replies) > 2
+
+
 async def test_list(actor):
 
     command = await actor.invoke_mock_command('list')
