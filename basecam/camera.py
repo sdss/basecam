@@ -633,6 +633,8 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         """
 
+        exptime = exptime or 0.0
+
         if exptime < 0:
             raise ExposureError('exposure time cannot be < 0')
 

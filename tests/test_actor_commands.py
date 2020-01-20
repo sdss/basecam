@@ -9,6 +9,7 @@
 import asyncio
 import types
 
+import astropy.io.fits
 import pytest
 
 from basecam.actor.tools import get_cameras
@@ -146,3 +147,53 @@ async def test_reconnect_timesout(actor):
 
     assert command.status.did_fail
     assert 'timed out' in actor.mock_replies
+
+
+@pytest.mark.parametrize('image_type', (None, 'object', 'flat', 'bias', 'dark'))
+async def test_expose(actor, tmp_path, image_type):
+
+    filename = tmp_path / 'test_exposure.fits'
+
+    command_str = f'expose 1 --filename {filename}'
+    if image_type:
+        command_str += f' --{image_type}'
+
+    command = await actor.invoke_mock_command(command_str)
+
+    assert command.status == command.status.DONE
+
+    assert 'integrating' in actor.mock_replies
+    assert 'reading' in actor.mock_replies
+
+    image_type = image_type or 'object'
+
+    hdu = astropy.io.fits.open(filename)
+    assert hdu[0].data is not None
+    assert hdu[0].header['IMAGETYP'] == image_type
+    assert hdu[0].header['EXPTIME'] == '1.0' if image_type != 'bias' else '0.0'
+
+    if image_type == 'bias':
+        assert 'seeting exposure time for bias to 0 seconds.' in actor.mock_replies
+
+
+async def test_expose_fails(actor):
+
+    actor.camera_system.cameras[0].raise_on_expose = True
+
+    command = await actor.invoke_mock_command('expose 1')
+
+    assert command.status == command.status.FAILED
+
+
+async def test_expose_filename_fails(actor, tmp_path):
+
+    filename = tmp_path / 'test.fits'
+
+    await actor.camera_system.add_camera(name='AAA', uid='AAA', force=True)
+    actor.camera_system.cameras[1].connected = True
+
+    command = await actor.invoke_mock_command(
+        f'expose test_camera AAA 1 --filename {filename}')
+
+    assert command.status == command.status.FAILED
+    assert '-filename can only be used when exposing a single camera' in actor.mock_replies

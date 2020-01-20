@@ -18,8 +18,10 @@ import clu.testing
 from clu.testing import TestCommand
 from sdsstools import read_yaml_file
 
-from basecam import BaseCamera, CameraConnectionError, CameraSystem, Exposure
+from basecam import (BaseCamera, CameraConnectionError,
+                     CameraSystem, Exposure, ExposureError)
 from basecam.actor import CameraActor
+from basecam.events import CameraEvent
 from basecam.mixins import ExposureTypeMixIn, ShutterMixIn
 
 
@@ -56,6 +58,7 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
 
         self.raise_on_connect = False
         self.raise_on_disconnect = False
+        self.raise_on_expose = False
 
         super().__init__(*args, **kwargs)
 
@@ -76,12 +79,18 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
 
     async def _expose_internal(self, exposure, **kwargs):
 
+        if self.raise_on_expose:
+            raise ExposureError('the exposure failed.')
+
         image_type = exposure.image_type
 
         if image_type in ['bias', 'dark']:
             await self.set_shutter(False)
         else:
             await self.set_shutter(True)
+
+        self._notify(CameraEvent.EXPOSURE_FLUSHING)
+        self._notify(CameraEvent.EXPOSURE_INTEGRATING)
 
         # Creates a spiral pattern
         xx = numpy.arange(-5, 5, 0.1)
@@ -93,6 +102,8 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
         data = numpy.tile(tile.astype(numpy.uint16),
                           (self.height // len(yy) + 1, self.width // len(yy) + 1))
         data = data[0:self.height, 0:self.width]
+
+        self._notify(CameraEvent.EXPOSURE_READING)
 
         exposure.data = data
         exposure.obstime = astropy.time.Time('2000-01-01 00:00:00')
@@ -174,13 +185,16 @@ async def actor_setup(config):
 @pytest.fixture(scope='function')
 async def actor(actor_setup):
 
-    cam = await actor_setup.camera_system.add_camera('test_camera')
+    await actor_setup.camera_system.add_camera('test_camera')
 
     yield actor_setup
 
     # Clear replies in preparation for next test.
     actor_setup.mock_replies.clear()
-    actor_setup.camera_system.cameras.remove(cam)
+
+    for cam in actor_setup.camera_system.cameras:
+        actor_setup.camera_system.cameras.remove(cam)
+
     actor_setup.default_cameras = actor_setup._default_cameras
 
 

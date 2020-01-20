@@ -10,7 +10,8 @@ import asyncio
 
 import click
 
-from ..exceptions import CameraConnectionError
+from ..events import CameraEvent
+from ..exceptions import CameraConnectionError, ExposureError
 from .actor import basecam_parser
 from .tools import get_cameras
 
@@ -26,7 +27,7 @@ async def list_(command):
 @basecam_parser.command()
 @click.argument('CAMERAS', nargs=-1, type=str)
 @click.option('-f', '--force', is_flag=True, default=False,
-              help='forces a camera to be set as default '
+              help='Forces a camera to be set as default '
                    'even if it is not connected.')
 async def set_default(command, cameras, force):
     """Set default cameras."""
@@ -76,7 +77,7 @@ async def status(command, cameras):
 @basecam_parser.command()
 @click.argument('CAMERAS', nargs=-1, type=str, required=False)
 @click.option('--timeout', '-t', type=float, default=5., show_default=True,
-              help='seconds to wait until disconnect or reconnect command times out.')
+              help='Seconds to wait until disconnect or reconnect command times out.')
 async def reconnect(command, cameras, timeout):
     """Reconnects a camera."""
 
@@ -105,3 +106,66 @@ async def reconnect(command, cameras, timeout):
             command.fail(text=f'camera {camera.name!r} fail to reconnect: {ee}')
         except asyncio.TimeoutError:
             command.fail(text=f'camera {camera.name!r} timed out reconnecting.')
+
+
+@basecam_parser.command()
+@click.argument('CAMERAS', nargs=-1, type=str, required=False)
+@click.argument('EXPTIME', type=float, required=False)
+@click.option('--object', 'image_type', flag_value='object', default=True,
+              show_default=True, help='Takes an object exposure.')
+@click.option('--flat', 'image_type', flag_value='flat',
+              show_default=True, help='Takes a flat exposure.')
+@click.option('--dark', 'image_type', flag_value='dark',
+              show_default=True, help='Takes a dark exposure.')
+@click.option('--bias', 'image_type', flag_value='bias',
+              show_default=True, help='Takes a bias exposure.')
+@click.option('--filename', '-f', type=str, default=None,
+              show_default=True, help='Filename of the imaga to save.')
+async def expose(command, cameras, exptime, image_type, filename):
+    """Exposes and writes an image to disk."""
+
+    async def stage(event, payload):
+        name = payload.get('name', None)
+        if event == CameraEvent.EXPOSURE_FLUSHING:
+            stage = 'flushing'
+        elif event == CameraEvent.EXPOSURE_INTEGRATING:
+            stage = 'integrating'
+        elif event == CameraEvent.EXPOSURE_READING:
+            stage = 'reading'
+        elif event == CameraEvent.EXPOSURE_FAILED:
+            stage = 'failed'
+        else:
+            return
+        command.info(name=name, stage=stage)
+
+    cameras = get_cameras(command, cameras=cameras, fail_command=True)
+    if not cameras:
+        return
+
+    if image_type == 'bias':
+        if exptime and exptime > 0:
+            command.warning('seeting exposure time for bias to 0 seconds.')
+        exptime = 0.0
+
+    if filename and len(cameras) > 1:
+        return command.fail('--filename can only be used when exposing '
+                            'a single camera.')
+
+    for camera in cameras:
+
+        command.actor.listener.register_callback(stage)
+        command.info(text=f'exposing camera {camera.name!r}')
+
+        try:
+            # Schedule camera.expose as a task to allow the events to be
+            # notified concurrently.
+            exposure = await command.actor.loop.create_task(
+                camera.expose(exptime, image_type=image_type, filename=filename))
+            exposure.write()
+        except ExposureError as ee:
+            return command.fail(text='error found while exposing camera '
+                                     f'{camera.name!r}: {ee!s}')
+        finally:
+            command.actor.listener.remove_callback(stage)
+
+    return command.finish()

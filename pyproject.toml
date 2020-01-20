@@ -73,9 +73,11 @@ omit = [
 
 [tool.coverage.report]
 exclude_lines = [
+    "pragma: no cover",
     "class Poller",  # Already tested in jaeger
     "def __repr__",
-    "raise NotImplementedError"
+    "raise NotImplementedError",
+    "if not cameras:(.*)"
 ]
 
 [tool.tox]
