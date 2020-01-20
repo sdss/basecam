@@ -62,7 +62,7 @@ async def status(command, cameras):
     """Returns the status of a camera."""
 
     cameras = get_cameras(command, fail_command=True)
-    if not cameras:
+    if not cameras:  # pragma: no cover
         return
 
     for camera in cameras:
@@ -82,7 +82,7 @@ async def reconnect(command, cameras, timeout):
     """Reconnects a camera."""
 
     cameras = get_cameras(command, fail_command=True)
-    if not cameras:
+    if not cameras:  # pragma: no cover
         return
 
     for camera in cameras:
@@ -139,7 +139,7 @@ async def expose(command, cameras, exptime, image_type, filename):
         command.info(name=name, stage=stage)
 
     cameras = get_cameras(command, cameras=cameras, fail_command=True)
-    if not cameras:
+    if not cameras:  # pragma: no cover
         return
 
     if image_type == 'bias':

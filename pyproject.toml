@@ -76,8 +76,7 @@ exclude_lines = [
     "pragma: no cover",
     "class Poller",  # Already tested in jaeger
     "def __repr__",
-    "raise NotImplementedError",
-    "if not cameras:(.*)"
+    "raise NotImplementedError"
 ]
 
 [tool.tox]
