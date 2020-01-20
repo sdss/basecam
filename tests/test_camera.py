@@ -11,7 +11,8 @@ import astropy.io.fits
 import numpy
 import pytest
 
-from basecam import CameraConnectionError, CameraWarning, Exposure
+from basecam import (CameraConnectionError, CameraWarning,
+                     Exposure, ExposureError, ExposureWarning)
 
 from .conftest import VirtualCamera
 
@@ -65,6 +66,37 @@ async def test_expose(camera):
     assert header['IMAGETYP'] == 'object'
     assert header['DATE-OBS'] == tai_time
     assert header['CAMNAME'] == camera.name
+
+
+async def test_expose_negative_exptime(camera):
+
+    with pytest.raises(ExposureError):
+        await camera.expose(-0.1)
+
+
+async def test_expose_bias_positive_exptime(camera):
+
+    with pytest.warns(ExposureWarning):
+        await camera.expose(1, image_type='bias')
+
+
+async def test_expose_write(camera, tmp_path):
+
+    filename = tmp_path / 'test.fits'
+
+    await camera.expose(1.0, write=True, filename=filename)
+
+    assert filename.exists()
+
+
+async def test_expose_bad_data(camera):
+
+    camera.data = None
+
+    with pytest.raises(ExposureError) as ee:
+        await camera.expose(0.1)
+
+    assert 'data was not taken.' in str(ee)
 
 
 async def test_shutter(camera):

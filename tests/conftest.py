@@ -104,6 +104,10 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
                           (self.height // len(yy) + 1, self.width // len(yy) + 1))
         data = data[0:self.height, 0:self.width]
 
+        # For some tests, we want to set out custom data.
+        if hasattr(self, 'data'):
+            data = self.data
+
         self._notify(CameraEvent.EXPOSURE_READING)
 
         exposure.data = data
