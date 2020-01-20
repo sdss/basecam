@@ -22,7 +22,7 @@ async def test_ping(actor):
 
     command = await actor.invoke_mock_command('ping')
 
-    assert command.status == command.status.DONE
+    assert command.status.did_succeed
     assert 'Pong' in actor.mock_replies
 
 
@@ -30,7 +30,7 @@ async def test_help(actor):
 
     command = await actor.invoke_mock_command('help')
 
-    assert command.status == command.status.DONE
+    assert command.status.did_succeed
     assert len(actor.mock_replies) > 2
     assert 'expose' in actor.mock_replies
 
@@ -41,7 +41,7 @@ async def test_list(actor):
 
     await asyncio.sleep(1)
 
-    assert command.status == command.status.DONE
+    assert command.status.did_succeed
     assert len(actor.mock_replies) == 2
     assert actor.mock_replies[1]['cameras'] == ['test_camera']
 
@@ -121,7 +121,7 @@ async def test_status(actor):
 
     command = await actor.invoke_mock_command('status')
 
-    assert command.status == command.status.DONE
+    assert command.status.did_succeed
     assert len(actor.mock_replies) == 3  # Running, status reply, and done reply.
     assert actor.mock_replies[1]['status'] == {'temperature': 25., 'cooler': 10.}
 
@@ -130,7 +130,7 @@ async def test_reconnect(actor):
 
     command = await actor.invoke_mock_command('reconnect')
 
-    assert command.status == command.status.DONE
+    assert command.status.did_succeed
 
 
 async def test_reconnect_disconnect_fails(actor):
@@ -139,7 +139,7 @@ async def test_reconnect_disconnect_fails(actor):
     command = await actor.invoke_mock_command('reconnect')
 
     assert 'failed to disconnect' in actor.mock_replies
-    assert command.status == command.status.DONE
+    assert command.status.did_succeed
 
 
 async def test_reconnect_connect_fails(actor):
@@ -178,7 +178,7 @@ async def test_expose(actor, tmp_path, image_type):
 
     command = await actor.invoke_mock_command(command_str)
 
-    assert command.status == command.status.DONE
+    assert command.status.did_succeed
 
     assert 'integrating' in actor.mock_replies
     assert 'reading' in actor.mock_replies
@@ -200,7 +200,7 @@ async def test_expose_fails(actor):
 
     command = await actor.invoke_mock_command('expose 1')
 
-    assert command.status == command.status.FAILED
+    assert command.status.did_fail
 
 
 async def test_expose_filename_fails(actor, tmp_path):
@@ -213,5 +213,5 @@ async def test_expose_filename_fails(actor, tmp_path):
     command = await actor.invoke_mock_command(
         f'expose test_camera AAA 1 --filename {filename}')
 
-    assert command.status == command.status.FAILED
+    assert command.status.did_fail
     assert '-filename can only be used when exposing a single camera' in actor.mock_replies
