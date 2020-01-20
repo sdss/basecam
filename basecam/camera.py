@@ -449,6 +449,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         self.name = name
 
         self.camera_system = camera_system
+        self.loop = camera_system.loop
 
         self.connected = False
 
@@ -504,11 +505,11 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         return self
 
-    def _notify(self, event, payload=None):
+    def _notify(self, event, extra_payload=None):
         """Notifies an event."""
 
         payload = self._get_basic_payload()
-        payload.update(payload or {})
+        payload.update(extra_payload or {})
 
         self.camera_system.notifier.notify(event, payload)
 

@@ -13,6 +13,9 @@ from contextlib import suppress
 from sdsstools import get_logger
 
 
+__all__ = ['LoggerMixIn', 'Poller', 'cancel_task']
+
+
 class LoggerMixIn(object):
     """A mixin to provide easy logging with a header.
 
@@ -170,3 +173,12 @@ class Poller(object):
             return True
 
         return False
+
+
+async def cancel_task(task):
+    """Cleanly cancels a task."""
+
+    if task and not task.done():
+        task.cancel()
+        with suppress(asyncio.CancelledError):
+            await task

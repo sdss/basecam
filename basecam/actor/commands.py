@@ -209,6 +209,45 @@ async def shutter(command, cameras, shutter_position):
     return command.finish()
 
 
+@click.command(cls=CluCommand)
+@click.argument('CAMERAS', nargs=-1, type=str, required=False)
+@click.argument('TEMPERATURE', type=float, required=False)
+async def temperature(command, cameras, temperature):
+    """Controls the camera temperature.
+
+    If called without a temperature value, returns the current temperature.
+
+    """
+
+    cameras = get_cameras(command, cameras=cameras, fail_command=True)
+    if not cameras:  # pragma: no cover
+        return
+
+    temperature_tasks = []
+
+    for camera in cameras:
+
+        if not temperature:
+            command.info(camera=camera.name,
+                         temperature=await camera.get_temperature())
+        else:
+            temperature_tasks.append(camera.set_temperature(temperature))
+
+    results = await asyncio.gather(*temperature_tasks, return_exceptions=True)
+    failed = False
+    for ii, result in enumerate(results):
+        if isinstance(result, CameraError):
+            command.error(camera=cameras[ii].name,
+                          error=str(result))
+            failed = True
+
+    if failed:
+        return command.fail('one or more cameras failed to set temperature.')
+    else:
+        return command.finish('all cameras have reached their set points.')
+
+
 _MIXIN_TO_COMMANDS = {
-    'ShutterMixIn': [shutter]
+    'ShutterMixIn': [shutter],
+    'CoolerMixIn': [temperature]
 }

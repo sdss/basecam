@@ -6,8 +6,12 @@
 # @Filename: test_mixins.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
+import asyncio
+
 import pytest
 from asynctest import patch
+
+from basecam.events import CameraEvent
 
 
 pytestmark = pytest.mark.asyncio
@@ -91,3 +95,30 @@ async def test_shutter(camera):
 
     await camera.close_shutter()
     assert await camera.get_shutter() is False
+
+
+async def test_get_temperature(camera):
+
+    assert await camera.get_temperature() == camera.temperature
+
+
+async def test_set_temperature(camera):
+
+    await camera.set_temperature(100.)
+
+    assert await camera.get_temperature() == 100.
+
+    assert CameraEvent.NEW_SET_POINT in camera.events[0]
+    assert camera.events[0][1]['temperature'] == 100.
+    assert CameraEvent.SET_POINT_REACHED in camera.events[1]
+
+
+async def test_set_temperature_override(camera):
+
+    await camera.set_temperature(100.)
+
+    await asyncio.sleep(0.01)
+    await camera.set_temperature(0.)
+
+    assert await camera.get_temperature() == 0.
+    assert CameraEvent.SET_POINT_REACHED in camera.events[-1]

@@ -12,17 +12,17 @@ import os
 import astropy.time
 import numpy
 import pytest
-from asynctest import CoroutineMock
 
 import clu.testing
 from clu.testing import TestCommand
 from sdsstools import read_yaml_file
 
-from basecam import (BaseCamera, CameraConnectionError, CameraError,
-                     CameraSystem, Exposure, ExposureError)
+from basecam import BaseCamera, CameraSystem, Exposure
 from basecam.actor import CameraActor
 from basecam.events import CameraEvent
-from basecam.mixins import ExposureTypeMixIn, ShutterMixIn
+from basecam.mixins import CoolerMixIn, ExposureTypeMixIn, ShutterMixIn
+from basecam.notifier import EventListener
+from basecam.utils import cancel_task
 
 
 TEST_CONFIG_FILE = os.path.dirname(__file__) + '/data/test_config.yaml'
@@ -37,7 +37,7 @@ class CameraSystemTester(CameraSystem):
         return self._connected_cameras
 
 
-class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
+class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn, CoolerMixIn):
     """A virtual camera that does not require hardware.
 
     This class is mostly intended for testing and development. It behaves
@@ -53,6 +53,9 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
 
         self._shutter_position = False
 
+        self.temperature = 25
+        self._change_temperature_task = None
+
         self.width = 640
         self.height = 480
 
@@ -67,8 +70,20 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn):
         return self._uid
 
     async def _status_internal(self):
-        return {'temperature': 25.,
+        return {'temperature': self.temperature,
                 'cooler': 10.}
+
+    async def _get_temperature_internal(self):
+        return self.temperature
+
+    async def _set_temperature_internal(self, temperature):
+
+        async def change_temperature():
+            await asyncio.sleep(0.2)
+            self.temperature = temperature
+
+        await cancel_task(self._change_temperature_task)
+        self._change_temperature_task = self.loop.create_task(change_temperature())
 
     async def _expose_internal(self, exposure, **kwargs):
 
@@ -146,8 +161,18 @@ async def camera_system(config, event_loop):
 async def camera(camera_system):
 
     camera = await camera_system.add_camera('test_camera')
+    camera.events = []
+
+    def add_event(event, payload):
+        camera.events.append((event, payload))
+
+    listener = EventListener(loop=camera.loop)
+    camera.camera_system.notifier.register_listener(listener)
+    listener.register_callback(add_event)
 
     yield camera
+
+    await listener.stop_listening()
 
 
 @pytest.fixture(scope='module')

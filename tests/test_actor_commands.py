@@ -255,3 +255,36 @@ async def test_set_shutter_fails(actor):
 
         command = await actor.invoke_mock_command(f'shutter --open')
         assert command.status.did_fail
+
+
+async def test_get_temperature(actor):
+
+    temperature = actor.camera_system.cameras[0].temperature
+
+    command = await actor.invoke_mock_command('temperature')
+
+    assert command.status.did_succeed
+    assert actor.mock_replies[1]['temperature'] == temperature
+
+
+async def test_set_temperature(actor):
+
+    command = await actor.invoke_mock_command('temperature 100')
+    await command
+
+    assert command.status.did_succeed
+    assert actor.camera_system.cameras[0].temperature == 100
+
+
+async def test_set_temperature_fails(actor):
+
+    camera = actor.camera_system.cameras[0]
+
+    with patch.object(camera, '_set_temperature_internal',
+                      side_effect=CameraError('failed to set temperature')):
+
+        command = await actor.invoke_mock_command('temperature 100')
+        await command
+
+        assert command.status.did_fail
+        assert 'failed to set temperature' in actor.mock_replies[1]['error']
