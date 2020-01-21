@@ -14,6 +14,13 @@ Camera
     :members:
     :private-members:
 
+Mixins
+------
+
+.. automodule:: basecam.mixins
+    :members:
+    :private-members:
+
 Exposure
 --------
 
@@ -29,13 +36,11 @@ Models
 .. automodule:: basecam.models.models
     :members:
 
-
 Notifier
 --------
 
 .. automodule:: basecam.notifier
     :members:
-
 
 Utils
 -----
@@ -43,13 +48,11 @@ Utils
 .. automodule:: basecam.utils
     :members:
 
-
 Actor
 -----
 
 .. automodule:: basecam.actor.actor
     :members:
-
 
 Exceptions
 ----------
