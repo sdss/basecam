@@ -23,7 +23,8 @@ from basecam import BaseCamera, CameraSystem, Exposure
 from basecam.actor import CameraActor
 from basecam.events import CameraEvent
 from basecam.exposure import ImageNamer
-from basecam.mixins import CoolerMixIn, ExposureTypeMixIn, ShutterMixIn
+from basecam.mixins import (CoolerMixIn, ExposureTypeMixIn,
+                            ImageAreaMixIn, ShutterMixIn)
 from basecam.notifier import EventListener
 from basecam.utils import cancel_task
 
@@ -42,7 +43,8 @@ class CameraSystemTester(CameraSystem):
         return self._connected_cameras
 
 
-class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn, CoolerMixIn):
+class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn,
+                    CoolerMixIn, ImageAreaMixIn):
     """A virtual camera that does not require hardware.
 
     This class is mostly intended for testing and development. It behaves
@@ -63,6 +65,9 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn, CoolerMixIn):
 
         self.width = 640
         self.height = 480
+
+        self._binning = (1, 1)
+        self._image_area = (1, 640, 1, 480)
 
         super().__init__(*args, **kwargs)
 
@@ -137,6 +142,23 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn, CoolerMixIn):
     async def _disconnect_internal(self):
 
         return True
+
+    async def _get_binning_internal(self):
+        return self._binning
+
+    async def _set_binning_internal(self, hbin, vbin):
+        self._binning = (hbin, vbin)
+
+    async def _get_image_area_internal(self):
+
+        return self._image_area
+
+    async def _set_image_area_internal(self, area=None):
+
+        if area is None:
+            self._image_area = (1, self.width, 1, self.height)
+        else:
+            self._image_area = area
 
 
 @pytest.fixture(scope='function', autouse=True)

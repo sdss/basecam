@@ -255,7 +255,85 @@ async def temperature(command, cameras, temperature):
         return command.finish('all cameras have reached their set points.')
 
 
+@click.command(cls=CluCommand)
+@click.argument('CAMERAS', nargs=-1, type=str, required=False)
+@click.argument('BINNING', nargs=2, type=int, required=False)
+async def binning(command, cameras, binning):
+    """Controls the camera binning.
+
+    If called without a binning value, returns the current value.
+
+    """
+
+    cameras = get_cameras(command, cameras=cameras, fail_command=True)
+    if not cameras:  # pragma: no cover
+        return
+
+    failed = False
+    for camera in cameras:
+
+        if not binning:
+            command.info(camera=camera.name,
+                         binning=tuple(await camera.get_binning()))
+        else:
+            try:
+                await camera.set_binning(*binning)
+                command.info(camera=camera.name,
+                             binning=tuple(binning))
+            except (CameraError, AssertionError) as ee:
+                command.error(camera=camera.name,
+                              error=str(ee))
+                failed = True
+
+    if failed:
+        return command.fail('failed to set binning for one or more cameras.')
+    else:
+        return command.finish()
+
+
+@click.command(cls=CluCommand)
+@click.argument('CAMERAS', nargs=-1, type=str, required=False)
+@click.argument('AREA', nargs=4, type=int, required=False)
+@click.option('--reset', '-r', is_flag=True, default=False,
+              show_default=True, help='Restores the original image area.')
+async def area(command, cameras, area, reset):
+    """Controls the camera image area.
+
+    If called without an image area value, returns the current value.
+    The image area must have the format (x0, x1, y0, y1) and be 1-indexed.
+
+    """
+
+    cameras = get_cameras(command, cameras=cameras, fail_command=True)
+    if not cameras:  # pragma: no cover
+        return
+
+    failed = False
+    for camera in cameras:
+
+        if not area and reset is False:
+            command.info(camera=camera.name,
+                         area=tuple(await camera.get_image_area()))
+        else:
+            if reset:
+                area = None
+            try:
+                await camera.set_image_area(area)
+                command.info(camera=camera.name,
+                             area=tuple(await camera.get_image_area()))
+            except CameraError as ee:
+                command.error(camera=camera.name,
+                              error=str(ee))
+                failed = True
+
+    if failed:
+        return command.fail('failed to set binning for one or more cameras.')
+    else:
+        return command.finish()
+
+
 _MIXIN_TO_COMMANDS = {
     'ShutterMixIn': [shutter],
-    'CoolerMixIn': [temperature]
+    'CoolerMixIn': [temperature],
+    'ImageAreaMixIn': [binning, area]
 }

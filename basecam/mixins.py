@@ -14,7 +14,7 @@ from .exceptions import CameraError
 from .utils import cancel_task
 
 
-__all__ = ['ShutterMixIn', 'ExposureTypeMixIn', 'CoolerMixIn']
+__all__ = ['ShutterMixIn', 'ExposureTypeMixIn', 'CoolerMixIn', 'ImageAreaMixIn']
 
 
 class ShutterMixIn(object, metaclass=abc.ABCMeta):
@@ -167,6 +167,85 @@ class CoolerMixIn(object, metaclass=abc.ABCMeta):
         return the temperature that the cooler modifies. Other temperature
         can be reported in the status. Must raise `.CameraError` if there is
         a problem.
+
+        """
+
+        raise NotImplementedError
+
+
+class ImageAreaMixIn(object, metaclass=abc.ABCMeta):
+    """Allows to select the image area and binning."""
+
+    async def get_image_area(self):
+        """Returns the imaging area as 1-indexed ``(x0, x1, y0, y1)``."""
+
+        return await self._get_image_area_internal()
+
+    @abc.abstractmethod
+    async def _get_image_area_internal(self):
+        """Internal method to return the image area."""
+
+        raise NotImplementedError
+
+    async def set_image_area(self, area=None):
+        """Sets the image area.
+
+        Parameters
+        ----------
+        area : tuple
+            The image area to set as 1-indexed ``(x0, x1, y0, y1)``.
+            If not provided, restores the full image area.
+
+        """
+
+        return await self._set_image_area_internal(area=area)
+
+    @abc.abstractmethod
+    async def _set_image_area_internal(self, area=None):
+        """Internal method to set the image area.
+
+        If ``area=None`` must restore the full image area. In case of error,
+        must raise `.CameraError`.
+
+        """
+
+        raise NotImplementedError
+
+    async def get_binning(self):
+        """Returns the horizontal and vertical binning as ``(hbin, vbin)``."""
+
+        return await self._get_binning_internal()
+
+    @abc.abstractmethod
+    async def _get_binning_internal(self):
+        """Internal method to return the binning."""
+
+        raise NotImplementedError
+
+    async def set_binning(self, hbin=1, vbin=None):
+        """Sets the binning.
+
+        Parameters
+        ----------
+        hbin : int
+            Horizontal binning.
+        vbin : int
+            Vertical binning. If not provided, same as ``hbin``.
+
+        """
+
+        assert isinstance(hbin, int), 'hbin must be an integer.'
+
+        vbin = vbin or hbin
+        assert isinstance(vbin, int), 'vbin must be an integer.'
+
+        return await self._set_binning_internal(hbin, vbin)
+
+    @abc.abstractmethod
+    async def _set_binning_internal(self, hbin, vbin):
+        """Internal method to set the binning.
+
+        In case of error it must raise `.CameraError`.
 
         """
 
