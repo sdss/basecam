@@ -32,6 +32,7 @@ class CameraEvent(enum.Enum):
     EXPOSURE_READING = enum.auto()
     EXPOSURE_DONE = enum.auto()
     EXPOSURE_FAILED = enum.auto()
+    EXPOSURE_SAVED = enum.auto()
 
     NEW_SET_POINT = enum.auto()
     SET_POINT_REACHED = enum.auto()

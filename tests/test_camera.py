@@ -127,3 +127,16 @@ async def test_expose_no_filename(camera):
 
     exposure.write()
     assert os.path.exists(exposure.filename)
+
+
+async def test_expose_stack_two(camera):
+
+    exposure = await camera.expose(1.0, stack=2)
+
+    assert exposure.data.dtype == numpy.dtype('float64')
+
+    hdu = exposure.to_hdu()
+    assert hdu[0].header['EXPTIME'] == '1.0'
+    assert hdu[0].header['EXPTIMEN'] == '2.0'
+    assert hdu[0].header['STACK'] == '2'
+    assert hdu[0].header['STACKFUN'] == 'median'

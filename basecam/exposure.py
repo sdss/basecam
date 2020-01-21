@@ -43,7 +43,15 @@ class Exposure(object):
     image_type : str
         The type of image, one of ``bias``, ``flat``, ``dark``, ``object``.
     exptime : float
-        The exposure time, in seconds.
+        The exposure time, in seconds, of a single integration.
+    exptime_n : float
+        The total exposure time, in seconds. If the image is stacked, this is
+        the total time, i.e., the sum of the exposure time of each stacked
+        image.
+    stack : int
+        Number of exposures stacked.
+    stack_function : str
+        Name of the function used for stacking.
     filename : str
         The path where to write the image.
 
@@ -57,7 +65,12 @@ class Exposure(object):
         self.filename = filename
 
         self._obstime = None
+
         self.exptime = None
+        self.exptime_n = None
+        self.stack = 1
+        self.stack_function = None
+
         self.image_type = None
 
         self.obstime = astropy.time.Time.now()
