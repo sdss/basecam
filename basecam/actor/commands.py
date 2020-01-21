@@ -130,7 +130,7 @@ async def reconnect(command, cameras, timeout):
 async def expose(command, cameras, exptime, image_type, filename):
     """Exposes and writes an image to disk."""
 
-    async def stage(event, payload):
+    def stage(event, payload):
         name = payload.get('name', None)
         if event == CameraEvent.EXPOSURE_FLUSHING:
             stage = 'flushing'
