@@ -7,6 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
 import asyncio
+import os
 
 import click
 
@@ -127,7 +128,9 @@ async def reconnect(command, cameras, timeout):
               show_default=True, help='Takes a bias exposure.')
 @click.option('--filename', '-f', type=str, default=None,
               show_default=True, help='Filename of the imaga to save.')
-async def expose(command, cameras, exptime, image_type, filename):
+@click.option('--stack', '-s', type=int, default=1,
+              show_default=True, help='Number of images to stack.')
+async def expose(command, cameras, exptime, image_type, filename, stack):
     """Exposes and writes an image to disk."""
 
     def stage(event, payload):
@@ -168,8 +171,11 @@ async def expose(command, cameras, exptime, image_type, filename):
             # Schedule camera.expose as a task to allow the events to be
             # notified concurrently.
             exposure = await command.actor.loop.create_task(
-                camera.expose(exptime, image_type=image_type, filename=filename))
+                camera.expose(exptime, image_type=image_type, stack=stack,
+                              filename=filename))
             exposure.write()
+            file_path = os.path.realpath(str(exposure.filename))
+            command.info(camera=camera.name, filename=file_path)
         except ExposureError as ee:
             return command.fail(text='error found while exposing camera '
                                      f'{camera.name!r}: {ee!s}')

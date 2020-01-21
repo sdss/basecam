@@ -7,6 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
 import asyncio
+import os
 import types
 
 import astropy.io.fits
@@ -200,6 +201,22 @@ async def test_expose(actor, tmp_path, image_type):
 
     if image_type == 'bias':
         assert 'seeting exposure time for bias to 0 seconds.' in actor.mock_replies
+
+
+async def test_expose_stack(actor):
+
+    command = await actor.invoke_mock_command('expose 1 --stack 2')
+
+    assert command.status.did_succeed
+
+    image_name = actor.mock_replies[-2]['filename']
+    assert os.path.exists(image_name)
+
+    hdu = astropy.io.fits.open(image_name)
+    assert hdu[0].data is not None
+    assert hdu[0].header['EXPTIME'] == '1.0'
+    assert hdu[0].header['EXPTIMEN'] == '2.0'
+    assert hdu[0].header['STACK'] == '2'
 
 
 async def test_expose_fails(actor):
