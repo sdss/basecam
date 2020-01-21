@@ -140,6 +140,8 @@ async def expose(command, cameras, exptime, image_type, filename):
             stage = 'reading'
         elif event == CameraEvent.EXPOSURE_FAILED:
             stage = 'failed'
+        elif event == CameraEvent.EXPOSURE_DONE:
+            stage = 'done'
         else:
             return
         command.info(name=name, stage=stage)
