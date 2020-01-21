@@ -6,6 +6,8 @@
 # @Filename: test_camera.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
+import os
+
 import astropy
 import astropy.io.fits
 import numpy
@@ -115,3 +117,13 @@ async def test_connect_uid_warning(camera):
 
     with pytest.warns(CameraWarning):
         await camera.connect(force=True)
+
+
+async def test_expose_no_filename(camera):
+
+    exposure = await camera.expose(1.0)
+
+    assert exposure.filename is not None
+
+    exposure.write()
+    assert os.path.exists(exposure.filename)

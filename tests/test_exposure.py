@@ -9,6 +9,7 @@
 import pytest
 
 from basecam.exceptions import ExposureError
+from basecam.exposure import ImageNamer
 
 
 def test_exposure_no_model(exposure):
@@ -55,3 +56,30 @@ def test_obstime_str(exposure):
     exposure.obstime = test_date
 
     assert exposure.obstime.utc.iso == test_date
+
+
+def test_image_namer(tmp_path):
+
+    image_namer = ImageNamer('test_{num:04d}.fits', dirname=tmp_path)
+
+    assert image_namer.counter == 1
+    assert image_namer() == tmp_path / 'test_0001.fits'
+
+
+def test_image_namer_overwrite(tmp_path):
+
+    image_namer = ImageNamer('test_{num:04d}.fits', dirname=tmp_path, overwrite=True)
+
+    assert image_namer.counter == 1
+    assert image_namer() == tmp_path / 'test_0001.fits'
+
+
+def test_image_namer_files_exist(tmp_path):
+
+    (tmp_path / 'test_0001.fits').touch()
+    (tmp_path / 'test_0004.fits').touch()
+
+    image_namer = ImageNamer('test_{num:04d}.fits', dirname=tmp_path)
+
+    assert image_namer.counter == 5
+    assert image_namer() == tmp_path / 'test_0005.fits'

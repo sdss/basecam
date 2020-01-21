@@ -7,7 +7,9 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
 import asyncio
+import glob
 import os
+import tempfile
 
 import astropy.time
 import numpy
@@ -20,12 +22,15 @@ from sdsstools import read_yaml_file
 from basecam import BaseCamera, CameraSystem, Exposure
 from basecam.actor import CameraActor
 from basecam.events import CameraEvent
+from basecam.exposure import ImageNamer
 from basecam.mixins import CoolerMixIn, ExposureTypeMixIn, ShutterMixIn
 from basecam.notifier import EventListener
 from basecam.utils import cancel_task
 
 
 TEST_CONFIG_FILE = os.path.dirname(__file__) + '/data/test_config.yaml'
+
+EXPOSURE_DIR = tempfile.TemporaryDirectory()
 
 
 class CameraSystemTester(CameraSystem):
@@ -60,6 +65,9 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn, CoolerMixIn):
         self.height = 480
 
         super().__init__(*args, **kwargs)
+
+        self.image_namer = ImageNamer(self.name + '-{num:04d}.fits',
+                                      dirname=EXPOSURE_DIR.name)
 
     async def _connect_internal(self, **connection_params):
 
@@ -129,6 +137,13 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn, CoolerMixIn):
     async def _disconnect_internal(self):
 
         return True
+
+
+@pytest.fixture(scope='function', autouse=True)
+def clean_exposure_dir():
+
+    for ff in glob.glob(os.path.join(EXPOSURE_DIR.name, '*.fits')):
+        os.remove(ff)
 
 
 @pytest.fixture(scope='module')
