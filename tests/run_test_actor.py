@@ -19,10 +19,11 @@ CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'data/test_config.yaml')
 
 async def main(loop):
 
-    camera_system = CameraSystemTester(VirtualCamera, config=CONFIG_FILE).setup()
+    camera_system = CameraSystemTester(VirtualCamera,
+                                       camera_config=CONFIG_FILE).setup()
     await camera_system.add_camera('test_camera')
 
-    camera_actor = await CameraActor.from_config(CONFIG_FILE, camera_system).run()
+    camera_actor = await CameraActor.from_config(CONFIG_FILE, camera_system).start()
     await camera_actor.server.server.serve_forever()
 
 
