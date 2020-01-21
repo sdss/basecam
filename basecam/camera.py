@@ -17,7 +17,7 @@ from sdsstools import read_yaml_file
 from .events import CameraEvent, CameraSystemEvent
 from .exceptions import (CameraConnectionError, CameraWarning,
                          ExposureError, ExposureWarning)
-from .exposure import Exposure
+from .exposure import Exposure, ImageNamer
 from .models import basic_fits_model
 from .notifier import EventNotifier
 from .utils import LoggerMixIn, Poller
@@ -421,6 +421,10 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         Parameters used to define how to connect to the camera, its geometry,
         initialisation parameters, etc. The format of the parameters must
         follow the structure of the configuration file.
+    image_namer : .ImageNamer
+        An instance of `.ImageNamer` used to sequentially assign predefined
+        names to new exposure images. If not set, creates one with format
+        ``<camera-name>-{num:04d}.fits``.
 
     Attributes
     ----------
@@ -444,7 +448,8 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
     fits_model = basic_fits_model
 
-    def __init__(self, name, camera_system, force=False, camera_config=None):
+    def __init__(self, name, camera_system, force=False, camera_config=None,
+                 image_namer=None):
 
         self.name = name
 
@@ -460,6 +465,9 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         self.camera_config = camera_config or {}
 
         self._status = {}
+
+        self.image_namer = image_namer or ImageNamer(self.name + '-{num:04d}.fits',
+                                                     dirname='.', overwrite=False)
 
         self.__version__ = self.camera_system.__version__
 
@@ -620,7 +628,9 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             A `.FITSModel` that can be used to override the default model
             for the camera.
         filename : str
-            The path where to write the image.
+            The path where to write the image. If not given, a new name is
+            automatically assigned based on the camera instance of
+            `.ImageNamer`.
         write : bool
             If `True`, writes the image to disk immediately.
         kwargs : dict
@@ -646,7 +656,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         exposure = Exposure(self, fits_model=(fits_model or self.fits_model))
         exposure.exptime = exptime
         exposure.image_type = image_type
-        exposure.filename = filename
+        exposure.filename = filename or self.image_namer()
 
         try:
             await self._expose_internal(exposure, **kwargs)
