@@ -122,3 +122,34 @@ async def test_set_temperature_override(camera):
 
     assert await camera.get_temperature() == 0.
     assert CameraEvent.SET_POINT_REACHED in camera.events[-1]
+
+
+async def test_get_binning(camera):
+
+    assert await camera.get_binning() == (1, 1)
+
+
+async def test_set_binning(camera):
+
+    await camera.set_binning(2, 2)
+    assert await camera.get_binning() == (2, 2)
+
+
+async def test_set_binning_only_hbin(camera):
+
+    await camera.set_binning(2)
+    assert await camera.get_binning() == (2, 2)
+
+
+async def test_get_image_area(camera):
+
+    assert await camera.get_image_area() == (1, camera.width, 1, camera.height)
+
+
+async def test_set_image_area(camera):
+
+    await camera.set_image_area((10, 100, 20, 40))
+    assert await camera.get_image_area() == (10, 100, 20, 40)
+
+    await camera.set_image_area()
+    assert await camera.get_image_area() == (1, camera.width, 1, camera.height)
