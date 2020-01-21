@@ -6,13 +6,17 @@
 # @Filename: exposure.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
+import os
+import pathlib
+import re
+
 import astropy
 
 from .exceptions import ExposureError
 from .models import FITSModel
 
 
-__all__ = ['Exposure']
+__all__ = ['Exposure', 'ImageNamer']
 
 
 class Exposure(object):
@@ -135,3 +139,65 @@ class Exposure(object):
         hdulist.writeto(filename, overwrite=overwrite, checksum=checksum)
 
         return hdulist
+
+
+class ImageNamer(object):
+    """Creates a new sequential filename for an image.
+
+    Parameters
+    ----------
+    basename : str
+        The basename of the image filenames. Must contain a placeholder
+        ``num`` in the place where to insert the sequence number. For example,
+        ``'test-{num:04d}.fits'`` will produce image names ``test-0001.fits``,
+        ``test-0002.fits``, etc.
+    dirname : str
+        The directory for the images.
+    overwrite : bool
+        If `True`, the sequence will start at 1 regardless of the existing
+        images. If `False`, the first element in the sequence will be selected
+        to avoid colliding with any image already existing in the directory.
+
+    Examples
+    --------
+    >>> namer = ImageNamer('test-{num:04d}.fits', dirname='testdir')
+    >>> namer()
+    PosixPath('testdir/test-0001.fits')
+    >>> namer()
+    PosixPath('testdir/test-0002.fits')
+
+    """
+
+    def __init__(self, basename, dirname='.', overwrite=False):
+
+        assert re.match(r'.+(\{num.+\}).+', basename), 'invalid basename'
+
+        self.basename = basename
+        self.dirname = pathlib.Path(dirname)
+
+        self.regex = re.compile(re.sub(r'\{num.+\}', '([0-9]*)', basename))
+
+        self.counter = self._get_counter(overwrite)
+
+    def _get_counter(self, overwrite):
+        """Returns the initial value for the counter."""
+
+        if overwrite:
+            return 1
+
+        all_files = list(map(str, self.dirname.glob('*')))
+
+        match_files = list(filter(self.regex.search, all_files))
+        if len(match_files) == 0:
+            return 1
+
+        values = [int(self.regex.search(file).group(1)) for file in match_files]
+        return max(values) + 1
+
+    def __call__(self):
+
+        path = self.dirname / self.basename.format(num=self.counter)
+
+        self.counter += 1
+
+        return path
