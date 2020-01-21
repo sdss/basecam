@@ -49,7 +49,8 @@ async def test_help(actor):
     command = actor.invoke_mock_command('help')
     await command
 
-    assert len(actor.mock_replies) > 3
+    assert len(actor.mock_replies) == 2
+    assert 'help' in actor.mock_replies
 
 
 async def test_arguments_from_config(actor):

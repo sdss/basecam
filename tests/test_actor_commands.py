@@ -34,8 +34,8 @@ async def test_help(actor):
     command = await actor.invoke_mock_command('help')
 
     assert command.status.did_succeed
-    assert len(actor.mock_replies) > 2
-    assert 'expose' in actor.mock_replies
+    assert len(actor.mock_replies) == 2
+    assert 'help' in actor.mock_replies
 
 
 async def test_list(actor):
