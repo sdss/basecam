@@ -301,7 +301,79 @@ async def test_set_temperature_fails(actor):
                       side_effect=CameraError('failed to set temperature')):
 
         command = await actor.invoke_mock_command('temperature 100')
-        await command
 
         assert command.status.did_fail
         assert 'failed to set temperature' in actor.mock_replies[1]['error']
+
+
+async def test_get_binning(actor):
+
+    command = await actor.invoke_mock_command('binning')
+
+    assert command.status.did_succeed
+
+    assert actor.mock_replies[1]['binning'] == [1, 1]
+
+
+async def test_set_binning(actor):
+
+    command = await actor.invoke_mock_command('binning 2 2')
+
+    assert command.status.did_succeed
+
+    assert actor.mock_replies[1]['binning'] == [2, 2]
+
+
+async def test_set_binning_fails(actor):
+
+    camera = actor.camera_system.cameras[0]
+
+    with patch.object(camera, '_set_binning_internal',
+                      side_effect=CameraError):
+
+        command = await actor.invoke_mock_command('binning 2 2')
+
+        assert command.status.did_fail
+
+
+async def test_get_area(actor):
+
+    camera = actor.camera_system.cameras[0]
+
+    command = await actor.invoke_mock_command('area')
+
+    assert command.status.did_succeed
+
+    assert actor.mock_replies[1]['area'] == [1, camera.width, 1, camera.height]
+
+
+async def test_set_area(actor):
+
+    command = await actor.invoke_mock_command('area 10 100 20 40')
+
+    assert command.status.did_succeed
+
+    assert actor.mock_replies[1]['area'] == [10, 100, 20, 40]
+
+
+async def test_set_area_reset(actor):
+
+    camera = actor.camera_system.cameras[0]
+
+    command = await actor.invoke_mock_command('area 10 100 20 40 --reset')
+
+    assert command.status.did_succeed
+
+    assert actor.mock_replies[1]['area'] == [1, camera.width, 1, camera.height]
+
+
+async def test_set_area_fails(actor):
+
+    camera = actor.camera_system.cameras[0]
+
+    with patch.object(camera, '_set_image_area_internal',
+                      side_effect=CameraError):
+
+        command = await actor.invoke_mock_command('area 10 100 20 40')
+
+        assert command.status.did_fail
