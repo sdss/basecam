@@ -49,48 +49,76 @@ async def test_list(actor):
     assert actor.mock_replies[1]['cameras'] == ['test_camera']
 
 
-async def test_get_cameras(command):
+@pytest.mark.parametrize('fail_command', (True, False))
+@pytest.mark.parametrize('check_cameras', (True, False))
+async def test_get_cameras(command, fail_command, check_cameras):
 
     assert command.actor.default_cameras == ['test_camera']
     assert command.status == command.flags.READY
 
-    assert get_cameras(command) == command.actor.camera_system.cameras
+    assert get_cameras(command,
+                       fail_command=fail_command,
+                       check_cameras=check_cameras) == command.actor.camera_system.cameras
 
 
-async def test_get_cameras_no_default(command):
+@pytest.mark.parametrize('fail_command', (True, False))
+@pytest.mark.parametrize('check_cameras', (True, False))
+async def test_get_cameras_no_default(command, fail_command, check_cameras):
 
     command.actor.set_default_cameras()
-    assert get_cameras(command, fail_command=True) is False
+    assert get_cameras(command,
+                       fail_command=fail_command,
+                       check_cameras=check_cameras) is False
 
 
-async def test_get_cameras_no_cameras(command):
+@pytest.mark.parametrize('fail_command', (True, False))
+@pytest.mark.parametrize('check_cameras', (True, False))
+async def test_get_cameras_no_cameras(command, fail_command, check_cameras):
 
     command.actor.default_cameras = []
     command.actor.camera_system.cameras = []
-    assert get_cameras(command, cameras=[], fail_command=True) is False
-    assert command.status.did_fail
+    assert get_cameras(command, cameras=[],
+                       check_cameras=check_cameras,
+                       fail_command=fail_command) is False
+
+    if fail_command:
+        assert command.status.did_fail
 
 
-async def test_get_cameras_bad_default(command):
+@pytest.mark.parametrize('fail_command', (True, False))
+@pytest.mark.parametrize('check_cameras', (True, False))
+async def test_get_cameras_bad_default(command, fail_command, check_cameras):
 
     command.actor.set_default_cameras('bad_camera')
-    assert get_cameras(command, fail_command=True) is False
-    assert command.status.did_fail
+    assert get_cameras(command,
+                       check_cameras=check_cameras,
+                       fail_command=fail_command) is False
+
+    if fail_command:
+        assert command.status.did_fail
 
 
-async def test_get_cameras_pass_cameras(command):
+@pytest.mark.parametrize('fail_command', (True, False))
+@pytest.mark.parametrize('check_cameras', (True, False))
+async def test_get_cameras_pass_cameras(command, fail_command, check_cameras):
 
-    assert get_cameras(command, ['test_camera']) == command.actor.camera_system.cameras
+    assert get_cameras(command, ['test_camera'],
+                       check_cameras=check_cameras,
+                       fail_command=fail_command) == command.actor.camera_system.cameras
 
 
-async def test_get_cameras_check(command):
+@pytest.mark.parametrize('fail_command', (True, False))
+async def test_get_cameras_check(command, fail_command):
 
     command.actor.set_default_cameras('test_camera')
     assert command.actor.camera_system.cameras[0].name == 'test_camera'
     command.actor.camera_system.cameras[0].connected = False
 
-    assert get_cameras(command, check_cameras=True, fail_command=True) is False
-    assert command.status.did_fail
+    assert get_cameras(command, check_cameras=True,
+                       fail_command=fail_command) is False
+
+    if fail_command:
+        assert command.status.did_fail
 
     command.actor.camera_system.cameras[0].connected = True
 
