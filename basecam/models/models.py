@@ -16,6 +16,9 @@ basic_header_model = HeaderModel(
         'CAMUID',
         'IMAGETYP',
         'EXPTIME',
+        'EXPTIMEN',
+        'STACK',
+        'STACKFUN',
         ('TIMESYS', 'TAI', 'The time scale system'),
         ('DATE-OBS', '{__exposure__.obstime.tai.isot}', 'Date (in TIMESYS) the exposure started')
     ]

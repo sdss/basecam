@@ -12,6 +12,8 @@ import logging
 import os
 import warnings
 
+import numpy
+
 from sdsstools import read_yaml_file
 
 from .events import CameraEvent, CameraSystemEvent
@@ -605,7 +607,9 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         return {}
 
     async def expose(self, exptime, image_type='object',
-                     fits_model=None, filename=None, write=False, **kwargs):
+                     stack=1, stack_function=numpy.median,
+                     fits_model=None, filename=None,
+                     write=False, **kwargs):
         """Exposes the camera.
 
         This is the general method to expose the camera. It receives the
@@ -624,6 +628,11 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             The exposure time for the image, in seconds.
         image_type : str
             The type of image (``{'bias', 'dark', 'object', 'flat'}``).
+        stack : int
+            Number of images to stack.
+        stack_function
+            The function to apply to the several images taken to generate the
+            final stacked image. Defaults to the median.
         fits_model : .FITSModel
             A `.FITSModel` that can be used to override the default model
             for the camera.
@@ -653,26 +662,44 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             warnings.warn('setting exposure time for bias to 0', ExposureWarning)
             exptime = 0.
 
-        exposure = Exposure(self, fits_model=(fits_model or self.fits_model))
-        exposure.exptime = exptime
-        exposure.image_type = image_type
+        exposures = []
+
+        for __ in range(stack):
+
+            exposure = Exposure(self, fits_model=(fits_model or self.fits_model))
+            exposure.image_type = image_type
+            exposure.exptime = exptime
+
+            try:
+                await self._expose_internal(exposure, **kwargs)
+            except ExposureError as e:
+                self._notify(CameraEvent.EXPOSURE_FAILED, {'error': str(e)})
+                raise
+
+            if exposure.data is None:
+                error = 'data was not taken.'
+                self._notify(CameraEvent.EXPOSURE_FAILED, {'error': error})
+                raise ExposureError(error)
+
+            exposures.append(exposure)
+
+        if len(exposures) > 1:
+            data = [exp.data for exp in exposures]
+            stacked_data = stack_function(numpy.stack(data), axis=0)
+            exposures[0].data = stacked_data
+
+        exposure = exposures[0]
+        exposure.exptime_n = exptime * stack
+        exposure.stack = stack
+        exposure.stack_function = stack_function.__name__
+
         exposure.filename = filename or self.image_namer()
-
-        try:
-            await self._expose_internal(exposure, **kwargs)
-        except ExposureError as e:
-            self._notify(CameraEvent.EXPOSURE_FAILED, {'error': str(e)})
-            raise
-
-        if exposure.data is None:
-            error = 'data was not taken.'
-            self._notify(CameraEvent.EXPOSURE_FAILED, {'error': error})
-            raise ExposureError(error)
 
         self._notify(CameraEvent.EXPOSURE_DONE)
 
         if write:
             exposure.write()
+            self._notify(CameraEvent.EXPOSURE_SAVED)
 
         return exposure
 
