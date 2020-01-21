@@ -55,8 +55,8 @@ async def set_default(command, cameras, force):
             if force:
                 command.write('w', text=msg)
             else:
-                command.fail(text=f'camera {camera_name} is not connected.')
-                return False
+                return command.fail(camera=camera.name,
+                                    text=f'camera {camera_name} is not connected.')
 
     command.actor.set_default_cameras(camera_names)
 
@@ -92,27 +92,41 @@ async def reconnect(command, cameras, timeout):
     if not cameras:  # pragma: no cover
         return
 
+    failed = False
     for camera in cameras:
 
         command.warning(text=f'reconnecting camera {camera.name!r}')
 
         try:
             await asyncio.wait_for(camera.disconnect(), timeout=timeout)
-            command.info(text=f'camera {camera.name!r} was disconnected.')
+            command.info(camera=camera.name,
+                         text=f'camera {camera.name!r} was disconnected.')
         except CameraConnectionError as ee:
-            command.warning(text=f'camera {camera.name!r} fail to disconnect: {ee} '
-                                 'Will try to reconnect.')
+            command.warning(camera=camera.name,
+                            text=f'camera {camera.name!r} fail to disconnect: '
+                                 f'{ee}. Will try to reconnect.')
         except asyncio.TimeoutError:
-            command.warning(text=f'camera {camera.name!r} timed out disconnecting. '
-                                 'Will try to reconnect.')
+            command.warning(camera=camera.name,
+                            text=f'camera {camera.name!r} timed out '
+                                 'disconnecting. Will try to reconnect.')
 
         try:
             await asyncio.wait_for(camera.connect(force=True), timeout=timeout)
-            command.finish(text=f'camera {camera.name!r} was reconnected.')
+            command.info(camera=camera.name,
+                         error=f'camera {camera.name!r} was reconnected.')
         except CameraConnectionError as ee:
-            command.fail(text=f'camera {camera.name!r} fail to reconnect: {ee}')
+            command.error(camera=camera.name,
+                          error=f'camera {camera.name!r} fail to reconnect: {ee}')
+            failed = True
         except asyncio.TimeoutError:
-            command.fail(text=f'camera {camera.name!r} timed out reconnecting.')
+            command.error(camera=camera.name,
+                          error=f'camera {camera.name!r} timed out reconnecting.')
+            failed = True
+
+    if failed:
+        return command.fail('some cameras failed to reconnect.')
+    else:
+        return command.finish()
 
 
 @camera_parser.command()
@@ -162,6 +176,7 @@ async def expose(command, cameras, exptime, image_type, filename, stack):
         return command.fail('--filename can only be used when exposing '
                             'a single camera.')
 
+    failed = False
     for camera in cameras:
 
         command.actor.listener.register_callback(stage)
@@ -177,12 +192,17 @@ async def expose(command, cameras, exptime, image_type, filename, stack):
             file_path = os.path.realpath(str(exposure.filename))
             command.info(camera=camera.name, filename=file_path)
         except ExposureError as ee:
-            return command.fail(text='error found while exposing camera '
-                                     f'{camera.name!r}: {ee!s}')
+            command.error(camera=camera.name,
+                          error='error found while exposing camera '
+                                f'{camera.name!r}: {ee!s}')
+            failed = True
         finally:
             command.actor.listener.remove_callback(stage)
 
-    return command.finish()
+    if failed:
+        return command.failed('one or more cameras failed to expose.')
+    else:
+        return command.finish()
 
 
 @click.command(cls=CluCommand)
@@ -203,6 +223,7 @@ async def shutter(command, cameras, shutter_position):
     if not cameras:  # pragma: no cover
         return
 
+    failed = False
     for camera in cameras:
         if shutter_position is None:
             shutter_now = await camera.get_shutter()
@@ -212,9 +233,14 @@ async def shutter(command, cameras, shutter_position):
                 await camera.set_shutter(shutter_position == 'open')
                 command.info(camera=camera.name, shutter=shutter_position)
             except CameraError as ee:
-                return command.fail(text=f'failed commanding shutter: {ee!s}')
+                command.error(camera=camera.name,
+                              error=f'failed commanding shutter: {ee!s}')
+                failed = True
 
-    return command.finish()
+    if failed:
+        return command.fail('failed to command the shutter of one or more cameras.')
+    else:
+        return command.finish()
 
 
 @click.command(cls=CluCommand)
