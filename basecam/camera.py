@@ -85,8 +85,12 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
             self.camera_config = camera_config
         elif camera_config and not isinstance(camera_config, dict):
             self.camera_config_file = os.path.expandvars(os.path.expanduser(str(camera_config)))
-            self.camera_config = read_yaml_file(self.camera_config_file)
-            self.log(f'read configuration file from {self.camera_config_file}')
+            if not os.path.exists(self.camera_config_file):
+                warnings.warn(f'cannot open configuration file {self.camera_config_file}',
+                              CameraWarning)
+            else:
+                self.camera_config = read_yaml_file(self.camera_config_file)
+                self.log(f'read configuration file from {self.camera_config_file}')
         else:
             self.camera_config = self.camera_config.copy()
 
