@@ -69,10 +69,6 @@ class BaseCameraActor:
         if command_parser == commands.camera_parser:
             self._add_optional_commands()
 
-        # Output log messages as keywords.
-        self.log.log_to_actor(self, code_mapping={logging.INFO: 'd'},
-                              filter_warnings=[CameraWarning, UserWarning])
-
         self.default_cameras = None
         self.set_default_cameras(default_cameras)
 
