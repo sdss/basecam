@@ -29,19 +29,8 @@ async def test_actor_basic(actor, config):
 async def test_logger(actor):
 
     assert actor.log is not None
-    assert len(actor.log.handlers) == 2  # It's 2 because we don't have a file handler for testing.
-
-    handler_classes = [handler.__class__ for handler in actor.log.handlers]
-    assert ActorHandler in handler_classes
-
-    assert len(actor.mock_replies) == 0
-
-    # It seems if we issue a normal warnings.warn warning here it doesn't get
-    # propagated to the actor. That seems to be because something that pytest
-    # does to the warning system. Log messages through the log.warning system
-    # still work fine.
-    actor.log.warning('test')
-    assert len(actor.mock_replies) == 1
+    assert len(actor.log.handlers) == 1
+    # It's one because we don't have a file handler for testing.
 
 
 async def test_help(actor):
@@ -70,8 +59,6 @@ async def test_set_default_cameras(actor):
 
     actor.set_default_cameras('sp1,sp2')
     assert actor.default_cameras == ['sp1', 'sp2']
-    assert len(actor.mock_replies) == 2
-    assert 'made default but is not connected' in actor.mock_replies[0]['text']
 
     actor.set_default_cameras('test_camera')
     assert actor.default_cameras == ['test_camera']
