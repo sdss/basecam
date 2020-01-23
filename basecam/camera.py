@@ -453,7 +453,8 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         And instance of `.ImageNamer` to determine the default file path for
         new exposures. If not provided, uses ``'{camera.name}-{num:04d}.fits'``
         where ``camera.name`` is the name of the camera, and ``num`` is a
-        sequential counter.
+        sequential counter. It is also possible to set this value as a class
+        attribute.
 
     """
 
