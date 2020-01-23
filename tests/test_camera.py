@@ -29,7 +29,7 @@ async def test_camera(camera):
 
 async def test_status(camera):
 
-    status = await camera.get_status()
+    status = camera.get_status()
     assert status['temperature'] == 25.
 
 

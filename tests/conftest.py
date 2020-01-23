@@ -82,7 +82,7 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn,
     def _uid_internal(self):
         return self._uid
 
-    async def _status_internal(self):
+    def _status_internal(self):
         return {'temperature': self.temperature,
                 'cooler': 10.}
 

@@ -75,7 +75,7 @@ async def status(command, cameras):
     for camera in cameras:
         status = {'camera': {'name': camera.name,
                              'uid': camera.uid},
-                  'status': await camera.get_status(update=True)}
+                  'status': camera.get_status(update=True)}
         command.info(status)
 
     command.finish()
