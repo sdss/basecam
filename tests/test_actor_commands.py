@@ -66,9 +66,12 @@ async def test_get_cameras(command, fail_command, check_cameras):
 async def test_get_cameras_no_default(command, fail_command, check_cameras):
 
     command.actor.set_default_cameras()
-    assert get_cameras(command,
-                       fail_command=fail_command,
-                       check_cameras=check_cameras) is False
+    cameras = get_cameras(command,
+                          fail_command=fail_command,
+                          check_cameras=check_cameras)
+
+    assert len(cameras) == 1
+    assert cameras[0] == command.actor.camera_system.cameras[0]
 
 
 @pytest.mark.parametrize('fail_command', (True, False))

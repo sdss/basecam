@@ -39,7 +39,8 @@ def get_cameras(command, cameras=None, check_cameras=True, fail_command=False):
 
     if not cameras:
         if default is None or len(default) == 0:
-            cameras = command.actor.camera_system.cameras
+            camera_instances = command.actor.camera_system.cameras
+            cameras = [camera_instance.name for camera_instance in camera_instances]
         else:
             cameras = default
 
