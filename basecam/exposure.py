@@ -208,7 +208,8 @@ class ImageNamer(object):
 
         date = astropy.time.Time.now()
 
-        return pathlib.Path(eval(f'f"{self.dirname}"', {}, {'date': date}))
+        return pathlib.Path(eval(f'f"{self.dirname}"', {}, {'date': date,
+                                                            'camera': self.camera}))
 
     def _get_num(self):
         """Returns the counter value."""
