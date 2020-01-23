@@ -14,10 +14,11 @@ import numpy
 import pytest
 from asynctest import patch
 
-from basecam import (CameraConnectionError, CameraWarning,
+from basecam import (CameraConnectionError, CameraError, CameraWarning,
                      Exposure, ExposureError, ExposureWarning)
+from basecam.exposure import ImageNamer
 
-from .conftest import VirtualCamera
+from .conftest import EXPOSURE_DIR, VirtualCamera
 
 
 pytestmark = pytest.mark.asyncio
@@ -128,6 +129,30 @@ async def test_expose_no_filename(camera):
     exposure.write()
     assert os.path.exists(exposure.filename)
     assert camera.name in str(exposure.filename)
+
+
+@pytest.mark.parametrize('image_namer', (ImageNamer(),
+                                         {'basename': '{camera.name}-{num:04d}.fits',
+                                          'dirname': EXPOSURE_DIR.name},
+                                         None))
+async def test_expose_image_namer(camera_system, image_namer):
+
+    camera = VirtualCamera('test_camera', camera_system, image_namer=image_namer)
+    await camera.connect()
+
+    exposure = await camera.expose(1.0)
+
+    assert exposure.filename is not None
+
+    exposure.write()
+    assert os.path.exists(exposure.filename)
+    assert camera.name in str(exposure.filename)
+
+
+async def test_bad_image_namer(camera_system):
+
+    with pytest.raises(CameraError):
+        VirtualCamera('test_camera', camera_system, image_namer='bad_value')
 
 
 async def test_expose_stack_two(camera):

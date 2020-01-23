@@ -171,6 +171,9 @@ class ImageNamer(object):
         If `True`, the sequence will start at 1 regardless of the existing
         images. If `False`, the first element in the sequence will be selected
         to avoid colliding with any image already existing in the directory.
+    camera : .BaseCamera
+        A `.BaseCamera` instance. It can also be passed when calling the
+        instance.
 
     Examples
     --------
@@ -182,7 +185,8 @@ class ImageNamer(object):
 
     """
 
-    def __init__(self, basename, dirname='.', overwrite=False):
+    def __init__(self, basename='{camera.name}-{num:04d}.fits',
+                 dirname='.', overwrite=False, camera=None):
 
         assert re.match(r'.+(\{num.+\}).+', basename), 'invalid basename.'
 
@@ -194,7 +198,7 @@ class ImageNamer(object):
         self.regex = re.compile(regex)
 
         self.counter = self._get_counter(overwrite)
-        self.camera = None
+        self.camera = camera
 
     def _get_counter(self, overwrite):
         """Returns the initial value for the counter."""

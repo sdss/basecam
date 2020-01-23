@@ -17,8 +17,8 @@ import numpy
 from sdsstools import read_yaml_file
 
 from .events import CameraEvent, CameraSystemEvent
-from .exceptions import (CameraConnectionError, CameraWarning,
-                         ExposureError, ExposureWarning)
+from .exceptions import (CameraConnectionError, CameraError,
+                         CameraWarning, ExposureError, ExposureWarning)
 from .exposure import Exposure, ImageNamer
 from .models import basic_fits_model
 from .notifier import EventNotifier
@@ -427,10 +427,11 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         Parameters used to define how to connect to the camera, its geometry,
         initialisation parameters, etc. The format of the parameters must
         follow the structure of the configuration file.
-    image_namer : .ImageNamer
+    image_namer : .ImageNamer or dict
         An instance of `.ImageNamer` used to sequentially assign predefined
-        names to new exposure images. If not set, creates one with format
-        ``<camera-name>-{num:04d}.fits``.
+        names to new exposure images, or a dictionary of parameters to be
+        pased to `.ImageNamer` to create a new instance. If not set, creates
+        an image namer with format ``{camera.name}-{num:04d}.fits``.
 
     Attributes
     ----------
@@ -453,14 +454,11 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         And instance of `.ImageNamer` to determine the default file path for
         new exposures. If not provided, uses ``'{camera.name}-{num:04d}.fits'``
         where ``camera.name`` is the name of the camera, and ``num`` is a
-        sequential counter. It is also possible to set this value as a class
-        attribute.
+        sequential counter.
 
     """
 
     fits_model = basic_fits_model
-    image_namer = ImageNamer('{camera.name}-{num:04d}.fits',
-                             dirname='.', overwrite=False)
 
     def __init__(self, name, camera_system, force=False, camera_config=None,
                  image_namer=None):
@@ -472,16 +470,25 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         self.connected = False
 
-        self.has_shutter = camera_config.pop('shutter', False)
-        self.auto_shutter = camera_config.pop('auto_shutter', True)
+        self.has_shutter = camera_config.pop('shutter', False) if camera_config else False
+        self.auto_shutter = camera_config.pop('auto_shutter', True) if camera_config else True
 
         self.force = force
         self.camera_config = camera_config or {}
 
         self._status = {}
 
-        self.image_namer = image_namer or self.image_namer
-        self.image_namer.camera = self
+        if isinstance(image_namer, ImageNamer):
+            self.image_namer = image_namer
+            self.image_namer.camera = self
+        elif isinstance(image_namer, dict):
+            self.image_namer = ImageNamer(**image_namer, camera=self)
+        elif image_namer is None:
+            self.image_namer = ImageNamer('{camera.name}-{num:04d}.fits',
+                                          dirname='.', overwrite=False,
+                                          camera=self)
+        else:
+            raise CameraError('invalid image_namer parameters.')
 
         self.__version__ = self.camera_system.__version__
 
