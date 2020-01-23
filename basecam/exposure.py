@@ -166,7 +166,9 @@ class ImageNamer(object):
         ``test-0002.fits``, etc. It's also possible to use placeholders for
         camera values, e.g. ``{camera.name}-{num}.fits``.
     dirname : str
-        The directory for the images.
+        The directory for the images. Can include an expression based on the
+        ``date`` substitution which is a `~astropy.time.Time.now` object. For
+        example: ``dirname='/data/{int(date.mjd)}'``.
     overwrite : bool
         If `True`, the sequence will start at 1 regardless of the existing
         images. If `False`, the first element in the sequence will be selected
@@ -192,25 +194,34 @@ class ImageNamer(object):
 
         self.basename = basename
         self.dirname = pathlib.Path(dirname)
+        self.overwrite = overwrite
 
         regex = re.sub(r'\{num.+\}', '(?P<num>[0-9]*?)', basename)
         regex = re.sub(r'\{camera.+\}', '[a-zA-Z-_]+?', regex)
         self.regex = re.compile(regex)
 
-        self.counter = self._get_counter(overwrite)
+        self._last_num = 0
         self.camera = camera
 
-    def _get_counter(self, overwrite):
-        """Returns the initial value for the counter."""
+    def _eval_dirname(self):
+        """Returns the evaluated dirname."""
 
-        if overwrite:
-            return 1
+        date = astropy.time.Time.now()
 
-        all_files = list(map(str, self.dirname.glob('*')))
+        return pathlib.Path(eval(f'f"{self.dirname}"', {}, {'date': date}))
+
+    def _get_num(self):
+        """Returns the counter value."""
+
+        if self.overwrite:
+            return self._last_num + 1
+
+        dirname = self._eval_dirname()
+        all_files = list(map(str, dirname.glob('*')))
 
         match_files = list(filter(self.regex.search, all_files))
         if len(match_files) == 0:
-            return 1
+            return self._last_num + 1
 
         values = [int(self.regex.search(file).group(1)) for file in match_files]
         return max(values) + 1
@@ -218,14 +229,15 @@ class ImageNamer(object):
     def __call__(self, camera=None):
 
         camera = camera or self.camera
+        num = self._get_num()
 
         if '{camera' in self.basename and camera:
-            expanded_basename = self.basename.format(num=self.counter, camera=camera)
+            expanded_basename = self.basename.format(num=num, camera=camera)
         else:
-            expanded_basename = self.basename.format(num=self.counter)
+            expanded_basename = self.basename.format(num=num)
 
-        path = pathlib.Path(self.dirname) / expanded_basename
+        path = self._eval_dirname() / expanded_basename
 
-        self.counter += 1
+        self._last_num = num
 
         return path

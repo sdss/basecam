@@ -62,16 +62,16 @@ def test_image_namer(tmp_path):
 
     image_namer = ImageNamer('test_{num:04d}.fits', dirname=tmp_path)
 
-    assert image_namer.counter == 1
     assert image_namer() == tmp_path / 'test_0001.fits'
+    assert image_namer._last_num == 1
 
 
 def test_image_namer_overwrite(tmp_path):
 
     image_namer = ImageNamer('test_{num:04d}.fits', dirname=tmp_path, overwrite=True)
 
-    assert image_namer.counter == 1
     assert image_namer() == tmp_path / 'test_0001.fits'
+    assert image_namer._last_num == 1
 
 
 def test_image_namer_files_exist(tmp_path):
@@ -81,5 +81,5 @@ def test_image_namer_files_exist(tmp_path):
 
     image_namer = ImageNamer('test_{num:04d}.fits', dirname=tmp_path)
 
-    assert image_namer.counter == 5
     assert image_namer() == tmp_path / 'test_0005.fits'
+    assert image_namer._last_num == 5
