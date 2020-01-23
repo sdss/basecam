@@ -127,6 +127,7 @@ async def test_expose_no_filename(camera):
 
     exposure.write()
     assert os.path.exists(exposure.filename)
+    assert camera.name in str(exposure.filename)
 
 
 async def test_expose_stack_two(camera):

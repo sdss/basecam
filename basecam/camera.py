@@ -449,10 +449,17 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
     fits_model : .FITSModel
         An instance of `.FITSModel` defining the data model of the images
         taken by the camera. If not defined, a basic model will be used.
+    image_namer : .ImageNamer
+        And instance of `.ImageNamer` to determine the default file path for
+        new exposures. If not provided, uses ``'{camera.name}-{num:04d}.fits'``
+        where ``camera.name`` is the name of the camera, and ``num`` is a
+        sequential counter.
 
     """
 
     fits_model = basic_fits_model
+    image_namer = ImageNamer('{camera.name}-{num:04d}.fits',
+                             dirname='.', overwrite=False)
 
     def __init__(self, name, camera_system, force=False, camera_config=None,
                  image_namer=None):
@@ -472,8 +479,8 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         self._status = {}
 
-        self.image_namer = image_namer or ImageNamer(self.name + '-{num:04d}.fits',
-                                                     dirname='.', overwrite=False)
+        self.image_namer = image_namer or self.image_namer
+        self.image_namer.camera = self
 
         self.__version__ = self.camera_system.__version__
 

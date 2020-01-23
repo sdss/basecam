@@ -71,8 +71,7 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn,
 
         super().__init__(*args, **kwargs)
 
-        self.image_namer = ImageNamer(self.name + '-{num:04d}.fits',
-                                      dirname=EXPOSURE_DIR.name)
+        self.image_namer.dirname = EXPOSURE_DIR.name
 
     async def _connect_internal(self, **connection_params):
 

@@ -163,7 +163,8 @@ class ImageNamer(object):
         The basename of the image filenames. Must contain a placeholder
         ``num`` in the place where to insert the sequence number. For example,
         ``'test-{num:04d}.fits'`` will produce image names ``test-0001.fits``,
-        ``test-0002.fits``, etc.
+        ``test-0002.fits``, etc. It's also possible to use placeholders for
+        camera values, e.g. ``{camera.name}-{num}.fits``.
     dirname : str
         The directory for the images.
     overwrite : bool
@@ -173,24 +174,27 @@ class ImageNamer(object):
 
     Examples
     --------
-    >>> namer = ImageNamer('test-{num:04d}.fits', dirname='testdir')
-    >>> namer()
-    PosixPath('testdir/test-0001.fits')
-    >>> namer()
-    PosixPath('testdir/test-0002.fits')
+    >>> namer = ImageNamer('{camera.name}-{num:04d}.fits', dirname='testdir')
+    >>> namer(camera=camera)
+    PosixPath('testdir/my_camera-0001.fits')
+    >>> namer(camera=camera)
+    PosixPath('testdir/my_camera-0002.fits')
 
     """
 
     def __init__(self, basename, dirname='.', overwrite=False):
 
-        assert re.match(r'.+(\{num.+\}).+', basename), 'invalid basename'
+        assert re.match(r'.+(\{num.+\}).+', basename), 'invalid basename.'
 
         self.basename = basename
         self.dirname = pathlib.Path(dirname)
 
-        self.regex = re.compile(re.sub(r'\{num.+\}', '([0-9]*)', basename))
+        regex = re.sub(r'\{num.+\}', '(?P<num>[0-9]*?)', basename)
+        regex = re.sub(r'\{camera.+\}', '[a-zA-Z-_]+?', regex)
+        self.regex = re.compile(regex)
 
         self.counter = self._get_counter(overwrite)
+        self.camera = None
 
     def _get_counter(self, overwrite):
         """Returns the initial value for the counter."""
@@ -207,9 +211,16 @@ class ImageNamer(object):
         values = [int(self.regex.search(file).group(1)) for file in match_files]
         return max(values) + 1
 
-    def __call__(self):
+    def __call__(self, camera=None):
 
-        path = self.dirname / self.basename.format(num=self.counter)
+        camera = camera or self.camera
+
+        if '{camera' in self.basename and camera:
+            expanded_basename = self.basename.format(num=self.counter, camera=camera)
+        else:
+            expanded_basename = self.basename.format(num=self.counter)
+
+        path = pathlib.Path(self.dirname) / expanded_basename
 
         self.counter += 1
 
