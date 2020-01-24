@@ -82,7 +82,7 @@ class Poller(object):
         while True:
 
             if asyncio.iscoroutinefunction(self.callback):
-                await self.loop.create_task(self.callback())
+                await self.callback()
             else:
                 self.callback()
 
