@@ -149,6 +149,10 @@ class Exposure(object):
 
         hdulist = self.to_hdu(context=context)
 
+        dirname = os.path.realpath(os.path.dirname(filename))
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+
         hdulist.writeto(filename, overwrite=overwrite, checksum=checksum)
 
         return hdulist

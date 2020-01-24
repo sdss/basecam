@@ -83,3 +83,13 @@ def test_image_namer_files_exist(tmp_path):
 
     assert image_namer() == tmp_path / 'test_0005.fits'
     assert image_namer._last_num == 5
+
+
+def test_image_name_non_existent_directory(exposure, tmp_path):
+
+    test_filename = tmp_path / 'test_dir/another_dir/test.fits'
+    assert not test_filename.exists()
+
+    exposure.filename = str(test_filename)
+    exposure.write()
+    assert test_filename.exists()
