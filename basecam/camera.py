@@ -286,7 +286,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         self.log(f'adding camera {name!r} with parameters {camera_params!r}')
 
-        camera = self.camera_class(name, self, force=force, camera_config=camera_params)
+        camera = self.camera_class(name, self, force=force, **camera_params)
 
         # If the autoconnect parameter is set, connects the camera.
         if camera_params.pop('autoconnect', False):
@@ -461,8 +461,8 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
     fits_model = basic_fits_model
 
-    def __init__(self, name, camera_system, force=False, camera_config=None,
-                 image_namer=None):
+    def __init__(self, name, camera_system, force=False, image_namer=None,
+                 **camera_config):
 
         self.name = name
 
