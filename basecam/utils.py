@@ -30,7 +30,7 @@ class LoggerMixIn(object):
 
     """
 
-    def __init__(self, name, log_header=None, level=logging.CRITICAL):
+    def __init__(self, name, log_header=None, level=logging.INFO):
 
         self.logger = get_logger(name)
         self.logger.set_level(level)
