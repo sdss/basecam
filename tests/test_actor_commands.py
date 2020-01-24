@@ -35,7 +35,7 @@ async def test_help(actor):
 
     assert command.status.did_succeed
     assert len(actor.mock_replies) == 2
-    assert 'help' in actor.mock_replies
+    assert actor.mock_replies[-1]['help'] is not None
 
 
 async def test_list(actor):

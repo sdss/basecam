@@ -33,15 +33,6 @@ async def test_logger(actor):
     # It's one because we don't have a file handler for testing.
 
 
-async def test_help(actor):
-
-    command = actor.invoke_mock_command('help')
-    await command
-
-    assert len(actor.mock_replies) == 2
-    assert 'help' in actor.mock_replies
-
-
 async def test_arguments_from_config(actor):
 
     assert actor._config is not None
