@@ -93,3 +93,13 @@ def test_image_name_non_existent_directory(exposure, tmp_path):
     exposure.filename = str(test_filename)
     exposure.write()
     assert test_filename.exists()
+
+
+def test_image_namer_files_exist_fz(camera, tmp_path):
+
+    (tmp_path / 'test_camera_0001.fits.fz').touch()
+
+    image_namer = ImageNamer('{camera.name}_{num:04d}.fits.fz', dirname=tmp_path)
+
+    assert image_namer(camera=camera) == tmp_path / 'test_camera_0002.fits.fz'
+    assert image_namer._last_num == 2

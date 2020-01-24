@@ -196,13 +196,10 @@ class ImageNamer(object):
 
         assert re.match(r'.+(\{num.+\}).+', basename), 'invalid basename.'
 
-        self.basename = basename
+        # We want to expand everything except the num first so we "double-escape" it.
+        self.basename = re.sub(r'(\{num.+\})', r'{\1}', basename)
         self.dirname = pathlib.Path(dirname)
         self.overwrite = overwrite
-
-        regex = re.sub(r'\{num.+\}', '(?P<num>[0-9]*?)', basename)
-        regex = re.sub(r'\{camera.+\}', '[a-zA-Z-_]+?', regex)
-        self.regex = re.compile(regex)
 
         self._last_num = 0
         self.camera = camera
@@ -215,34 +212,36 @@ class ImageNamer(object):
         return pathlib.Path(eval(f'f"{self.dirname}"', {}, {'date': date,
                                                             'camera': self.camera}))
 
-    def _get_num(self):
+    def _get_num(self, basename):
         """Returns the counter value."""
 
         if self.overwrite:
             return self._last_num + 1
 
+        regex = re.compile(re.sub(r'\{num.+\}', '(?P<num>[0-9]*?)', basename))
+
         dirname = self._eval_dirname()
         all_files = list(map(str, dirname.glob('*')))
 
-        match_files = list(filter(self.regex.search, all_files))
+        match_files = list(filter(regex.search, all_files))
+
         if len(match_files) == 0:
             return self._last_num + 1
 
-        values = [int(self.regex.search(file).group(1)) for file in match_files]
+        values = [int(regex.search(file).group(1)) for file in match_files]
         return max(values) + 1
 
     def __call__(self, camera=None):
 
         camera = camera or self.camera
-        num = self._get_num()
 
-        if '{camera' in self.basename and camera:
-            expanded_basename = self.basename.format(num=num, camera=camera)
+        if camera:
+            expanded_basename = self.basename.format(camera=camera)
         else:
-            expanded_basename = self.basename.format(num=num)
+            expanded_basename = self.basename.format()
 
-        path = self._eval_dirname() / expanded_basename
-
+        num = self._get_num(expanded_basename)
+        path = self._eval_dirname() / expanded_basename.format(num=num)
         self._last_num = num
 
         return path
