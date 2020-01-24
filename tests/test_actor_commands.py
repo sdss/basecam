@@ -284,7 +284,7 @@ async def test_get_shutter(actor):
 
     command = await actor.invoke_mock_command('shutter')
     assert command.status.did_succeed
-    assert actor.mock_replies[1]['shutter'] is False
+    assert actor.mock_replies[-2]['shutter'] is False
 
 
 @pytest.mark.parametrize('shutter_position', ('open', 'close'))

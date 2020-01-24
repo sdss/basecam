@@ -9,6 +9,7 @@
 import logging
 
 from clu import BaseActor, JSONActor
+from clu.misc.logger import ActorHandler
 
 from basecam import EventListener
 from basecam.exceptions import CameraWarning
@@ -69,9 +70,11 @@ class BaseCameraActor:
         if command_parser == commands.camera_parser:
             self._add_optional_commands()
 
-        # Output log messages as keywords.
-        self.log.log_to_actor(self, code_mapping={logging.INFO: 'd'},
-                              filter_warnings=[CameraWarning, UserWarning])
+        # Output camera_system log messages as keywords.
+        actor_handler = ActorHandler(self, code_mapping={logging.INFO: 'd'},
+                                     filter_warnings=[CameraWarning, UserWarning])
+        actor_handler.setLevel(logging.INFO)
+        self.camera_system.logger.addHandler(actor_handler)
 
         self.default_cameras = None
         self.set_default_cameras(default_cameras)
