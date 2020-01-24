@@ -718,6 +718,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         self._notify(CameraEvent.EXPOSURE_DONE)
 
         if write:
+            self._notify(CameraEvent.EXPOSURE_WRITING)
             exposure.write()
             self._notify(CameraEvent.EXPOSURE_SAVED)
 
