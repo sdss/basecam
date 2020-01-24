@@ -25,6 +25,7 @@ branches:
 
 before_install:
   - pip install poetry
+  - pip install -U git+https://github.com/sdss/clu
 
 install:
   - poetry install
