@@ -784,4 +784,4 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         """
 
-        raise NotImplementedError
+        pass
