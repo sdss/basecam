@@ -29,8 +29,8 @@ async def test_actor_basic(actor, config):
 async def test_logger(actor):
 
     assert actor.log is not None
-    assert len(actor.log.handlers) == 1
-    # It's one because we don't have a file handler for testing.
+    assert len(actor.log.handlers) == 2
+    # It's two because we don't have a file handler for testing.
 
 
 async def test_help(actor):
