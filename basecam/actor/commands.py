@@ -187,8 +187,7 @@ async def expose(command, cameras, exptime, image_type, filename, stack):
             # notified concurrently.
             exposure = await command.actor.loop.create_task(
                 camera.expose(exptime, image_type=image_type, stack=stack,
-                              filename=filename))
-            exposure.write()
+                              filename=filename, write=True))
             file_path = os.path.realpath(str(exposure.filename))
             command.info(camera=camera.name, filename=file_path)
         except ExposureError as ee:
