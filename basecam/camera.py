@@ -72,6 +72,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
         self.camera_config_file = None
 
         self.loop = loop or asyncio.get_event_loop()
+        self.loop.set_exception_handler(self.logger.asyncio_exception_handler)
 
         #: list: The list of cameras being handled.
         self.cameras = []
