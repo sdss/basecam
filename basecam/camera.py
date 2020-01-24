@@ -715,12 +715,12 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         exposure.filename = filename or self.image_namer()
 
-        self._notify(CameraEvent.EXPOSURE_DONE)
+        self._notify(CameraEvent.EXPOSURE_READ)
 
         if write:
             self._notify(CameraEvent.EXPOSURE_WRITING)
             exposure.write()
-            self._notify(CameraEvent.EXPOSURE_SAVED)
+            self._notify(CameraEvent.EXPOSURE_WRITTEN)
 
         return exposure
 

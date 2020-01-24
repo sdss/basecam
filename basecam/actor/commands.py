@@ -149,19 +149,9 @@ async def expose(command, cameras, exptime, image_type, filename, stack):
 
     def stage(event, payload):
         name = payload.get('name', None)
-        if event == CameraEvent.EXPOSURE_FLUSHING:
-            stage = 'flushing'
-        elif event == CameraEvent.EXPOSURE_INTEGRATING:
-            stage = 'integrating'
-        elif event == CameraEvent.EXPOSURE_READING:
-            stage = 'reading'
-        elif event == CameraEvent.EXPOSURE_FAILED:
-            stage = 'failed'
-        elif event == CameraEvent.EXPOSURE_DONE:
-            stage = 'done'
-        else:
-            return
-        command.info(name=name, stage=stage)
+        if event in CameraEvent:
+            stage = event.value
+            command.info(name=name, stage=stage)
 
     cameras = get_cameras(command, cameras=cameras, fail_command=True)
     if not cameras:  # pragma: no cover

@@ -22,18 +22,18 @@ class CameraSystemEvent(enum.Enum):
 class CameraEvent(enum.Enum):
     """Enumeration of camera events."""
 
-    CAMERA_CONNECTED = enum.auto()
-    CAMERA_CONNECT_FAILED = enum.auto()
-    CAMERA_DISCONNECTED = enum.auto()
-    CAMERA_DISCONNECT_FAILED = enum.auto()
+    CAMERA_CONNECTED = 'connected'
+    CAMERA_CONNECT_FAILED = 'connect_failed'
+    CAMERA_DISCONNECTED = 'disconnected'
+    CAMERA_DISCONNECT_FAILED = 'disconnect_failed'
 
-    EXPOSURE_FLUSHING = enum.auto()
-    EXPOSURE_INTEGRATING = enum.auto()
-    EXPOSURE_READING = enum.auto()
-    EXPOSURE_DONE = enum.auto()
-    EXPOSURE_FAILED = enum.auto()
-    EXPOSURE_WRITING = enum.auto()
-    EXPOSURE_SAVED = enum.auto()
+    EXPOSURE_FLUSHING = 'flushing'
+    EXPOSURE_INTEGRATING = 'integrating'
+    EXPOSURE_READING = 'reading'
+    EXPOSURE_READ = 'read'
+    EXPOSURE_FAILED = 'failed'
+    EXPOSURE_WRITING = 'writing'
+    EXPOSURE_WRITTEN = 'written'
 
-    NEW_SET_POINT = enum.auto()
-    SET_POINT_REACHED = enum.auto()
+    NEW_SET_POINT = 'new_set_point'
+    SET_POINT_REACHED = 'set_point_reached'
