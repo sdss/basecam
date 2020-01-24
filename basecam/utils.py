@@ -10,6 +10,7 @@ import asyncio
 import logging
 from contextlib import suppress
 
+import sdsstools
 from sdsstools import get_logger
 
 
@@ -87,8 +88,8 @@ class Poller(object):
                 else:
                     self.callback()
             except Exception as ee:
-                self.loop.call_exception_handler(ee)
-
+                self.loop.call_exception_handler({'message': 'failed running callback',
+                                                  'exception': ee})
             self._sleep_task = self.loop.create_task(asyncio.sleep(self.delay))
 
             await self._sleep_task
