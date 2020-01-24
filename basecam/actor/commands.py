@@ -267,6 +267,9 @@ async def temperature(command, cameras, temperature):
         else:
             temperature_tasks.append(camera.set_temperature(temperature))
 
+    if not temperature:
+        return command.finish()
+
     results = await asyncio.gather(*temperature_tasks, return_exceptions=True)
     failed = False
     for ii, result in enumerate(results):
