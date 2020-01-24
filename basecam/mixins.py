@@ -161,7 +161,7 @@ class CoolerMixIn(object, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     async def _get_temperature_internal(self, temperature):
-        """Internal method to get the cameratemperature.
+        """Internal method to get the camera temperature.
 
         If the camera can report multiple temperatures, this method must
         return the temperature that the cooler modifies. Other temperature
