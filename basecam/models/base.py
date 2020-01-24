@@ -159,12 +159,15 @@ class Extension(object):
 
         data = self.get_data(exposure, primary=primary)
 
-        if self.header_model:
-            header = self.header_model.to_header(exposure, context=context)
-        else:
-            header = None
+        # Create the HDU without a header first to allow astropy to create a
+        # basic header (for example, if HDUClass is CompImageHDU this will add
+        # the BITPIX keyword). Then append our header.
+        hdu = HDUClass(data=data, header=None)
 
-        return HDUClass(data=data, header=header)
+        if self.header_model:
+            hdu.header.extend(self.header_model.to_header(exposure, context=context))
+
+        return hdu
 
     def get_data(self, exposure, primary=False):
         """Returns the data as a numpy array."""
