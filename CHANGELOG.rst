@@ -4,6 +4,7 @@
 Changelog
 =========
 
+* :release:`0.1.1 <2020-01-24>`
 * Allow to use ``camera`` substitutions in `.ImageNamer`.
 * Use asyncio exception handler in `.Poller`.
 * Create intermediate directories when writing file.
