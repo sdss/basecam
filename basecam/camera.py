@@ -431,7 +431,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
     image_namer : .ImageNamer or dict
         An instance of `.ImageNamer` used to sequentially assign predefined
         names to new exposure images, or a dictionary of parameters to be
-        pased to `.ImageNamer` to create a new instance. If not set, creates
+        passed to `.ImageNamer` to create a new instance. If not set, creates
         an image namer with format ``{camera.name}-{num:04d}.fits``.
 
     Attributes
