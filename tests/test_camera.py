@@ -7,6 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
 import os
+import warnings
 
 import astropy
 import astropy.io.fits
@@ -18,7 +19,7 @@ from basecam import (CameraConnectionError, CameraError, CameraWarning,
                      Exposure, ExposureError, ExposureWarning)
 from basecam.exposure import ImageNamer
 
-from .conftest import EXPOSURE_DIR, VirtualCamera
+from .conftest import EXPOSURE_DIR, CameraSystemTester, VirtualCamera
 
 
 pytestmark = pytest.mark.asyncio
@@ -166,3 +167,72 @@ async def test_expose_stack_two(camera):
     assert hdu[0].header['EXPTIMEN'] == '2.0'
     assert hdu[0].header['STACK'] == '2'
     assert hdu[0].header['STACKFUN'] == 'median'
+
+
+async def test_instantiate_no_config():
+
+    camera_system = CameraSystemTester(VirtualCamera)
+
+    assert camera_system.camera_config is None
+
+
+async def test_instantiate_bad_config():
+
+    with pytest.warns(CameraWarning):
+        camera_system = CameraSystemTester(VirtualCamera, camera_config='bad_config')
+
+    assert camera_system.camera_config is None
+
+
+async def test_camera_error_from_camera_system():
+
+    class TestCameraSystem(CameraSystemTester):
+        def raise_camera_error(self):
+            raise CameraError('this is a test')
+
+    with pytest.raises(CameraError) as ee:
+        camera_system = TestCameraSystem(VirtualCamera)
+        camera_system.raise_camera_error()
+
+    assert 'CAMERA_SYSTEM' in str(ee)
+
+
+async def test_camera_error_no_self():
+
+    with pytest.raises(CameraError) as ee:
+        raise CameraError('test')
+
+    assert ' - ' not in str(ee)
+
+
+async def test_camera_warning_no_self():
+
+    with pytest.warns(CameraWarning) as ww:
+        warnings.warn('test', CameraWarning)
+
+    assert ' - ' not in ww[0].message.args[0]
+
+
+async def test_camera_warning_camera_system():
+
+    class TestCameraSystem(CameraSystemTester):
+        def warns_camera_warning(self):
+            warnings.warn('this is a test', CameraWarning)
+
+    with pytest.warns(CameraWarning) as ww:
+        camera_system = TestCameraSystem(VirtualCamera)
+        camera_system.warns_camera_warning()
+
+    assert 'CAMERA_SYSTEM - ' in ww[0].message.args[0]
+
+
+async def test_camera_exception_unknown():
+
+    class Test:
+        def warns_camera_warning(self):
+            warnings.warn('this is a test', CameraWarning)
+
+    with pytest.warns(CameraWarning) as ww:
+        Test().warns_camera_warning()
+
+    assert 'UNKNOWN - ' in ww[0].message.args[0]

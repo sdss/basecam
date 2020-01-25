@@ -8,6 +8,8 @@
 
 import inspect
 
+from . import camera
+
 
 class CameraError(Exception):
     """A custom core exception"""
@@ -18,11 +20,16 @@ class CameraError(Exception):
         f_locals = stack[1][0].f_locals
 
         if 'self' in f_locals:
-            camera_name = f_locals['self'].name
+            class_ = f_locals['self']
+            if isinstance(class_, camera.BaseCamera):
+                camera_name = f_locals['self'].name
+            elif isinstance(class_, camera.CameraSystem):
+                camera_name = 'CAMERA_SYSTEM'
+            else:
+                camera_name = 'UNKNOWN'
+            super().__init__(f'{camera_name} - {message}')
         else:
-            camera_name = 'UNKNOWN'
-
-        super().__init__(f'{camera_name} - {message}')
+            super().__init__(f'{message}')
 
 
 class CameraConnectionError(CameraError):
@@ -50,11 +57,16 @@ class CameraWarning(UserWarning):
         f_locals = stack[1][0].f_locals
 
         if 'self' in f_locals:
-            camera_name = f_locals['self'].name
+            class_ = f_locals['self']
+            if isinstance(class_, camera.BaseCamera):
+                camera_name = f_locals['self'].name
+            elif isinstance(class_, camera.CameraSystem):
+                camera_name = 'CAMERA_SYSTEM'
+            else:
+                camera_name = 'UNKNOWN'
+            super().__init__(f'{camera_name} - {message}')
         else:
-            camera_name = 'UNKNOWN'
-
-        super().__init__(f'{camera_name} - {message}')
+            super().__init__(f'{message}')
 
 
 class ExposureWarning(UserWarning):

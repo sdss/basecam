@@ -22,7 +22,6 @@ from sdsstools import read_yaml_file
 from basecam import BaseCamera, CameraSystem, Exposure
 from basecam.actor import CameraActor
 from basecam.events import CameraEvent
-from basecam.exposure import ImageNamer
 from basecam.mixins import (CoolerMixIn, ExposureTypeMixIn,
                             ImageAreaMixIn, ShutterMixIn)
 from basecam.notifier import EventListener

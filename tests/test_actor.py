@@ -7,7 +7,10 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
 import pytest
+
 from clu.misc.logger import ActorHandler
+
+from basecam.actor.actor import BaseCameraActor
 
 
 pytestmark = pytest.mark.asyncio
@@ -31,6 +34,15 @@ async def test_logger(actor):
     assert actor.log is not None
     assert len(actor.log.handlers) == 1
     # It's one because we don't have a file handler for testing.
+
+    assert any([isinstance(handler, ActorHandler)
+                for handler in actor.camera_system.logger.handlers])
+
+
+async def test_check_subclass(camera_system):
+
+    with pytest.raises(RuntimeError):
+        BaseCameraActor(camera_system)
 
 
 async def test_arguments_from_config(actor):

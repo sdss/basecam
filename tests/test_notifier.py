@@ -121,12 +121,20 @@ async def test_remove_not_registered_listener(camera_system, event_loop):
     await listener_new.stop_listening()
 
 
-async def test_filter_notifications(camera_system, listener):
+async def test_filter_notifications(camera_system, listener, event_loop):
+
+    filtered_listener = EventListener(event_loop,
+                                      filter_events=CameraSystemEvent.CAMERA_ADDED)
+
+    camera_system.notifier.remove_listener(listener)
+    camera_system.notifier.register_listener(filtered_listener)
+
+    async def record_event(event, __):
+        camera_system.events.append(event)
+
+    filtered_listener.register_callback(record_event)
 
     events = camera_system.events
-
-    # Only notify of cameras being added.
-    listener.filter_events = [CameraSystemEvent.CAMERA_ADDED]
 
     await camera_system.add_camera('test_camera')
     await camera_system.remove_camera('test_camera')
@@ -134,6 +142,8 @@ async def test_filter_notifications(camera_system, listener):
     await asyncio.sleep(0.2)
 
     assert len(events) == 1
+
+    await filtered_listener.stop_listening()
 
 
 async def test_listener_wait_for(camera_system, listener, event_loop):

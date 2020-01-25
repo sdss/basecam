@@ -8,10 +8,11 @@
 
 import astropy.io.fits
 import astropy.table
+import numpy
 import pytest
 
 from basecam import models
-from basecam.exceptions import CardWarning
+from basecam.exceptions import CardError, CardWarning
 
 
 class MacroCardTest(models.MacroCard):
@@ -63,12 +64,13 @@ def test_fits_model_multi_extension(exposure):
 
     fits_model = models.FITSModel([models.Extension(data='none'),
                                   models.Extension(data=None),
-                                  models.Extension(data='raw')])
+                                  models.Extension(data='raw'),
+                                  models.Extension(data=numpy.zeros((10, 10)))])
 
     exposure.fits_model = fits_model
     hdulist = exposure.to_hdu()
 
-    assert len(hdulist) == 3
+    assert len(hdulist) == 4
 
     assert isinstance(hdulist[0], astropy.io.fits.PrimaryHDU)
     assert hdulist[0].data is None
@@ -78,6 +80,9 @@ def test_fits_model_multi_extension(exposure):
 
     assert isinstance(hdulist[2], astropy.io.fits.ImageHDU)
     assert hdulist[2].data is not None
+
+    assert isinstance(hdulist[3], astropy.io.fits.ImageHDU)
+    assert numpy.all(hdulist[3].data == numpy.zeros((10, 10)))
 
 
 def test_fits_model_multi_extension_compressed(exposure):
@@ -104,10 +109,29 @@ def test_basic_header_model(exposure):
 
     basic_header_model = models.models.basic_header_model
     basic_header_model.append(MacroCardTest())
+    basic_header_model.append(models.Card('TEST', 'test'))
 
     header = basic_header_model.to_header(exposure)
     assert isinstance(header, astropy.io.fits.Header)
     assert 'IMAGETYP' in header
+    assert 'TEST' in header
+
+
+def test_header_model_insert(exposure):
+
+    basic_header_model = models.models.basic_header_model
+    basic_header_model.insert(0, [('A', 1)])
+
+    header = basic_header_model.to_header(exposure)
+    assert isinstance(header, astropy.io.fits.Header)
+    assert header['A'] == 1
+
+
+def test_header_invalid_card():
+
+    with pytest.raises(CardError):
+        basic_header_model = models.models.basic_header_model
+        basic_header_model.insert(0, {})
 
 
 def test_header_describe(exposure):

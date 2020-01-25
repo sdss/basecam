@@ -89,6 +89,8 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
             if not os.path.exists(self.camera_config_file):
                 warnings.warn(f'cannot open configuration file {self.camera_config_file}',
                               CameraWarning)
+                self.camera_config = None
+                self.camera_config_file = None
             else:
                 self.camera_config = read_yaml_file(self.camera_config_file)
                 self.log(f'read configuration file from {self.camera_config_file}')

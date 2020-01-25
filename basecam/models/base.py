@@ -172,10 +172,11 @@ class Extension(object):
     def get_data(self, exposure, primary=False):
         """Returns the data as a numpy array."""
 
-        if self.data == 'raw':
-            data = exposure.data
-        elif self.data == 'none':
-            data = None
+        if isinstance(self.data, str):
+            if self.data == 'raw':
+                data = exposure.data
+            elif self.data == 'none':
+                data = None
         elif self.data is None:
             data = exposure.data if primary else None
         else:
