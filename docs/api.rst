@@ -14,6 +14,8 @@ Camera
     :members:
     :private-members:
 
+.. _api-mixins:
+
 Mixins
 ------
 

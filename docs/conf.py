@@ -130,7 +130,7 @@ html_theme_options = {
     'logo': 'sdssv_logo.png',
     'github_user': 'sdss',
     'github_repo': 'basecam',
-    'github_button': True,
+    'github_button': False,
     'github_type': 'star',
     'sidebar_collapse': True,
     'page_width': '80%'
