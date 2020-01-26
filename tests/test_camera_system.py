@@ -156,3 +156,9 @@ async def test_get_camera_no_params(camera_system):
     camera = camera_system.get_camera()
 
     assert camera
+
+
+async def test_add_camera_autoconnect(camera_system):
+
+    camera = await camera_system.add_camera(name='test_camera')
+    assert camera.connected

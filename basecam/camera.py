@@ -243,7 +243,8 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         raise NotImplementedError
 
-    async def add_camera(self, name=None, uid=None, force=False, **kwargs):
+    async def add_camera(self, name=None, uid=None, force=False,
+                         autoconnect=False, **kwargs):
         """Adds a new `camera <.BaseCamera>` instance to `.cameras`.
 
         The configuration values (if any) found in the configuration that
@@ -260,6 +261,8 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
         force : bool
             Forces the camera to stay in the `.CameraSystem` list even if it
             does not appear in the system camera list.
+        autoconnect : bool
+            Whether to autoconnect the camera on instantiation.
         kwargs
             Other arguments to be passed to `.BaseCamera` during
             initialisation. These parameters override the default configuration
@@ -291,7 +294,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
         camera = self.camera_class(name, self, force=force, **camera_params)
 
         # If the autoconnect parameter is set, connects the camera.
-        if camera_params.pop('autoconnect', False):
+        if autoconnect or camera_params.pop('autoconnect', False):
             await camera.connect()
 
         self.cameras.append(camera)
