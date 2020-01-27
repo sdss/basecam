@@ -61,3 +61,10 @@ Exceptions
 
 .. automodule:: basecam.exceptions
     :members:
+
+Events
+------
+
+.. automodule:: basecam.events
+    :undoc-members:
+    :member-order: bysource
