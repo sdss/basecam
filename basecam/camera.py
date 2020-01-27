@@ -466,6 +466,9 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
     fits_model = basic_fits_model
 
+    has_shutter = False
+    auto_shutter = True
+
     def __init__(self, name, camera_system, force=False, image_namer=None,
                  **camera_config):
 
@@ -476,8 +479,10 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         self.connected = False
 
-        self.has_shutter = camera_config.pop('shutter', False) if camera_config else False
-        self.auto_shutter = camera_config.pop('auto_shutter', True) if camera_config else True
+        if camera_config and 'shutter' in camera_config:
+            self.has_shutter = camera_config.pop('shutter')
+        if camera_config and 'auto_shutter' in camera_config:
+            self.auto_shutter = camera_config.pop('auto_shutter')
 
         self.force = force
         self.camera_config = camera_config or {}
