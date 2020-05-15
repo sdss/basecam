@@ -76,7 +76,7 @@ Opens the camera and makes sure it's ready to be accessed. It must raise a `.Cam
 `def _uid_internal <._uid_internal>` (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This property is the internal counterpart of `~.uid`. It must return the camera unique identifier (UID; this can be any string, integer, or other type that is used to identify the camera). If not overridden it returns `None`. In this case, `~.uid` will try to retrieve the UID from the camera configuration. If that is not available; the camera will fail during the connection stage.
+This property is the internal counterpart of `~.uid`. It must return the camera unique identifier (UID; this can be any string, integer, or other type that is used to identify the camera). If not overridden it returns `None`. In this case, `~.uid` will try to retrieve the UID from the camera configuration. If that is not available; the camera will fail during the connection stage. ::
 
     @property
     def _uid_internal(self):
@@ -86,7 +86,7 @@ This property is the internal counterpart of `~.uid`. It must return the camera 
 `def _status_internal <._status_internal>` (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Called by `.get_status`. Must returns a dictionary of all the relevant status parameters the camera is aware of (temperature, firmware version, serial, binning, etc.) By default, it returns an empty dictionary.
+Called by `.get_status`. Must returns a dictionary of all the relevant status parameters the camera is aware of (temperature, firmware version, serial, binning, etc.) By default, it returns an empty dictionary. ::
 
     def _status_internal(self):
 
