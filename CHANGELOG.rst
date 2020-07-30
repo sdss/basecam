@@ -4,6 +4,8 @@
 Changelog
 =========
 
+* Fix ``CameraWarning`` when used from a ``CameraSystem`` instance.
+
 * :release:`0.1.1 <2020-01-24>`
 * Allow to use ``camera`` substitutions in `.ImageNamer`.
 * Use asyncio exception handler in `.Poller`.
