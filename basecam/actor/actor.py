@@ -108,7 +108,7 @@ class BaseCameraActor:
     def set_default_cameras(self, cameras=None):
         """Sets the camera(s) that will be used by default.
 
-        These cameras will be used by default when a command is issues without
+        These cameras will be used by default when a command is issued without
         the ``--cameras`` flag.
 
         Parameters
