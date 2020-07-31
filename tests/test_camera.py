@@ -208,6 +208,20 @@ async def test_camera_error_no_self():
     assert ' - ' not in str(ee)
 
 
+async def test_camera_warning(camera_system):
+
+    class TestCamera(VirtualCamera):
+        def raise_camera_warning(self):
+            warnings.warn('this is a test', CameraWarning)
+
+    with pytest.warns(CameraWarning) as ww:
+        camera = TestCamera('FAKE_UID', camera_system)
+        camera.raise_camera_warning()
+
+    assert 'FAKE_UID' in ww[0].message.args[0]
+    assert 'this is a test' in ww[0].message.args[0]
+
+
 async def test_camera_warning_no_self():
 
     with pytest.warns(CameraWarning) as ww:
