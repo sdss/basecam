@@ -4,6 +4,7 @@
 Changelog
 =========
 
+* :release:`0.2.0 <2020-07-31>`
 * :bug:`-` Fix ``CameraWarning`` when used from a ``CameraSystem`` instance.
 * :support:`-` Significant refactor. Most functionality is not affected but things are handled a bit differently, with some simplifications.
 * :support:`-` Use GitHub Workflows.
