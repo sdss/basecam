@@ -18,7 +18,7 @@ def get_cameras(command, cameras=None, check_cameras=True, fail_command=False):
     command
         The command that wants to access the cameras.
     cameras : list
-        The output of the ``--cameras`` flag passed to the command.
+        The list of camera names passed to the command.
     check_cameras : bool
         If any of the cameras is not connected, returns `False`.
     fail_command : bool
