@@ -300,7 +300,7 @@ description = "iniconfig: brain-dead simple config-ini parsing"
 name = "iniconfig"
 optional = false
 python-versions = "*"
-version = "1.0.0"
+version = "1.0.1"
 
 [[package]]
 category = "dev"
@@ -874,16 +874,16 @@ description = "A new protocol for SDSS actors."
 name = "sdss-clu"
 optional = false
 python-versions = ">=3.7,<4.0"
-version = "0.2.2"
+version = "0.3.0"
 
 [package.dependencies]
 Click = ">=7.0,<8.0"
 aio_pika = ">=6.4.1,<7.0.0"
 jsonschema = ">=3.0.1,<4.0.0"
-sdsstools = ">=0.1.0"
+sdsstools = ">=0.2.0"
 
 [package.extras]
-docs = ["Sphinx (>=2.3,<3.0)"]
+docs = ["Sphinx (>=2.3)"]
 
 [[package]]
 category = "main"
@@ -891,7 +891,7 @@ description = "Small tools for SDSS products"
 name = "sdsstools"
 optional = false
 python-versions = ">=3.6,<4.0"
-version = "0.2.0"
+version = "0.2.1"
 
 [package.dependencies]
 docutils = ">=0.16,<0.17"
@@ -1195,7 +1195,7 @@ testing = ["jaraco.itertools", "func-timeout"]
 docs = ["sphinx"]
 
 [metadata]
-content-hash = "9a4045a8c16424faa79c4eb7400a9c72f93215090cbcaaa736d883fd57850b71"
+content-hash = "330d3d7fa40cf65a89f190a078e0f900bd137b56c9f3ff89d45b0283f10b17c6"
 lock-version = "1.1"
 python-versions = "^3.7"
 
@@ -1399,7 +1399,8 @@ importlib-metadata = [
     {file = "importlib_metadata-1.7.0.tar.gz", hash = "sha256:90bb658cdbbf6d1735b6341ce708fc7024a3e14e99ffdc5783edea9f9b077f83"},
 ]
 iniconfig = [
-    {file = "iniconfig-1.0.0.tar.gz", hash = "sha256:aa0b40f50a00e72323cb5d41302f9c6165728fd764ac8822aa3fff00a40d56b4"},
+    {file = "iniconfig-1.0.1-py3-none-any.whl", hash = "sha256:80cf40c597eb564e86346103f609d74efce0f6b4d4f30ec8ce9e2c26411ba437"},
+    {file = "iniconfig-1.0.1.tar.gz", hash = "sha256:e5f92f89355a67de0595932a6c6c02ab4afddc6fcdc0bfc5becd0d60884d3f69"},
 ]
 invoke = [
     {file = "invoke-1.4.1-py2-none-any.whl", hash = "sha256:93e12876d88130c8e0d7fd6618dd5387d6b36da55ad541481dfa5e001656f134"},
@@ -1729,12 +1730,12 @@ rfc3986 = [
     {file = "rfc3986-1.4.0.tar.gz", hash = "sha256:112398da31a3344dc25dbf477d8df6cb34f9278a94fee2625d89e4514be8bb9d"},
 ]
 sdss-clu = [
-    {file = "sdss-clu-0.2.2.tar.gz", hash = "sha256:d1108b288b33703eaebc1810327074665e5874f80d8d4a75442da2c6bcbfd983"},
-    {file = "sdss_clu-0.2.2-py3-none-any.whl", hash = "sha256:5c6c9a41ea0387b67eb959719969b1701dc45c39628eca6eda5c0d9a8c771aec"},
+    {file = "sdss-clu-0.3.0.tar.gz", hash = "sha256:546aec57b2c752dd293a69a57d4862f0c8b895dd277e96cf4b00df6174b1f3d4"},
+    {file = "sdss_clu-0.3.0-py3-none-any.whl", hash = "sha256:5db2e8061dde27944a501be748525728710fcc9cef54c83f51fdae398be0f38d"},
 ]
 sdsstools = [
-    {file = "sdsstools-0.2.0-py3-none-any.whl", hash = "sha256:b2d043f0577bb2134371f527cf0d47f31c51e731532099f6702baea91044e55e"},
-    {file = "sdsstools-0.2.0.tar.gz", hash = "sha256:0d7917ec909207083ba5a767f3bc2a421f250dd7d341cf96ed5cfd83d5330894"},
+    {file = "sdsstools-0.2.1-py3-none-any.whl", hash = "sha256:f78df4e98d6755f1680eaa91614d9f14c0f82cee465f0bf1a918f48db632730d"},
+    {file = "sdsstools-0.2.1.tar.gz", hash = "sha256:00a5b3e74485a3fb1f35bf86a3f90b001c095b2fdde753bf25b655dd164521fb"},
 ]
 secretstorage = [
     {file = "SecretStorage-3.1.2-py3-none-any.whl", hash = "sha256:b5ec909dde94d4ae2fa26af7c089036997030f0cf0a5cb372b4cccabd81c143b"},
