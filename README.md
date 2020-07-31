@@ -9,7 +9,5 @@ basecam
 ``basecam`` provides a wrapper around CCD camera APIs with an SDSS-style TCP/IP actor. The main benefits of using `basecam` are:
 
 - Simplifies the creation of production-level camera libraries by providing all the common boilerplate so that you only need to focus on implementing the parts that are specific to your camera API.
-
 - Provides a common API regardless of the underlying camera being handled.
-
 - Powerful event handling and notification.
