@@ -172,7 +172,7 @@ class ImageNamer(object):
     dirname : str
         The directory for the images. Can include an expression based on the
         ``date`` substitution which is a `~astropy.time.Time.now` object. For
-        example: ``dirname='/data/{int(date.mjd)}'``.
+        example: ``dirname='/data/{camera.uid}/{int(date.mjd)}'``.
     overwrite : bool
         If `True`, the sequence will start at 1 regardless of the existing
         images. If `False`, the first element in the sequence will be selected

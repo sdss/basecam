@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sdss-basecam"
-version = "0.1.2-alpha.0"
+version = "0.2.0-alpha.0"
 description = "A base library for camera wrapping and actor."
 authors = ["José Sánchez-Gallego <gallegoj@uw.edu>"]
 license = "BSD 3-Clause License"
@@ -24,10 +24,10 @@ include = ["LICENSE.md"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-astropy = ">=3.2.1"
-numpy = ">=1.17"
-sdss-clu = ">=0.2.0"
-sdsstools = ">=0.1.0"
+astropy = "^4.0"
+numpy = "^1.17"
+sdss-clu = "^0.3.0"
+sdsstools = ">=0.2.0"
 sphinx = {version=">=2.3.1", optional=true}
 
 [tool.poetry.dev-dependencies]
@@ -46,7 +46,7 @@ coverage = {version = ">=5.0", extras = ["toml"]}
 ipdb = ">=0.12.3"
 asynctest = ">=0.13.0"
 sphinx = ">=2.3.1"
-sdsstools = {version=">=0.1.0", extras=["dev"]}
+sdsstools = {version=">=0.2.0", extras=["dev"]}
 
 [tool.poetry.extras]
 docs = ["sphinx"]
@@ -61,6 +61,12 @@ balanced_wrapping = true
 include_trailing_comma = false
 lines_after_imports = 2
 use_parentheses = true
+
+[tool.pytest.ini_options]
+addopts = "--cov basecam --cov-report xml --cov-report html --cov-report term"
+filterwarnings = [
+    "ignore::DeprecationWarning"
+]
 
 [tool.coverage.run]
 branch = true

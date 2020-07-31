@@ -9,7 +9,7 @@
 import logging
 
 from clu import BaseActor, JSONActor
-from clu.misc.logger import ActorHandler
+from clu.tools import ActorHandler
 
 from basecam import EventListener
 from basecam.exceptions import CameraWarning
@@ -61,13 +61,13 @@ class BaseCameraActor:
         self.listener = EventListener()
         self.camera_system.notifier.register_listener(self.listener)
 
-        command_parser = command_parser or commands.camera_parser
+        self.parser = command_parser or commands.camera_parser
 
-        super().__init__(*args, parser=command_parser, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Add commands that depend on what mixins the base camera has
         # been subclassed with.
-        if command_parser == commands.camera_parser:
+        if self.parser == commands.camera_parser:
             self._add_optional_commands()
 
         # Output camera_system log messages as keywords.
@@ -103,7 +103,7 @@ class BaseCameraActor:
             mixin_name = mixin.__name__
             if mixin_name in commands._MIXIN_TO_COMMANDS:
                 for command in commands._MIXIN_TO_COMMANDS[mixin_name]:
-                    self.command_parser.add_command(command)
+                    self.parser.add_command(command)
 
     def set_default_cameras(self, cameras=None):
         """Sets the camera(s) that will be used by default.
@@ -134,7 +134,8 @@ class BaseCameraActor:
         connected_cameras = [camera.name for camera in self.camera_system.cameras]
         for camera in self.default_cameras:
             if camera not in connected_cameras:
-                self.log.warning(f'camera {camera!r} made default but is not connected.')
+                self.log.warning(f'camera {camera!r} made default '
+                                 'but is not connected.')
 
 
 class CameraActor(BaseCameraActor, JSONActor):

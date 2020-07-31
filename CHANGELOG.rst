@@ -4,7 +4,9 @@
 Changelog
 =========
 
-* Fix ``CameraWarning`` when used from a ``CameraSystem`` instance.
+* :bug:`-` Fix ``CameraWarning`` when used from a ``CameraSystem`` instance.
+* :support:`-` Significant refactor. Most functionality is not affected but things are handled a bit differently, with some simplifications.
+* :support:`-` Use GitHub Workflows.
 
 * :release:`0.1.1 <2020-01-24>`
 * Allow to use ``camera`` substitutions in `.ImageNamer`.

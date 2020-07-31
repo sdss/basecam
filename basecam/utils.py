@@ -10,32 +10,14 @@ import asyncio
 import logging
 from contextlib import suppress
 
-import sdsstools
-from sdsstools import get_logger
-
 
 __all__ = ['LoggerMixIn', 'Poller', 'cancel_task']
 
 
 class LoggerMixIn(object):
-    """A mixin to provide easy logging with a header.
+    """A mixin to provide easy logging with a header."""
 
-    Parameters
-    ----------
-    name : str
-        The name of the logger to which to output.
-    log_header : str
-        A header to prefix to each message.
-    level : int
-        Initial level for logging.
-
-    """
-
-    def __init__(self, name, log_header=None, level=logging.INFO):
-
-        self.logger = get_logger(name)
-        self.logger.set_level(level)
-        self.log_header = log_header
+    log_header = ''
 
     def log(self, message, level=logging.DEBUG, use_header=True):
         """Logs a message with a header."""

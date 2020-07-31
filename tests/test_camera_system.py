@@ -22,7 +22,7 @@ async def test_load_config():
     camera_system = CameraSystemTester(VirtualCamera, camera_config=TEST_CONFIG_FILE)
 
     assert isinstance(camera_system, CameraSystemTester)
-    assert 'test_camera' in camera_system.camera_config
+    assert 'test_camera' in camera_system._config
 
 
 async def test_discover(camera_system):
@@ -72,27 +72,21 @@ async def test_get_cameras_not_implemented(camera_system, mocker):
 async def test_config_bad_name(camera_system):
 
     data = camera_system.get_camera_config('BAD_CAMERA')
-
-    assert data['name'] == 'BAD_CAMERA'
-    assert data['uid'] is None
+    assert data is None
 
 
 async def test_config_bad_uid(camera_system):
 
     data = camera_system.get_camera_config(uid='BAD_UID')
-
-    assert data['name'] == 'BAD_UID'
-    assert data['uid'] == 'BAD_UID'
+    assert data is None
 
 
 async def test_no_config(camera_system):
 
-    camera_system.camera_config = None
+    camera_system._config = None
 
     data = camera_system.get_camera_config('test_camera')
-
-    assert data['name'] == 'test_camera'
-    assert data['uid'] is None
+    assert data is None
 
 
 async def test_config_from_uid(camera_system):
@@ -101,7 +95,6 @@ async def test_config_from_uid(camera_system):
 
     assert data['name'] == 'test_camera'
     assert data['uid'] == 'DEV_12345'
-    assert data['shutter'] is True
 
 
 @pytest.mark.parametrize('param,value', [('name', 'test_camera'),
@@ -162,3 +155,30 @@ async def test_add_camera_autoconnect(camera_system):
 
     camera = await camera_system.add_camera(name='test_camera')
     assert camera.connected
+
+
+async def test_bad_camera_class():
+
+    with pytest.raises(ValueError):
+        CameraSystemTester(dict)
+
+
+async def test_verbose():
+
+    camera_system = CameraSystemTester(VirtualCamera, verbose=True)
+    assert camera_system.logger.sh.level == 1
+
+    camera_system = CameraSystemTester(VirtualCamera, verbose=False)
+    assert camera_system.logger.sh.level == logging.CRITICAL
+
+
+async def test_log_file(tmp_path):
+
+    log_file = tmp_path / 'logfile.log'
+
+    camera_system = CameraSystemTester(VirtualCamera, log_file=log_file)
+
+    assert camera_system.logger.fh is not None
+
+    text = log_file.read_text()
+    assert 'logging to ' + str(log_file) in text

@@ -277,7 +277,7 @@ async def test_expose_filename_fails(actor, tmp_path):
 
 async def test_shutter_command_exists(actor):
 
-    assert 'shutter' in actor.command_parser.commands
+    assert 'shutter' in actor.parser.commands
 
 
 async def test_get_shutter(actor):
@@ -301,7 +301,7 @@ async def test_set_shutter_fails(actor):
 
     with patch.object(camera, '_set_shutter_internal', side_effect=CameraError):
 
-        command = await actor.invoke_mock_command(f'shutter --open')
+        command = await actor.invoke_mock_command('shutter --open')
         assert command.status.did_fail
 
 

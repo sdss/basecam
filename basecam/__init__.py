@@ -8,8 +8,6 @@ from .events import *
 from .exceptions import *
 from .exposure import *
 from .notifier import *
-from . import mixins
-from . import models
 
 
 NAME = 'sdss-basecam'

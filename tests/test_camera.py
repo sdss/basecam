@@ -112,15 +112,6 @@ async def test_reconnect_fails(camera):
         await camera.connect()
 
 
-async def test_connect_uid_warning(camera):
-
-    camera._uid = None
-    camera.camera_config['uid'] = None
-
-    with pytest.warns(CameraWarning):
-        await camera.connect(force=True)
-
-
 async def test_expose_no_filename(camera):
 
     exposure = await camera.expose(1.0)
@@ -173,15 +164,13 @@ async def test_instantiate_no_config():
 
     camera_system = CameraSystemTester(VirtualCamera)
 
-    assert camera_system.camera_config is None
+    assert camera_system._config is None
 
 
-async def test_instantiate_bad_config():
+async def test_instantiate_bad_file():
 
-    with pytest.warns(CameraWarning):
-        camera_system = CameraSystemTester(VirtualCamera, camera_config='bad_config')
-
-    assert camera_system.camera_config is None
+    with pytest.raises(FileNotFoundError):
+        CameraSystemTester(VirtualCamera, camera_config='bad_config')
 
 
 async def test_camera_error_from_camera_system():
@@ -197,12 +186,40 @@ async def test_camera_error_from_camera_system():
     assert 'CAMERA_SYSTEM' in str(ee)
 
 
+async def test_camera_error(camera_system):
+
+    class TestCamera(VirtualCamera):
+        def raise_camera_error(self):
+            raise CameraError('this is a test')
+
+    with pytest.raises(CameraError) as ee:
+        camera = TestCamera('FAKE_UID', camera_system)
+        camera.raise_camera_error()
+
+    assert 'FAKE_UID' in str(ee)
+    assert 'this is a test' in str(ee)
+
+
 async def test_camera_error_no_self():
 
     with pytest.raises(CameraError) as ee:
         raise CameraError('test')
 
     assert ' - ' not in str(ee)
+
+
+async def test_camera_warning(camera_system):
+
+    class TestCamera(VirtualCamera):
+        def raise_camera_warning(self):
+            warnings.warn('this is a test', CameraWarning)
+
+    with pytest.warns(CameraWarning) as ww:
+        camera = TestCamera('FAKE_UID', camera_system)
+        camera.raise_camera_warning()
+
+    assert 'FAKE_UID' in ww[0].message.args[0]
+    assert 'this is a test' in ww[0].message.args[0]
 
 
 async def test_camera_warning_no_self():

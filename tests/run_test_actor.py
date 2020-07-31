@@ -9,9 +9,9 @@
 import asyncio
 import os
 
-from basecam.actor import CameraActor
-
 from conftest import CameraSystemTester, VirtualCamera
+
+from basecam.actor import CameraActor
 
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'data/test_config.yaml')
