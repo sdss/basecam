@@ -9,6 +9,7 @@
 import abc
 import asyncio
 import logging
+import time
 import warnings
 from logging import INFO, WARNING
 
@@ -71,10 +72,10 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
                  log_header=None, log_file=None, verbose=False,
                  loop=None):
 
-        assert issubclass(camera_class, BaseCamera) and camera_class != BaseCamera, \
-            'camera_class must be a subclass of BaseCamera.'
-
         self.camera_class = self.camera_class or camera_class
+
+        if not issubclass(self.camera_class, BaseCamera):
+            raise ValueError('camera_class must be a subclass of BaseCamera.')
 
         self.include = self.include or include
         self.exclude = self.exclude or exclude
@@ -86,10 +87,12 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
         if verbose:
             self.logger.sh.setLevel(logging.DEBUG)
         else:
-            self.logger.sh.setLevel(logging.NOTSET)
+            self.logger.sh.setLevel(logging.CRITICAL)
 
         if log_file:
             self.logger.start_file_logger(log_file)
+            self.logger.fh.formatter.converter = time.gmtime
+            self.log(f'logging to {log_file}')
 
         self.loop = loop or asyncio.get_event_loop()
         self.loop.set_exception_handler(self.logger.asyncio_exception_handler)
