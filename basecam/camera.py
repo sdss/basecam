@@ -486,6 +486,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
     """
 
     fits_model = basic_fits_model
+    image_name = None
 
     def __init__(self, uid, camera_system, name=None, force=False,
                  image_namer=None, camera_params={}):
@@ -509,13 +510,14 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         if isinstance(image_namer, ImageNamer):
             self.image_namer = image_namer
-            self.image_namer.camera = self
         elif isinstance(image_namer, dict):
             self.image_namer = ImageNamer(**image_namer, camera=self)
-        elif image_namer is None:
+        elif image_namer is None and self.image_name is None:
             self.image_namer = ImageNamer('{camera.name}-{num:04d}.fits',
                                           dirname='.', overwrite=False,
                                           camera=self)
+        elif self.image_name is not None:
+            self.image_namer.camera = self
         else:
             raise CameraError('invalid image_namer parameters.')
 
