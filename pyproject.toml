@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sdss-basecam"
-version = "0.2.0"
+version = "0.2.1-alpha.0"
 description = "A base library for camera wrapping and actor."
 authors = ["José Sánchez-Gallego <gallegoj@uw.edu>"]
 license = "BSD 3-Clause License"
