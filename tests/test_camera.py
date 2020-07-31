@@ -186,6 +186,20 @@ async def test_camera_error_from_camera_system():
     assert 'CAMERA_SYSTEM' in str(ee)
 
 
+async def test_camera_error(camera_system):
+
+    class TestCamera(VirtualCamera):
+        def raise_camera_error(self):
+            raise CameraError('this is a test')
+
+    with pytest.raises(CameraError) as ee:
+        camera = TestCamera('FAKE_UID', camera_system)
+        camera.raise_camera_error()
+
+    assert 'FAKE_UID' in str(ee)
+    assert 'this is a test' in str(ee)
+
+
 async def test_camera_error_no_self():
 
     with pytest.raises(CameraError) as ee:
