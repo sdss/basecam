@@ -155,3 +155,30 @@ async def test_add_camera_autoconnect(camera_system):
 
     camera = await camera_system.add_camera(name='test_camera')
     assert camera.connected
+
+
+async def test_bad_camera_class():
+
+    with pytest.raises(ValueError):
+        CameraSystemTester(dict)
+
+
+async def test_verbose():
+
+    camera_system = CameraSystemTester(VirtualCamera, verbose=True)
+    assert camera_system.logger.sh.level == 1
+
+    camera_system = CameraSystemTester(VirtualCamera, verbose=False)
+    assert camera_system.logger.sh.level == logging.CRITICAL
+
+
+async def test_log_file(tmp_path):
+
+    log_file = tmp_path / 'logfile.log'
+
+    camera_system = CameraSystemTester(VirtualCamera, log_file=log_file)
+
+    assert camera_system.logger.fh is not None
+
+    text = log_file.read_text()
+    assert 'logging to ' + str(log_file) in text

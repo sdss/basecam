@@ -17,7 +17,6 @@ coverage:
                 # basic
                 target: auto
                 threshold: 10%
-                base: auto
                 # advanced
                 if_no_uploads: error
                 if_not_found: success
