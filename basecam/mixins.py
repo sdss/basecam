@@ -10,7 +10,6 @@ import abc
 import asyncio
 
 from .events import CameraEvent
-from .exceptions import CameraError
 from .utils import cancel_task
 
 
@@ -47,9 +46,6 @@ class ShutterMixIn(object, metaclass=abc.ABCMeta):
 
         """
 
-        if not self.has_shutter:
-            return
-
         current_status = await self.get_shutter()
         if current_status == shutter and not force:
             return
@@ -68,9 +64,6 @@ class ShutterMixIn(object, metaclass=abc.ABCMeta):
 
     async def get_shutter(self):
         """Gets the position of the shutter."""
-
-        if not self.has_shutter:
-            raise CameraError('camera {self.name!r} does not have a shutter.')
 
         return await self._get_shutter_internal()
 

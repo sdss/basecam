@@ -87,7 +87,6 @@ async def test_object(camera):
 
 async def test_shutter(camera):
 
-    assert camera.has_shutter
     assert await camera.get_shutter() is False
 
     await camera.open_shutter()

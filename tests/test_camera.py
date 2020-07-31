@@ -112,15 +112,6 @@ async def test_reconnect_fails(camera):
         await camera.connect()
 
 
-async def test_connect_uid_warning(camera):
-
-    camera._uid = None
-    camera.camera_config['uid'] = None
-
-    with pytest.warns(CameraWarning):
-        await camera.connect(force=True)
-
-
 async def test_expose_no_filename(camera):
 
     exposure = await camera.expose(1.0)
@@ -173,15 +164,13 @@ async def test_instantiate_no_config():
 
     camera_system = CameraSystemTester(VirtualCamera)
 
-    assert camera_system.camera_config is None
+    assert camera_system._config is None
 
 
-async def test_instantiate_bad_config():
+async def test_instantiate_bad_file():
 
-    with pytest.warns(CameraWarning):
-        camera_system = CameraSystemTester(VirtualCamera, camera_config='bad_config')
-
-    assert camera_system.camera_config is None
+    with pytest.raises(FileNotFoundError):
+        CameraSystemTester(VirtualCamera, camera_config='bad_config')
 
 
 async def test_camera_error_from_camera_system():

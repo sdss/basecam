@@ -8,7 +8,7 @@
 
 import pytest
 
-from clu.misc.logger import ActorHandler
+from clu.tools import ActorHandler
 
 from basecam.actor.actor import BaseCameraActor
 

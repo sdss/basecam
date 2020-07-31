@@ -11,8 +11,6 @@ actor:
 cameras:
     test_camera:
         uid: DEV_12345
-        shutter: true
-        auto_shutter: false
         autoconnect: true
-        connection_params:
+        connection:
             device: /dev/camera
