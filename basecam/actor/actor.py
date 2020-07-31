@@ -134,7 +134,8 @@ class BaseCameraActor:
         connected_cameras = [camera.name for camera in self.camera_system.cameras]
         for camera in self.default_cameras:
             if camera not in connected_cameras:
-                self.log.warning(f'camera {camera!r} made default but is not connected.')
+                self.log.warning(f'camera {camera!r} made default '
+                                 'but is not connected.')
 
 
 class CameraActor(BaseCameraActor, JSONActor):
