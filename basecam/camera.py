@@ -87,7 +87,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
         if verbose:
             self.logger.sh.setLevel(int(verbose))
         else:
-            self.logger.sh.setLevel(logging.CRITICAL)
+            self.logger.sh.setLevel(logging.ERROR)
 
         if log_file:
             self.logger.start_file_logger(log_file)
