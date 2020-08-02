@@ -118,7 +118,7 @@ async def test_expose_no_filename(camera):
 
     assert exposure.filename is not None
 
-    exposure.write()
+    await exposure.write()
     assert os.path.exists(exposure.filename)
     assert camera.name in str(exposure.filename)
 
@@ -136,7 +136,7 @@ async def test_expose_image_namer(camera_system, image_namer):
 
     assert exposure.filename is not None
 
-    exposure.write()
+    await exposure.write()
     assert os.path.exists(exposure.filename)
     assert camera.name in str(exposure.filename)
 

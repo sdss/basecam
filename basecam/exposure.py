@@ -6,6 +6,8 @@
 # @Filename: exposure.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
+import asyncio
+import functools
 import os
 import pathlib
 import re
@@ -119,7 +121,8 @@ class Exposure(object):
 
         return fits_model.to_hdu(self, context=context)
 
-    def write(self, filename=None, context={}, overwrite=False, checksum=True):
+    async def write(self, filename=None, context={}, overwrite=False,
+                    checksum=True):
         """Writes the image to disk.
 
         Parameters
@@ -153,7 +156,13 @@ class Exposure(object):
         if not os.path.exists(dirname):
             os.makedirs(dirname)
 
-        hdulist.writeto(filename, overwrite=overwrite, checksum=checksum)
+        writeto_partial = functools.partial(hdulist.writeto,
+                                            filename,
+                                            overwrite=overwrite,
+                                            checksum=checksum)
+
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, writeto_partial)
 
         return hdulist
 

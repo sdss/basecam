@@ -711,7 +711,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         if write:
             self._notify(CameraEvent.EXPOSURE_WRITING)
-            await self.loop.run_in_executor(None, exposure.write)
+            await exposure.write()
             self._notify(CameraEvent.EXPOSURE_WRITTEN)
 
         return exposure
