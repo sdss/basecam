@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sdss-basecam"
-version = "0.2.1-alpha.0"
+version = "0.3.0"
 description = "A base library for camera wrapping and actor."
 authors = ["José Sánchez-Gallego <gallegoj@uw.edu>"]
 license = "BSD 3-Clause License"
@@ -26,7 +26,7 @@ include = ["LICENSE.md"]
 python = "^3.7"
 astropy = "^4.0"
 numpy = "^1.17"
-sdss-clu = "^0.3.0"
+sdss-clu = "^0.3.3"
 sdsstools = ">=0.2.0"
 sphinx = {version=">=2.3.1", optional=true}
 

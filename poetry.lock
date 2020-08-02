@@ -735,7 +735,7 @@ description = "A new protocol for SDSS actors."
 name = "sdss-clu"
 optional = false
 python-versions = ">=3.7,<4.0"
-version = "0.3.0"
+version = "0.3.3"
 
 [package.dependencies]
 Click = ">=7.0,<8.0"
@@ -990,7 +990,7 @@ testing = ["jaraco.itertools", "func-timeout"]
 docs = ["sphinx"]
 
 [metadata]
-content-hash = "330d3d7fa40cf65a89f190a078e0f900bd137b56c9f3ff89d45b0283f10b17c6"
+content-hash = "3909510b4efc0920c008b204b9e21882618932530dd134c1bed3881e56817fa1"
 lock-version = "1.1"
 python-versions = "^3.7"
 
@@ -1440,8 +1440,8 @@ restructuredtext-lint = [
     {file = "restructuredtext_lint-1.3.1.tar.gz", hash = "sha256:470e53b64817211a42805c3a104d2216f6f5834b22fe7adb637d1de4d6501fb8"},
 ]
 sdss-clu = [
-    {file = "sdss-clu-0.3.0.tar.gz", hash = "sha256:546aec57b2c752dd293a69a57d4862f0c8b895dd277e96cf4b00df6174b1f3d4"},
-    {file = "sdss_clu-0.3.0-py3-none-any.whl", hash = "sha256:5db2e8061dde27944a501be748525728710fcc9cef54c83f51fdae398be0f38d"},
+    {file = "sdss-clu-0.3.3.tar.gz", hash = "sha256:a9ebad6f57d8d6cd343be6f526a18c7b4cc0e0aafc8b797d10608aabedbd54e8"},
+    {file = "sdss_clu-0.3.3-py3-none-any.whl", hash = "sha256:20b1da68408867488bb598085d208d0635bf0a0179090b28bee71cd82a80eebb"},
 ]
 sdsstools = [
     {file = "sdsstools-0.3.0-py3-none-any.whl", hash = "sha256:d830a6bc5b3f5aba26b53641ba9c766029c5ee28a1d462db6dbf1ac7dff494ef"},
