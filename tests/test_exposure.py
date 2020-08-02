@@ -22,26 +22,28 @@ def test_exposure_no_model(exposure):
     assert 'IMAGETYP' not in hdulist[0].header
 
 
-def test_exposure_write(exposure, tmp_path):
+@pytest.mark.asyncio
+async def test_exposure_write(exposure, tmp_path):
 
     test_filename = tmp_path / 'test.fits'
     assert not test_filename.exists()
 
     exposure.filename = str(test_filename)
-    exposure.write()
+    await exposure.write()
     assert test_filename.exists()
 
     test_filename2 = tmp_path / 'test2.fits'
-    exposure.write(filename=test_filename2)
+    await exposure.write(filename=test_filename2)
     assert test_filename2.exists()
 
 
-def test_exposure_write_fails(exposure):
+@pytest.mark.asyncio
+async def test_exposure_write_fails(exposure):
 
     exposure.filename = None
 
     with pytest.raises(ExposureError):
-        exposure.write()
+        await exposure.write()
 
 
 def test_obstime_fails(exposure):
@@ -85,13 +87,14 @@ def test_image_namer_files_exist(tmp_path):
     assert image_namer._last_num == 5
 
 
-def test_image_name_non_existent_directory(exposure, tmp_path):
+@pytest.mark.asyncio
+async def test_image_name_non_existent_directory(exposure, tmp_path):
 
     test_filename = tmp_path / 'test_dir/another_dir/test.fits'
     assert not test_filename.exists()
 
     exposure.filename = str(test_filename)
-    exposure.write()
+    await exposure.write()
     assert test_filename.exists()
 
 
