@@ -26,8 +26,8 @@ include = ["LICENSE.md"]
 python = "^3.7"
 astropy = "^4.0"
 numpy = "^1.17"
-sdss-clu = "^0.3.3"
-sdsstools = ">=0.2.0"
+sdss-clu = "^0.5.0"
+sdsstools = ">=0.4.0"
 sphinx = {version=">=2.3.1", optional=true}
 
 [tool.poetry.dev-dependencies]
@@ -46,7 +46,6 @@ coverage = {version = ">=5.0", extras = ["toml"]}
 ipdb = ">=0.12.3"
 asynctest = ">=0.13.0"
 sphinx = ">=2.3.1"
-sdsstools = {version=">=0.2.0", extras=["dev"]}
 
 [tool.poetry.extras]
 docs = ["sphinx"]
