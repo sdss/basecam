@@ -4,6 +4,8 @@
 Changelog
 =========
 
+* :support:`-` When ``verbose=False`` set the ``StreamHandler`` level to ``WARNING``.
+
 * :release:`0.3.0 <2020-08-01>`
 * :bug:`-` When ``verbose=False`` set the ``StreamHandler`` level to ``ERROR`` to allow tracebacks.
 * :feature:`11` *Breaking change.* `.Exposure.write` is now a coroutine and must be awaited if called directly. ``HDUList.writeto()`` is run in an executor.
