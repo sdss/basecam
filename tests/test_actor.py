@@ -47,8 +47,8 @@ async def test_check_subclass(camera_system):
 
 async def test_arguments_from_config(actor):
 
-    assert actor._config is not None
-    assert 'default_cameras' in actor._config
+    assert actor.config is not None
+    assert 'default_cameras' in actor.config['actor']
 
     assert actor.default_cameras == ['test_camera']
 
