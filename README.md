@@ -2,6 +2,7 @@ basecam
 =======
 
 ![Versions](https://img.shields.io/badge/python-3.8-blue)
+[![PyPI version](https://badge.fury.io/py/sdss-basecam.svg)](https://badge.fury.io/py/sdss-basecam)
 [![Documentation Status](https://readthedocs.org/projects/sdss-basecam/badge/?version=latest)](https://sdss-basecam.readthedocs.io/en/latest/?badge=latest)
 [![Build](https://img.shields.io/github/workflow/status/sdss/basecam/Test)](https://github.com/sdss/basecam/actions)
 [![Coverage Status](https://codecov.io/gh/sdss/basecam/branch/master/graph/badge.svg)](https://codecov.io/gh/sdss/basecam)
