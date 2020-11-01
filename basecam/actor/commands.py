@@ -11,7 +11,7 @@ import os
 
 import click
 
-from clu.parser import CluCommand, CluGroup
+from clu.parser import CluCommand, CluGroup, help_, ping
 
 from ..events import CameraEvent
 from ..exceptions import CameraConnectionError, CameraError, ExposureError
@@ -21,6 +21,10 @@ from .tools import get_cameras
 @click.group(cls=CluGroup)
 def camera_parser():
     pass
+
+
+camera_parser.add_command(help_)
+camera_parser.add_command(ping)
 
 
 @camera_parser.command(name='list')

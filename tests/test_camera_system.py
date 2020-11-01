@@ -169,7 +169,7 @@ async def test_verbose():
     assert camera_system.logger.sh.level == 1
 
     camera_system = CameraSystemTester(VirtualCamera, verbose=False)
-    assert camera_system.logger.sh.level == logging.ERROR
+    assert camera_system.logger.sh.level == logging.WARNING
 
 
 async def test_log_file(tmp_path):
