@@ -4,6 +4,7 @@
 Changelog
 =========
 
+* :release:`0.3.1 <2020-10-31>`
 * :support:`-` When ``verbose=False`` set the ``StreamHandler`` level to ``WARNING``.
 
 * :release:`0.3.0 <2020-08-01>`
