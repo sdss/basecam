@@ -91,7 +91,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         if log_file:
             self.logger.start_file_logger(log_file)
-            if self.logger.fh
+            if self.logger.fh:
                 self.logger.fh.formatter.converter = time.gmtime
                 self.log(f'logging to {log_file}')
 
