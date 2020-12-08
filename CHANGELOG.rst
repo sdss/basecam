@@ -4,6 +4,9 @@
 Changelog
 =========
 
+* :release:`0.3.2 <2020-12-07>`
+* :bug:`-` Do not try to set logger format if it failed to create the file logger.
+
 * :release:`0.3.1 <2020-10-31>`
 * :support:`-` When ``verbose=False`` set the ``StreamHandler`` level to ``WARNING``.
 

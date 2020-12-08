@@ -91,8 +91,9 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         if log_file:
             self.logger.start_file_logger(log_file)
-            self.logger.fh.formatter.converter = time.gmtime
-            self.log(f'logging to {log_file}')
+            if self.logger.fh
+                self.logger.fh.formatter.converter = time.gmtime
+                self.log(f'logging to {log_file}')
 
         self.loop = loop or asyncio.get_event_loop()
         self.loop.set_exception_handler(self.logger.asyncio_exception_handler)
