@@ -4,6 +4,9 @@
 Changelog
 =========
 
+* :release:`0.3.3 <2020-12-07>`
+* :support:`-` Retag of 0.3.2 with sytanx error fixed.
+
 * :release:`0.3.2 <2020-12-07>`
 * :bug:`-` Do not try to set logger format if it failed to create the file logger.
 
