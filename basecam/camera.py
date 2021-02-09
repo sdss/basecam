@@ -16,18 +16,7 @@ import time
 import warnings
 from logging import INFO, WARNING
 
-from typing import (
-    Any,
-    Callable,
-    ClassVar,
-    Literal,
-    Optional,
-    Protocol,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import Any, Callable, Literal, Optional, Type, TypeVar, Union, cast
 
 import numpy
 

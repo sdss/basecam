@@ -11,7 +11,7 @@ from __future__ import annotations
 import abc
 import asyncio
 
-from typing import Callable, Union
+from typing import Callable
 
 from basecam.camera import BaseCamera
 
