@@ -14,22 +14,22 @@ from . import camera
 class CameraError(Exception):
     """A custom core exception"""
 
-    def __init__(self, message=''):
+    def __init__(self, message=""):
 
         stack = inspect.stack()
         f_locals = stack[1][0].f_locals
 
-        if 'self' in f_locals:
-            class_ = f_locals['self']
+        if "self" in f_locals:
+            class_ = f_locals["self"]
             if isinstance(class_, camera.BaseCamera):
-                camera_name = f_locals['self'].name
+                camera_name = f_locals["self"].name
             elif isinstance(class_, camera.CameraSystem):
-                camera_name = 'CAMERA_SYSTEM'
+                camera_name = "CAMERA_SYSTEM"
             else:
-                camera_name = 'UNKNOWN'
-            super().__init__(f'{camera_name} - {message}')
+                camera_name = "UNKNOWN"
+            super().__init__(f"{camera_name} - {message}")
         else:
-            super().__init__(f'{message}')
+            super().__init__(f"{message}")
 
 
 class CameraConnectionError(CameraError):
@@ -56,17 +56,17 @@ class CameraWarning(UserWarning):
         stack = inspect.stack()
         f_locals = stack[1][0].f_locals
 
-        if 'self' in f_locals:
-            class_ = f_locals['self']
+        if "self" in f_locals:
+            class_ = f_locals["self"]
             if isinstance(class_, camera.BaseCamera):
-                camera_name = f_locals['self'].name
+                camera_name = f_locals["self"].name
             elif isinstance(class_, camera.CameraSystem):
-                camera_name = 'CAMERA_SYSTEM'
+                camera_name = "CAMERA_SYSTEM"
             else:
-                camera_name = 'UNKNOWN'
-            super().__init__(f'{camera_name} - {message}')
+                camera_name = "UNKNOWN"
+            super().__init__(f"{camera_name} - {message}")
         else:
-            super().__init__(f'{message}')
+            super().__init__(f"{message}")
 
 
 class ExposureWarning(UserWarning):

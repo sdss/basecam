@@ -17,7 +17,7 @@ from basecam.exceptions import CameraWarning
 from . import commands
 
 
-__all__ = ['BaseCameraActor', 'CameraActor']
+__all__ = ["BaseCameraActor", "CameraActor"]
 
 
 class BaseCameraActor:
@@ -49,8 +49,9 @@ class BaseCameraActor:
 
     """
 
-    def __init__(self, camera_system, *args, default_cameras=None,
-                 command_parser=None, **kwargs):
+    def __init__(
+        self, camera_system, *args, default_cameras=None, command_parser=None, **kwargs
+    ):
 
         self._check_is_subclass()
 
@@ -71,8 +72,11 @@ class BaseCameraActor:
             self._add_optional_commands()
 
         # Output camera_system log messages as keywords.
-        actor_handler = ActorHandler(self, code_mapping={logging.INFO: 'd'},
-                                     filter_warnings=[CameraWarning, UserWarning])
+        actor_handler = ActorHandler(
+            self,
+            code_mapping={logging.INFO: "d"},
+            filter_warnings=[CameraWarning, UserWarning],
+        )
         actor_handler.setLevel(logging.INFO)
         self.camera_system.logger.addHandler(actor_handler)
 
@@ -82,7 +86,7 @@ class BaseCameraActor:
     def _check_is_subclass(self):
         """Checks if the object is a subclass of a CLU actor."""
 
-        error = 'BaseCameraActor must be sub-classed along with a CLU actor class.'
+        error = "BaseCameraActor must be sub-classed along with a CLU actor class."
         bases = self.__class__.__bases__
 
         assert issubclass(self.__class__, BaseCameraActor), error
@@ -125,17 +129,18 @@ class BaseCameraActor:
             return
 
         if isinstance(cameras, str):
-            self.default_cameras = cameras.split(',')
+            self.default_cameras = cameras.split(",")
         elif isinstance(cameras, (list, tuple)):
             self.default_cameras = list(cameras)
         else:
-            raise ValueError(f'invalid data type for cameras={cameras!r}')
+            raise ValueError(f"invalid data type for cameras={cameras!r}")
 
         connected_cameras = [camera.name for camera in self.camera_system.cameras]
         for camera in self.default_cameras:
             if camera not in connected_cameras:
-                self.log.warning(f'camera {camera!r} made default '
-                                 'but is not connected.')
+                self.log.warning(
+                    f"camera {camera!r} made default " "but is not connected."
+                )
 
 
 class CameraActor(BaseCameraActor, JSONActor):

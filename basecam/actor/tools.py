@@ -7,7 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
 
-__all__ = ['get_cameras']
+__all__ = ["get_cameras"]
 
 
 def get_cameras(command, cameras=None, check_cameras=True, fail_command=False):
@@ -49,7 +49,7 @@ def get_cameras(command, cameras=None, check_cameras=True, fail_command=False):
         camera_instance = command.actor.camera_system.get_camera(name=camera)
         if camera_instance is False:
             if fail_command:
-                command.fail(text=f'camera {camera} is not connected.')
+                command.fail(text=f"camera {camera} is not connected.")
             return False
         camera_instances.append(camera_instance)
 
@@ -57,13 +57,15 @@ def get_cameras(command, cameras=None, check_cameras=True, fail_command=False):
         for camera_instance in camera_instances:
             if not camera_instance.connected:
                 if fail_command:
-                    command.fail(text=f'camera {camera_instance.name} '
-                                 'has not been initialised.')
+                    command.fail(
+                        text=f"camera {camera_instance.name} "
+                        "has not been initialised."
+                    )
                 return False
 
     if len(cameras) == 0:
         if fail_command:
-            command.fail(text='no cameras connected.')
+            command.fail(text="no cameras connected.")
         return False
 
     return camera_instances

@@ -16,11 +16,9 @@ from basecam.exceptions import CardError, CardWarning
 
 
 class MacroCardTest(models.MacroCard):
-
     def macro(self, exposure, **kwargs):
 
-        return [('KEYWORD1', 1, 'The first card'),
-                ('KEYWORD2', 2)]
+        return [("KEYWORD1", 1, "The first card"), ("KEYWORD2", 2)]
 
 
 def test_fits_model():
@@ -28,7 +26,7 @@ def test_fits_model():
     fits_model = models.FITSModel()
 
     assert len(fits_model) == 1
-    assert fits_model[0].data == 'raw'
+    assert fits_model[0].data == "raw"
     assert fits_model[0].header_model is None
 
 
@@ -44,11 +42,10 @@ def test_fits_model_to_hdu(exposure):
     assert hdulist[0].data is not None
 
 
-@pytest.mark.parametrize('compressed', [True, 'GZIP_1'])
+@pytest.mark.parametrize("compressed", [True, "GZIP_1"])
 def test_model_compressed(exposure, compressed):
 
-    fits_model = models.FITSModel([models.Extension(data=None,
-                                                    compressed=compressed)])
+    fits_model = models.FITSModel([models.Extension(data=None, compressed=compressed)])
 
     exposure.fits_model = fits_model
     hdulist = exposure.to_hdu()
@@ -62,10 +59,14 @@ def test_model_compressed(exposure, compressed):
 
 def test_fits_model_multi_extension(exposure):
 
-    fits_model = models.FITSModel([models.Extension(data='none'),
-                                  models.Extension(data=None),
-                                  models.Extension(data='raw'),
-                                  models.Extension(data=numpy.zeros((10, 10)))])
+    fits_model = models.FITSModel(
+        [
+            models.Extension(data="none"),
+            models.Extension(data=None),
+            models.Extension(data="raw"),
+            models.Extension(data=numpy.zeros((10, 10))),
+        ]
+    )
 
     exposure.fits_model = fits_model
     hdulist = exposure.to_hdu()
@@ -87,8 +88,12 @@ def test_fits_model_multi_extension(exposure):
 
 def test_fits_model_multi_extension_compressed(exposure):
 
-    fits_model = models.FITSModel([models.Extension(data=None, compressed=True),
-                                   models.Extension(data=None, compressed=True)])
+    fits_model = models.FITSModel(
+        [
+            models.Extension(data=None, compressed=True),
+            models.Extension(data=None, compressed=True),
+        ]
+    )
 
     exposure.fits_model = fits_model
     hdulist = exposure.to_hdu()
@@ -109,22 +114,22 @@ def test_basic_header_model(exposure):
 
     basic_header_model = models.models.basic_header_model
     basic_header_model.append(MacroCardTest())
-    basic_header_model.append(models.Card('TEST', 'test'))
+    basic_header_model.append(models.Card("TEST", "test"))
 
     header = basic_header_model.to_header(exposure)
     assert isinstance(header, astropy.io.fits.Header)
-    assert 'IMAGETYP' in header
-    assert 'TEST' in header
+    assert "IMAGETYP" in header
+    assert "TEST" in header
 
 
 def test_header_model_insert(exposure):
 
     basic_header_model = models.models.basic_header_model
-    basic_header_model.insert(0, [('A', 1)])
+    basic_header_model.insert(0, [("A", 1)])
 
     header = basic_header_model.to_header(exposure)
     assert isinstance(header, astropy.io.fits.Header)
-    assert header['A'] == 1
+    assert header["A"] == 1
 
 
 def test_header_invalid_card():
@@ -138,23 +143,28 @@ def test_header_describe(exposure):
 
     basic_header_model = models.models.basic_header_model
     basic_header_model.append(MacroCardTest())
-    basic_header_model.append(models.CardGroup(
-        [('PARAM1', 'A parameter'),
-         ('PARAM2', '{__camera__.uid}', 'Camera UID'),
-         'VCAM']))
+    basic_header_model.append(
+        models.CardGroup(
+            [
+                ("PARAM1", "A parameter"),
+                ("PARAM2", "{__camera__.uid}", "Camera UID"),
+                "VCAM",
+            ]
+        )
+    )
 
     description = basic_header_model.describe()
     assert isinstance(description, astropy.table.Table)
     assert len(description) > 0
 
-    assert '### MACRO' in description['name']
-    assert 'PARAM2' in description['name']
-    assert description[description['name'] == 'PARAM2']['value'] != ''
+    assert "### MACRO" in description["name"]
+    assert "PARAM2" in description["name"]
+    assert description[description["name"] == "PARAM2"]["value"] != ""
 
 
 def test_macro(exposure):
 
-    macro = MacroCardTest(name='test_macro', use_group_title=False)
+    macro = MacroCardTest(name="test_macro", use_group_title=False)
 
     cards = macro.evaluate(exposure)
     assert isinstance(cards, list)
@@ -163,31 +173,31 @@ def test_macro(exposure):
     assert isinstance(header, astropy.io.fits.Header)
 
     assert len(header) == 2
-    assert header.cards['KEYWORD2'].comment == ''
+    assert header.cards["KEYWORD2"].comment == ""
 
 
 def test_macro_with_group_title(exposure):
 
-    macro = MacroCardTest(name='test_macro', use_group_title=True)
+    macro = MacroCardTest(name="test_macro", use_group_title=True)
     header = macro.to_header(exposure)
 
     assert len(header) == 3
 
-    assert header.cards[0].keyword == 'COMMENT'
-    assert header.cards[0].value == '######### test_macro #########'
+    assert header.cards[0].keyword == "COMMENT"
+    assert header.cards[0].value == "######### test_macro #########"
 
 
 def test_card_group(exposure):
 
-    card_group = models.CardGroup([('KEYW1', 1, 'The first card'),
-                                   models.Card(('KEYW2', 2))],
-                                  name='card_group')
+    card_group = models.CardGroup(
+        [("KEYW1", 1, "The first card"), models.Card(("KEYW2", 2))], name="card_group"
+    )
 
     assert len(card_group) == 2
     assert isinstance(card_group[0], models.Card)
     assert isinstance(card_group[1], models.Card)
 
-    assert card_group[0].name == 'KEYW1'
+    assert card_group[0].name == "KEYW1"
 
     header = card_group.to_header(exposure)
     assert isinstance(header, astropy.io.fits.Header)
@@ -196,56 +206,56 @@ def test_card_group(exposure):
 
 def test_card_group_append(exposure):
 
-    card_group = models.CardGroup([('KEYW1', 1, 'The first card')])
-    card_group.append(('KEYW2', 2))
+    card_group = models.CardGroup([("KEYW1", 1, "The first card")])
+    card_group.append(("KEYW2", 2))
 
     assert len(card_group) == 2
-    assert card_group[1].name == 'KEYW2'
+    assert card_group[1].name == "KEYW2"
 
 
 def test_card_group_insert(exposure):
 
-    card_group = models.CardGroup([('KEYW1', 1, 'The first card')])
-    card_group.insert(0, ('KEYW2', 2))
+    card_group = models.CardGroup([("KEYW1", 1, "The first card")])
+    card_group.insert(0, ("KEYW2", 2))
 
     assert len(card_group) == 2
-    assert card_group[0].name == 'KEYW2'
+    assert card_group[0].name == "KEYW2"
 
 
 def test_evaluate_callable(exposure):
 
-    card = models.Card('testcall', value=lambda x, y: x + y, fargs=(1, 2))
+    card = models.Card("testcall", value=lambda x, y: x + y, fargs=(1, 2))
 
     name, value, comment = card.evaluate(exposure)
 
-    assert name == 'testcall'
+    assert name == "testcall"
     assert comment is None
     assert value == 3
 
 
 def test_card_evaluate(exposure):
 
-    card = models.Card('TESTCARD', value='2+2', evaluate=True)
+    card = models.Card("TESTCARD", value="2+2", evaluate=True)
     assert card.evaluate(exposure)[1] == 4
 
 
 def test_card_magic_evaluate(exposure):
 
-    models.magic._MAGIC_CARDS['TESTCARD'] = ('2+2', '', {'evaluate': True})
+    models.magic._MAGIC_CARDS["TESTCARD"] = ("2+2", "", {"evaluate": True})
 
-    card = models.Card('TESTCARD')
+    card = models.Card("TESTCARD")
     assert card.evaluate(exposure)[1] == 4
 
 
 def test_magic_card_raises():
 
     with pytest.raises(ValueError):
-        models.Card('VCAM', value='a value')
+        models.Card("VCAM", value="a value")
 
 
 def test_card_name_trimming():
 
     with pytest.warns(CardWarning):
-        card = models.Card('AVERYLARGENAME', 'value')
+        card = models.Card("AVERYLARGENAME", "value")
 
-    assert card.name == 'AVERYLAR'
+    assert card.name == "AVERYLAR"

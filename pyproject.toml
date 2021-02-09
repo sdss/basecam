@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sdss-basecam"
-version = "0.3.4-alpha.0"
+version = "0.4.0-alpha.0"
 description = "A base library for camera wrapping and actor."
 authors = ["José Sánchez-Gallego <gallegoj@uw.edu>"]
 license = "BSD 3-Clause License"
@@ -26,9 +26,8 @@ include = ["LICENSE.md"]
 python = "^3.7"
 astropy = "^4.0"
 numpy = "^1.17"
-sdss-clu = "^0.5.0"
+sdss-clu = "^0.6.0"
 sdsstools = ">=0.4.0"
-sphinx = {version=">=2.3.1", optional=true}
 
 [tool.poetry.dev-dependencies]
 ipython = ">=7.9.0"
@@ -45,27 +44,25 @@ codecov = ">=2.0.15"
 coverage = {version = ">=5.0", extras = ["toml"]}
 ipdb = ">=0.12.3"
 asynctest = ">=0.13.0"
-sphinx = ">=2.3.1"
+sphinx = ">=3.0.0"
+black = {version = "^20.8b1", allow-prereleases = true}
 
-[tool.poetry.extras]
-docs = ["sphinx"]
+[tool.black]
+line-length = 88
+target-version = ['py38']
+fast = true
 
 [tool.isort]
-line_length = 79
-sections = ["FUTURE", "STDLIB", "THIRDPARTY", "SDSS", "FIRSTPARTY", "LOCALFOLDER"]
+profile = "black"
+sections = ["FUTURE", "STDLIB", "TYPING", "THIRDPARTY", "SDSS", "FIRSTPARTY", "LOCALFOLDER"]
 default_section = "THIRDPARTY"
-known_first_party = ["basecam"]
-known_sdss = ["clu", "sdsstools"]
-balanced_wrapping = true
-include_trailing_comma = false
+known_first_party = "basecam"
+known_typing = ["typing"]
+known_sdss = ["sdsstools", "clu"]
 lines_after_imports = 2
-use_parentheses = true
 
 [tool.pytest.ini_options]
 addopts = "--cov basecam --cov-report xml --cov-report html --cov-report term"
-filterwarnings = [
-    "ignore::DeprecationWarning"
-]
 
 [tool.coverage.run]
 branch = true
@@ -116,5 +113,5 @@ commands =
 """
 
 [build-system]
-requires = ["poetry-core>=1.0.0a9"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

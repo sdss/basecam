@@ -18,7 +18,7 @@ from .exceptions import ExposureError
 from .models import FITSModel
 
 
-__all__ = ['Exposure', 'ImageNamer']
+__all__ = ["Exposure", "ImageNamer"]
 
 
 class Exposure(object):
@@ -94,9 +94,9 @@ class Exposure(object):
         if isinstance(value, astropy.time.Time):
             self._obstime = value
         elif isinstance(value, str):
-            self._obstime = astropy.time.Time(value, format='iso', scale='utc')
+            self._obstime = astropy.time.Time(value, format="iso", scale="utc")
         else:
-            raise ExposureError(f'invalid obstime {value}')
+            raise ExposureError(f"invalid obstime {value}")
 
     def to_hdu(self, context={}):
         """Return an `~astropy.io.fits.HDUList` for the image.
@@ -121,8 +121,7 @@ class Exposure(object):
 
         return fits_model.to_hdu(self, context=context)
 
-    async def write(self, filename=None, context={}, overwrite=False,
-                    checksum=True):
+    async def write(self, filename=None, context={}, overwrite=False, checksum=True):
         """Writes the image to disk.
 
         Parameters
@@ -148,7 +147,7 @@ class Exposure(object):
 
         filename = filename or self.filename
         if not filename:
-            raise ExposureError('filename not set.')
+            raise ExposureError("filename not set.")
 
         hdulist = self.to_hdu(context=context)
 
@@ -156,10 +155,9 @@ class Exposure(object):
         if not os.path.exists(dirname):
             os.makedirs(dirname)
 
-        writeto_partial = functools.partial(hdulist.writeto,
-                                            filename,
-                                            overwrite=overwrite,
-                                            checksum=checksum)
+        writeto_partial = functools.partial(
+            hdulist.writeto, filename, overwrite=overwrite, checksum=checksum
+        )
 
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(None, writeto_partial)
@@ -200,13 +198,18 @@ class ImageNamer(object):
 
     """
 
-    def __init__(self, basename='{camera.name}-{num:04d}.fits',
-                 dirname='.', overwrite=False, camera=None):
+    def __init__(
+        self,
+        basename="{camera.name}-{num:04d}.fits",
+        dirname=".",
+        overwrite=False,
+        camera=None,
+    ):
 
-        assert re.match(r'.+(\{num.+\}).+', basename), 'invalid basename.'
+        assert re.match(r".+(\{num.+\}).+", basename), "invalid basename."
 
         # We want to expand everything except the num first so we "double-escape" it.
-        self.basename = re.sub(r'(\{num.+\})', r'{\1}', basename)
+        self.basename = re.sub(r"(\{num.+\})", r"{\1}", basename)
         self.dirname = pathlib.Path(dirname)
         self.overwrite = overwrite
 
@@ -218,8 +221,9 @@ class ImageNamer(object):
 
         date = astropy.time.Time.now()
 
-        return pathlib.Path(eval(f'f"{self.dirname}"', {}, {'date': date,
-                                                            'camera': self.camera}))
+        return pathlib.Path(
+            eval(f'f"{self.dirname}"', {}, {"date": date, "camera": self.camera})
+        )
 
     def _get_num(self, basename):
         """Returns the counter value."""
@@ -227,10 +231,10 @@ class ImageNamer(object):
         if self.overwrite:
             return self._last_num + 1
 
-        regex = re.compile(re.sub(r'\{num.+\}', '(?P<num>[0-9]*?)', basename))
+        regex = re.compile(re.sub(r"\{num.+\}", "(?P<num>[0-9]*?)", basename))
 
         dirname = self._eval_dirname()
-        all_files = list(map(str, dirname.glob('*')))
+        all_files = list(map(str, dirname.glob("*")))
 
         match_files = list(filter(regex.search, all_files))
 

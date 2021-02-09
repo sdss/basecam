@@ -11,18 +11,18 @@ import logging
 from contextlib import suppress
 
 
-__all__ = ['LoggerMixIn', 'Poller', 'cancel_task']
+__all__ = ["LoggerMixIn", "Poller", "cancel_task"]
 
 
 class LoggerMixIn(object):
     """A mixin to provide easy logging with a header."""
 
-    log_header = ''
+    log_header = ""
 
     def log(self, message, level=logging.DEBUG, use_header=True):
         """Logs a message with a header."""
 
-        header = (self.log_header or '') if use_header else ''
+        header = (self.log_header or "") if use_header else ""
 
         self.logger.log(level, header + message)
 
@@ -70,8 +70,9 @@ class Poller(object):
                 else:
                     self.callback()
             except Exception as ee:
-                self.loop.call_exception_handler({'message': 'failed running callback',
-                                                  'exception': ee})
+                self.loop.call_exception_handler(
+                    {"message": "failed running callback", "exception": ee}
+                )
             self._sleep_task = self.loop.create_task(asyncio.sleep(self.delay))
 
             await self._sleep_task

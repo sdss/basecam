@@ -10,6 +10,6 @@ from .exposure import *
 from .notifier import *
 
 
-NAME = 'sdss-basecam'
+NAME = "sdss-basecam"
 
-__version__ = get_package_version(__file__, 'sdss-basecam') or 'dev'
+__version__ = get_package_version(__file__, "sdss-basecam") or "dev"

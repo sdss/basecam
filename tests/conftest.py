@@ -22,13 +22,12 @@ from sdsstools import read_yaml_file
 from basecam import BaseCamera, CameraSystem, Exposure
 from basecam.actor import CameraActor
 from basecam.events import CameraEvent
-from basecam.mixins import (CoolerMixIn, ExposureTypeMixIn,
-                            ImageAreaMixIn, ShutterMixIn)
+from basecam.mixins import CoolerMixIn, ExposureTypeMixIn, ImageAreaMixIn, ShutterMixIn
 from basecam.notifier import EventListener
 from basecam.utils import cancel_task
 
 
-TEST_CONFIG_FILE = os.path.dirname(__file__) + '/data/test_config.yaml'
+TEST_CONFIG_FILE = os.path.dirname(__file__) + "/data/test_config.yaml"
 
 EXPOSURE_DIR = tempfile.TemporaryDirectory()
 
@@ -36,14 +35,15 @@ EXPOSURE_DIR = tempfile.TemporaryDirectory()
 class CameraSystemTester(CameraSystem):
 
     _connected_cameras = []
-    __version__ = '0.1.0'
+    __version__ = "0.1.0"
 
     def list_available_cameras(self):
         return self._connected_cameras
 
 
-class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn,
-                    CoolerMixIn, ImageAreaMixIn):
+class VirtualCamera(
+    BaseCamera, ExposureTypeMixIn, ShutterMixIn, CoolerMixIn, ImageAreaMixIn
+):
     """A virtual camera that does not require hardware.
 
     This class is mostly intended for testing and development. It behaves
@@ -53,7 +53,7 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn,
     """
 
     # Sets the internal UID for the camera.
-    _uid = 'DEV_12345'
+    _uid = "DEV_12345"
 
     def __init__(self, *args, **kwargs):
 
@@ -77,14 +77,12 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn,
         return True
 
     def _status_internal(self):
-        return {'temperature': self.temperature,
-                'cooler': 10.}
+        return {"temperature": self.temperature, "cooler": 10.0}
 
     async def _get_temperature_internal(self):
         return self.temperature
 
     async def _set_temperature_internal(self, temperature):
-
         async def change_temperature():
             await asyncio.sleep(0.2)
             self.temperature = temperature
@@ -96,7 +94,7 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn,
 
         image_type = exposure.image_type
 
-        if image_type in ['bias', 'dark']:
+        if image_type in ["bias", "dark"]:
             await self.set_shutter(False)
         else:
             await self.set_shutter(True)
@@ -108,21 +106,23 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn,
         xx = numpy.arange(-5, 5, 0.1)
         yy = numpy.arange(-5, 5, 0.1)
         xg, yg = numpy.meshgrid(xx, yy, sparse=True)
-        tile = numpy.sin(xg**2 + yg**2) / (xg**2 + yg**2)
+        tile = numpy.sin(xg ** 2 + yg ** 2) / (xg ** 2 + yg ** 2)
 
         # Repeats the tile to match the size of the image.
-        data = numpy.tile(tile.astype(numpy.uint16),
-                          (self.height // len(yy) + 1, self.width // len(yy) + 1))
-        data = data[0:self.height, 0:self.width]
+        data = numpy.tile(
+            tile.astype(numpy.uint16),
+            (self.height // len(yy) + 1, self.width // len(yy) + 1),
+        )
+        data = data[0 : self.height, 0 : self.width]
 
         # For some tests, we want to set out custom data.
-        if hasattr(self, 'data'):
+        if hasattr(self, "data"):
             data = self.data
 
         self._notify(CameraEvent.EXPOSURE_READING)
 
         exposure.data = data
-        exposure.obstime = astropy.time.Time('2000-01-01 00:00:00')
+        exposure.obstime = astropy.time.Time("2000-01-01 00:00:00")
 
         await self.set_shutter(False)
 
@@ -155,19 +155,19 @@ class VirtualCamera(BaseCamera, ExposureTypeMixIn, ShutterMixIn,
             self._image_area = area
 
 
-@pytest.fixture(scope='function', autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def clean_exposure_dir():
 
-    for ff in glob.glob(os.path.join(EXPOSURE_DIR.name, '*.fits')):
+    for ff in glob.glob(os.path.join(EXPOSURE_DIR.name, "*.fits")):
         os.remove(ff)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def config():
     return read_yaml_file(TEST_CONFIG_FILE)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def event_loop(request):
     """A module-scoped event loop."""
 
@@ -176,12 +176,12 @@ def event_loop(request):
     loop.close()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 async def camera_system(config, event_loop):
 
-    camera_system = CameraSystemTester(VirtualCamera,
-                                       camera_config=config,
-                                       loop=event_loop).setup()
+    camera_system = CameraSystemTester(
+        VirtualCamera, camera_config=config, loop=event_loop
+    ).setup()
 
     yield camera_system
 
@@ -191,7 +191,7 @@ async def camera_system(config, event_loop):
 @pytest.fixture
 async def camera(camera_system):
 
-    camera = await camera_system.add_camera('test_camera')
+    camera = await camera_system.add_camera("test_camera")
     camera.events = []
 
     def add_event(event, payload):
@@ -206,7 +206,7 @@ async def camera(camera_system):
     await listener.stop_listening()
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 async def actor_setup(config):
     """Setups an actor for testing, mocking the client transport.
 
@@ -226,10 +226,10 @@ async def actor_setup(config):
     yield actor
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 async def actor(actor_setup):
 
-    await actor_setup.camera_system.add_camera('test_camera')
+    await actor_setup.camera_system.add_camera("test_camera")
 
     yield actor_setup
 
@@ -242,20 +242,20 @@ async def actor(actor_setup):
     actor_setup.default_cameras = actor_setup._default_cameras
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 async def command(actor):
 
     command = TestCommand(commander_id=1, actor=actor)
     yield command
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def exposure(camera):
 
     exp = Exposure(camera)
 
     exp.data = numpy.zeros((10, 10), dtype=numpy.uint16)
     exp.obstime = astropy.time.Time.now()
-    exp.image_type = 'object'
+    exp.image_type = "object"
 
     yield exp

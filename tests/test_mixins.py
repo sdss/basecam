@@ -19,8 +19,9 @@ pytestmark = pytest.mark.asyncio
 
 async def test_bias(camera):
 
-    with patch.object(camera, '_set_shutter_internal',
-                      wraps=camera._set_shutter_internal) as mock:
+    with patch.object(
+        camera, "_set_shutter_internal", wraps=camera._set_shutter_internal
+    ) as mock:
 
         # Open the shutter
         await camera.open_shutter()
@@ -28,8 +29,8 @@ async def test_bias(camera):
         exposure = await camera.bias()
         hdu = exposure.to_hdu()
 
-        assert hdu[0].header['EXPTIME'] == '0.0'
-        assert hdu[0].header['IMAGETYP'] == 'bias'
+        assert hdu[0].header["EXPTIME"] == "0.0"
+        assert hdu[0].header["IMAGETYP"] == "bias"
 
         calls = mock.mock_calls
         assert len(calls) == 2
@@ -38,14 +39,15 @@ async def test_bias(camera):
 
 async def test_dark(camera):
 
-    with patch.object(camera, '_set_shutter_internal',
-                      wraps=camera._set_shutter_internal) as mock:
+    with patch.object(
+        camera, "_set_shutter_internal", wraps=camera._set_shutter_internal
+    ) as mock:
 
         exposure = await camera.dark(5)
         hdu = exposure.to_hdu()
 
-        assert hdu[0].header['EXPTIME'] == '5'
-        assert hdu[0].header['IMAGETYP'] == 'dark'
+        assert hdu[0].header["EXPTIME"] == "5"
+        assert hdu[0].header["IMAGETYP"] == "dark"
 
         calls = mock.mock_calls
         assert len(calls) == 0
@@ -53,14 +55,15 @@ async def test_dark(camera):
 
 async def test_flat(camera):
 
-    with patch.object(camera, '_set_shutter_internal',
-                      wraps=camera._set_shutter_internal) as mock:
+    with patch.object(
+        camera, "_set_shutter_internal", wraps=camera._set_shutter_internal
+    ) as mock:
 
         exposure = await camera.flat(5)
         hdu = exposure.to_hdu()
 
-        assert hdu[0].header['EXPTIME'] == '5'
-        assert hdu[0].header['IMAGETYP'] == 'flat'
+        assert hdu[0].header["EXPTIME"] == "5"
+        assert hdu[0].header["IMAGETYP"] == "flat"
 
         calls = mock.mock_calls
         assert len(calls) == 2
@@ -70,14 +73,15 @@ async def test_flat(camera):
 
 async def test_object(camera):
 
-    with patch.object(camera, '_set_shutter_internal',
-                      wraps=camera._set_shutter_internal) as mock:
+    with patch.object(
+        camera, "_set_shutter_internal", wraps=camera._set_shutter_internal
+    ) as mock:
 
         exposure = await camera.object(5)
         hdu = exposure.to_hdu()
 
-        assert hdu[0].header['EXPTIME'] == '5'
-        assert hdu[0].header['IMAGETYP'] == 'object'
+        assert hdu[0].header["EXPTIME"] == "5"
+        assert hdu[0].header["IMAGETYP"] == "object"
 
         calls = mock.mock_calls
         assert len(calls) == 2
@@ -103,23 +107,23 @@ async def test_get_temperature(camera):
 
 async def test_set_temperature(camera):
 
-    await camera.set_temperature(100.)
+    await camera.set_temperature(100.0)
 
-    assert await camera.get_temperature() == 100.
+    assert await camera.get_temperature() == 100.0
 
     assert CameraEvent.NEW_SET_POINT in camera.events[0]
-    assert camera.events[0][1]['temperature'] == 100.
+    assert camera.events[0][1]["temperature"] == 100.0
     assert CameraEvent.SET_POINT_REACHED in camera.events[1]
 
 
 async def test_set_temperature_override(camera):
 
-    await camera.set_temperature(100.)
+    await camera.set_temperature(100.0)
 
     await asyncio.sleep(0.01)
-    await camera.set_temperature(0.)
+    await camera.set_temperature(0.0)
 
-    assert await camera.get_temperature() == 0.
+    assert await camera.get_temperature() == 0.0
     assert CameraEvent.SET_POINT_REACHED in camera.events[-1]
 
 

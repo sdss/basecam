@@ -9,7 +9,7 @@
 import enum
 
 
-__all__ = ['CameraSystemEvent', 'CameraEvent']
+__all__ = ["CameraSystemEvent", "CameraEvent"]
 
 
 class CameraSystemEvent(enum.Enum):
@@ -22,18 +22,18 @@ class CameraSystemEvent(enum.Enum):
 class CameraEvent(enum.Enum):
     """Enumeration of camera events."""
 
-    CAMERA_CONNECTED = 'connected'
-    CAMERA_CONNECT_FAILED = 'connect_failed'
-    CAMERA_DISCONNECTED = 'disconnected'
-    CAMERA_DISCONNECT_FAILED = 'disconnect_failed'
+    CAMERA_CONNECTED = "connected"
+    CAMERA_CONNECT_FAILED = "connect_failed"
+    CAMERA_DISCONNECTED = "disconnected"
+    CAMERA_DISCONNECT_FAILED = "disconnect_failed"
 
-    EXPOSURE_FLUSHING = 'flushing'
-    EXPOSURE_INTEGRATING = 'integrating'
-    EXPOSURE_READING = 'reading'
-    EXPOSURE_READ = 'read'
-    EXPOSURE_FAILED = 'failed'
-    EXPOSURE_WRITING = 'writing'
-    EXPOSURE_WRITTEN = 'written'
+    EXPOSURE_FLUSHING = "flushing"
+    EXPOSURE_INTEGRATING = "integrating"
+    EXPOSURE_READING = "reading"
+    EXPOSURE_READ = "read"
+    EXPOSURE_FAILED = "failed"
+    EXPOSURE_WRITING = "writing"
+    EXPOSURE_WRITTEN = "written"
 
-    NEW_SET_POINT = 'new_set_point'
-    SET_POINT_REACHED = 'set_point_reached'
+    NEW_SET_POINT = "new_set_point"
+    SET_POINT_REACHED = "set_point_reached"

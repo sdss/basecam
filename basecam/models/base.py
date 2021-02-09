@@ -19,7 +19,7 @@ from ..exceptions import CardError, CardWarning
 from .magic import _MAGIC_CARDS
 
 
-__all__ = ['FITSModel', 'Extension', 'HeaderModel', 'Card', 'CardGroup', 'MacroCard']
+__all__ = ["FITSModel", "Extension", "HeaderModel", "Card", "CardGroup", "MacroCard"]
 
 
 class FITSModel(list):
@@ -44,7 +44,7 @@ class FITSModel(list):
         list.__init__(self, extensions)
 
         if len(self) == 0:
-            self.append(Extension(data='raw', name='DATA'))
+            self.append(Extension(data="raw", name="DATA"))
 
     def to_hdu(self, exposure, context={}):
         """Returns an `~astropy.io.fits.HDUList` from an exposure.
@@ -103,14 +103,14 @@ class Extension(object):
 
     """
 
-    __VALID_DATA_VALUES = ['raw', 'none']
+    __VALID_DATA_VALUES = ["raw", "none"]
 
     def __init__(self, data=None, header_model=None, name=None, compressed=False):
 
         if isinstance(data, numpy.ndarray):
             self.data = data
         else:
-            assert data is None or data in self.__VALID_DATA_VALUES, 'invalid data'
+            assert data is None or data in self.__VALID_DATA_VALUES, "invalid data"
             self.data = data
 
         self.header_model = header_model
@@ -120,7 +120,7 @@ class Extension(object):
 
     def __repr__(self):
 
-        return f'<Extension (name={self.name!r}, compressed={self.compressed})>'
+        return f"<Extension (name={self.name!r}, compressed={self.compressed})>"
 
     def to_hdu(self, exposure, primary=False, context={}):
         """Evaluates the extension as an HDU.
@@ -173,9 +173,9 @@ class Extension(object):
         """Returns the data as a numpy array."""
 
         if isinstance(self.data, str):
-            if self.data == 'raw':
+            if self.data == "raw":
                 data = exposure.data
-            elif self.data == 'none':
+            elif self.data == "none":
                 data = None
         elif self.data is None:
             data = exposure.data if primary else None
@@ -211,7 +211,7 @@ class HeaderModel(list):
 
     def __repr__(self):
 
-        return f'<HeaderModel {list.__repr__(self)!s}>'
+        return f"<HeaderModel {list.__repr__(self)!s}>"
 
     def _process_input(self, input_card):
         """Processes the input and converts it into a valid card."""
@@ -227,7 +227,7 @@ class HeaderModel(list):
         elif isinstance(input_card, str):
             return Card(input_card)
         else:
-            raise CardError(f'invalid input {input_card!r}')
+            raise CardError(f"invalid input {input_card!r}")
 
     def append(self, card):
         list.append(self, self._process_input(card))
@@ -276,12 +276,13 @@ class HeaderModel(list):
                 for card_ in card:
                     rows.append((card_.name.upper(), card_.value, card_.comment))
             elif isinstance(card, MacroCard):
-                rows.append(('### MACRO', card.__class__.__name__, ''))
+                rows.append(("### MACRO", card.__class__.__name__, ""))
             else:
-                raise CardError(f'invalid card {card}. '
-                                'This should not have happened.')
+                raise CardError(
+                    f"invalid card {card}. " "This should not have happened."
+                )
 
-        return astropy.table.Table(rows=rows, names=['name', 'value', 'comment'])
+        return astropy.table.Table(rows=rows, names=["name", "value", "comment"])
 
 
 class Card(object):
@@ -341,17 +342,18 @@ class Card(object):
 
     """
 
-    def __init__(self, name, value=None, comment=None, fargs=None,
-                 evaluate=False, context=None):
+    def __init__(
+        self, name, value=None, comment=None, fargs=None, evaluate=False, context=None
+    ):
 
         if isinstance(name, (list, tuple)):
             try:
                 name_ = name[0]
                 value = name[1]
                 comment = name[2]
-                fargs = name[3].get('fargs', None)
-                context = name[3].get('context', {})
-                evaluate = name[3].get('evaluate', False)
+                fargs = name[3].get("fargs", None)
+                context = name[3].get("context", {})
+                evaluate = name[3].get("evaluate", False)
             except IndexError:
                 pass
             finally:
@@ -360,13 +362,13 @@ class Card(object):
         self.name = name
 
         if len(self.name) > 8:
-            warnings.warn(f'trimming {self.name} to 8 characters', CardWarning)
+            warnings.warn(f"trimming {self.name} to 8 characters", CardWarning)
             self.name = self.name[:8]
 
         if self.is_magic():
 
             if value:
-                raise ValueError(f'cannot override value of magic card {self.name!r}')
+                raise ValueError(f"cannot override value of magic card {self.name!r}")
 
             magic_params = _MAGIC_CARDS[self.name.upper()]
             self.value, magic_comment = magic_params[0:2]
@@ -374,9 +376,9 @@ class Card(object):
             self.comment = comment or magic_comment
 
             if len(magic_params) == 3:
-                fargs = magic_params[2].get('fargs', None)
-                context = magic_params[2].get('context', {})
-                evaluate = magic_params[2].get('evaluate', False)
+                fargs = magic_params[2].get("fargs", None)
+                context = magic_params[2].get("context", {})
+                evaluate = magic_params[2].get("evaluate", False)
 
         else:
 
@@ -390,7 +392,7 @@ class Card(object):
 
     def __repr__(self):
 
-        return f'<Card (name={self.name!r}, value={self.value!r})>'
+        return f"<Card (name={self.name!r}, value={self.value!r})>"
 
     def is_magic(self):
         """Returns `True` if the card name matches a magic card."""
@@ -405,8 +407,9 @@ class Card(object):
 
         try:
             self._exposure = exposure
-            self.context.update({'__exposure__': self._exposure,
-                                 '__camera__': self._exposure.camera})
+            self.context.update(
+                {"__exposure__": self._exposure, "__camera__": self._exposure.camera}
+            )
             self.context.update(context)
             yield
         finally:
@@ -431,8 +434,9 @@ class Card(object):
         if use_fargs and self._fargs:
             # Evaluate the fargs as values so that we can apply
             # all the magic to them as well.
-            fargs = (self._evaluate_value(farg, use_fargs=False)
-                     for farg in self._fargs)
+            fargs = (
+                self._evaluate_value(farg, use_fargs=False) for farg in self._fargs
+            )
             return func(*fargs)
 
         return func()
@@ -505,7 +509,7 @@ class CardGroup(list):
 
     def __repr__(self):
 
-        return f'<CardGroup {list.__repr__(self)!s}>'
+        return f"<CardGroup {list.__repr__(self)!s}>"
 
     def _process_input(self, card):
         """Processes the input and converts it into a valid card."""
@@ -515,7 +519,7 @@ class CardGroup(list):
         elif isinstance(card, (list, tuple, str)):
             return Card(card)
         else:
-            raise CardError(f'invalid card {card}')
+            raise CardError(f"invalid card {card}")
 
     def append(self, card):
         list.append(self, self._process_input(card))
@@ -567,7 +571,7 @@ class CardGroup(list):
 
         use_group_title = use_group_title or self.use_group_title
         if use_group_title and self.name:
-            header.insert(0, ('COMMENT', '{s:#^30}'.format(s=f' {self.name} ')))
+            header.insert(0, ("COMMENT", "{s:#^30}".format(s=f" {self.name} ")))
 
         return header
 
@@ -599,7 +603,7 @@ class MacroCard(object, metaclass=abc.ABCMeta):
 
     def __repr__(self):
 
-        return f'<{self.__class__.__name__ (name=self.name)}>'
+        return f"<{self.__class__.__name__ (name=self.name)}>"
 
     @abc.abstractmethod
     def macro(self, exposure, context={}):
@@ -663,6 +667,6 @@ class MacroCard(object, metaclass=abc.ABCMeta):
 
         use_group_title = use_group_title or self.use_group_title
         if use_group_title and self.name:
-            header.insert(0, ('COMMENT', '{s:#^30}'.format(s=f' {self.name} ')))
+            header.insert(0, ("COMMENT", "{s:#^30}".format(s=f" {self.name} ")))
 
         return header

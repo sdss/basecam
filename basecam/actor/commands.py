@@ -27,7 +27,7 @@ camera_parser.add_command(help_)
 camera_parser.add_command(ping)
 
 
-@camera_parser.command(name='list')
+@camera_parser.command(name="list")
 async def list_(command):
     """Lists cameras connected to the camera system."""
 
@@ -36,10 +36,14 @@ async def list_(command):
 
 
 @camera_parser.command()
-@click.argument('CAMERAS', nargs=-1, type=str)
-@click.option('-f', '--force', is_flag=True, default=False,
-              help='Forces a camera to be set as default '
-                   'even if it is not connected.')
+@click.argument("CAMERAS", nargs=-1, type=str)
+@click.option(
+    "-f",
+    "--force",
+    is_flag=True,
+    default=False,
+    help="Forces a camera to be set as default " "even if it is not connected.",
+)
 async def set_default(command, cameras, force):
     """Set default cameras."""
 
@@ -47,7 +51,7 @@ async def set_default(command, cameras, force):
 
     camera_names = []
     for camera in cameras:
-        for camera_split in camera.split(','):
+        for camera_split in camera.split(","):
             if camera_split not in camera_names:
                 camera_names.append(camera_split)
 
@@ -55,12 +59,13 @@ async def set_default(command, cameras, force):
         camera = camera_system.get_camera(name=camera_name)
 
         if not camera:
-            msg = f'camera {camera_name} is not connected.'
+            msg = f"camera {camera_name} is not connected."
             if force:
-                command.write('w', text=msg)
+                command.write("w", text=msg)
             else:
-                return command.fail(camera=camera.name,
-                                    text=f'camera {camera_name} is not connected.')
+                return command.fail(
+                    camera=camera.name, text=f"camera {camera_name} is not connected."
+                )
 
     command.actor.set_default_cameras(camera_names)
 
@@ -68,7 +73,7 @@ async def set_default(command, cameras, force):
 
 
 @camera_parser.command()
-@click.argument('CAMERAS', nargs=-1, type=str, required=False)
+@click.argument("CAMERAS", nargs=-1, type=str, required=False)
 async def status(command, cameras):
     """Returns the status of a camera."""
 
@@ -77,18 +82,25 @@ async def status(command, cameras):
         return
 
     for camera in cameras:
-        status = {'camera': {'name': camera.name,
-                             'uid': camera.uid},
-                  'status': camera.get_status(update=True)}
+        status = {
+            "camera": {"name": camera.name, "uid": camera.uid},
+            "status": camera.get_status(update=True),
+        }
         command.info(status)
 
     command.finish()
 
 
 @camera_parser.command()
-@click.argument('CAMERAS', nargs=-1, type=str, required=False)
-@click.option('--timeout', '-t', type=float, default=5., show_default=True,
-              help='Seconds to wait until disconnect or reconnect command times out.')
+@click.argument("CAMERAS", nargs=-1, type=str, required=False)
+@click.option(
+    "--timeout",
+    "-t",
+    type=float,
+    default=5.0,
+    show_default=True,
+    help="Seconds to wait until disconnect or reconnect command times out.",
+)
 async def reconnect(command, cameras, timeout):
     """Reconnects a camera."""
 
@@ -99,60 +111,103 @@ async def reconnect(command, cameras, timeout):
     failed = False
     for camera in cameras:
 
-        command.warning(text=f'reconnecting camera {camera.name!r}')
+        command.warning(text=f"reconnecting camera {camera.name!r}")
 
         try:
             await asyncio.wait_for(camera.disconnect(), timeout=timeout)
-            command.info(camera=camera.name,
-                         text=f'camera {camera.name!r} was disconnected.')
+            command.info(
+                camera=camera.name, text=f"camera {camera.name!r} was disconnected."
+            )
         except CameraConnectionError as ee:
-            command.warning(camera=camera.name,
-                            text=f'camera {camera.name!r} fail to disconnect: '
-                                 f'{ee}. Will try to reconnect.')
+            command.warning(
+                camera=camera.name,
+                text=f"camera {camera.name!r} fail to disconnect: "
+                f"{ee}. Will try to reconnect.",
+            )
         except asyncio.TimeoutError:
-            command.warning(camera=camera.name,
-                            text=f'camera {camera.name!r} timed out '
-                                 'disconnecting. Will try to reconnect.')
+            command.warning(
+                camera=camera.name,
+                text=f"camera {camera.name!r} timed out "
+                "disconnecting. Will try to reconnect.",
+            )
 
         try:
             await asyncio.wait_for(camera.connect(force=True), timeout=timeout)
-            command.info(camera=camera.name,
-                         error=f'camera {camera.name!r} was reconnected.')
+            command.info(
+                camera=camera.name, error=f"camera {camera.name!r} was reconnected."
+            )
         except CameraConnectionError as ee:
-            command.error(camera=camera.name,
-                          error=f'camera {camera.name!r} fail to reconnect: {ee}')
+            command.error(
+                camera=camera.name,
+                error=f"camera {camera.name!r} fail to reconnect: {ee}",
+            )
             failed = True
         except asyncio.TimeoutError:
-            command.error(camera=camera.name,
-                          error=f'camera {camera.name!r} timed out reconnecting.')
+            command.error(
+                camera=camera.name,
+                error=f"camera {camera.name!r} timed out reconnecting.",
+            )
             failed = True
 
     if failed:
-        return command.fail('some cameras failed to reconnect.')
+        return command.fail("some cameras failed to reconnect.")
     else:
         return command.finish()
 
 
 @camera_parser.command()
-@click.argument('CAMERAS', nargs=-1, type=str, required=False)
-@click.argument('EXPTIME', type=float, required=False)
-@click.option('--object', 'image_type', flag_value='object', default=True,
-              show_default=True, help='Takes an object exposure.')
-@click.option('--flat', 'image_type', flag_value='flat',
-              show_default=True, help='Takes a flat exposure.')
-@click.option('--dark', 'image_type', flag_value='dark',
-              show_default=True, help='Takes a dark exposure.')
-@click.option('--bias', 'image_type', flag_value='bias',
-              show_default=True, help='Takes a bias exposure.')
-@click.option('--filename', '-f', type=str, default=None,
-              show_default=True, help='Filename of the imaga to save.')
-@click.option('--stack', '-s', type=int, default=1,
-              show_default=True, help='Number of images to stack.')
+@click.argument("CAMERAS", nargs=-1, type=str, required=False)
+@click.argument("EXPTIME", type=float, required=False)
+@click.option(
+    "--object",
+    "image_type",
+    flag_value="object",
+    default=True,
+    show_default=True,
+    help="Takes an object exposure.",
+)
+@click.option(
+    "--flat",
+    "image_type",
+    flag_value="flat",
+    show_default=True,
+    help="Takes a flat exposure.",
+)
+@click.option(
+    "--dark",
+    "image_type",
+    flag_value="dark",
+    show_default=True,
+    help="Takes a dark exposure.",
+)
+@click.option(
+    "--bias",
+    "image_type",
+    flag_value="bias",
+    show_default=True,
+    help="Takes a bias exposure.",
+)
+@click.option(
+    "--filename",
+    "-f",
+    type=str,
+    default=None,
+    show_default=True,
+    help="Filename of the imaga to save.",
+)
+@click.option(
+    "--stack",
+    "-s",
+    type=int,
+    default=1,
+    show_default=True,
+    help="Number of images to stack.",
+)
 async def expose(command, cameras, exptime, image_type, filename, stack):
     """Exposes and writes an image to disk."""
 
     def stage(event, payload):
-        name = payload.get('name', None)
+        name = payload.get("name", None)
         if event in CameraEvent:
             stage = event.value
             command.info(name=name, stage=stage)
@@ -161,49 +216,57 @@ async def expose(command, cameras, exptime, image_type, filename, stack):
     if not cameras:  # pragma: no cover
         return
 
-    if image_type == 'bias':
+    if image_type == "bias":
         if exptime and exptime > 0:
-            command.warning('seeting exposure time for bias to 0 seconds.')
+            command.warning("seeting exposure time for bias to 0 seconds.")
         exptime = 0.0
 
     if filename and len(cameras) > 1:
-        return command.fail('--filename can only be used when exposing '
-                            'a single camera.')
+        return command.fail(
+            "--filename can only be used when exposing " "a single camera."
+        )
 
     failed = False
     for camera in cameras:
 
         command.actor.listener.register_callback(stage)
-        command.info(text=f'exposing camera {camera.name!r}')
+        command.info(text=f"exposing camera {camera.name!r}")
 
         try:
             # Schedule camera.expose as a task to allow the events to be
             # notified concurrently.
             exposure = await command.actor.loop.create_task(
-                camera.expose(exptime, image_type=image_type, stack=stack,
-                              filename=filename, write=True))
+                camera.expose(
+                    exptime,
+                    image_type=image_type,
+                    stack=stack,
+                    filename=filename,
+                    write=True,
+                )
+            )
             file_path = os.path.realpath(str(exposure.filename))
             command.info(camera=camera.name, filename=file_path)
         except ExposureError as ee:
-            command.error(camera=camera.name,
-                          error='error found while exposing camera '
-                                f'{camera.name!r}: {ee!s}')
+            command.error(
+                camera=camera.name,
+                error="error found while exposing camera " f"{camera.name!r}: {ee!s}",
+            )
             failed = True
         finally:
             command.actor.listener.remove_callback(stage)
 
     if failed:
-        return command.failed('one or more cameras failed to expose.')
+        return command.failed("one or more cameras failed to expose.")
     else:
         return command.finish()
 
 
 @click.command(cls=CluCommand)
-@click.argument('CAMERAS', nargs=-1, type=str, required=False)
-@click.option('--open', 'shutter_position', flag_value='open',
-              help='Open the shutter.')
-@click.option('--close', 'shutter_position', flag_value='close',
-              help='Close the shutter.')
+@click.argument("CAMERAS", nargs=-1, type=str, required=False)
+@click.option("--open", "shutter_position", flag_value="open", help="Open the shutter.")
+@click.option(
+    "--close", "shutter_position", flag_value="close", help="Close the shutter."
+)
 async def shutter(command, cameras, shutter_position):
     """Controls the camera shutter.
 
@@ -223,22 +286,23 @@ async def shutter(command, cameras, shutter_position):
             command.info(camera=camera.name, shutter=shutter_now)
         else:
             try:
-                await camera.set_shutter(shutter_position == 'open')
+                await camera.set_shutter(shutter_position == "open")
                 command.info(camera=camera.name, shutter=shutter_position)
             except CameraError as ee:
-                command.error(camera=camera.name,
-                              error=f'failed commanding shutter: {ee!s}')
+                command.error(
+                    camera=camera.name, error=f"failed commanding shutter: {ee!s}"
+                )
                 failed = True
 
     if failed:
-        return command.fail('failed to command the shutter of one or more cameras.')
+        return command.fail("failed to command the shutter of one or more cameras.")
     else:
         return command.finish()
 
 
 @click.command(cls=CluCommand)
-@click.argument('CAMERAS', nargs=-1, type=str, required=False)
-@click.argument('TEMPERATURE', type=float, required=False)
+@click.argument("CAMERAS", nargs=-1, type=str, required=False)
+@click.argument("TEMPERATURE", type=float, required=False)
 async def temperature(command, cameras, temperature):
     """Controls the camera temperature.
 
@@ -255,8 +319,7 @@ async def temperature(command, cameras, temperature):
     for camera in cameras:
 
         if not temperature:
-            command.info(camera=camera.name,
-                         temperature=await camera.get_temperature())
+            command.info(camera=camera.name, temperature=await camera.get_temperature())
         else:
             temperature_tasks.append(camera.set_temperature(temperature))
 
@@ -267,19 +330,18 @@ async def temperature(command, cameras, temperature):
     failed = False
     for ii, result in enumerate(results):
         if isinstance(result, CameraError):
-            command.error(camera=cameras[ii].name,
-                          error=str(result))
+            command.error(camera=cameras[ii].name, error=str(result))
             failed = True
 
     if failed:
-        return command.fail('one or more cameras failed to set temperature.')
+        return command.fail("one or more cameras failed to set temperature.")
     else:
-        return command.finish('all cameras have reached their set points.')
+        return command.finish("all cameras have reached their set points.")
 
 
 @click.command(cls=CluCommand)
-@click.argument('CAMERAS', nargs=-1, type=str, required=False)
-@click.argument('BINNING', nargs=2, type=int, required=False)
+@click.argument("CAMERAS", nargs=-1, type=str, required=False)
+@click.argument("BINNING", nargs=2, type=int, required=False)
 async def binning(command, cameras, binning):
     """Controls the camera binning.
 
@@ -295,29 +357,32 @@ async def binning(command, cameras, binning):
     for camera in cameras:
 
         if not binning:
-            command.info(camera=camera.name,
-                         binning=tuple(await camera.get_binning()))
+            command.info(camera=camera.name, binning=tuple(await camera.get_binning()))
         else:
             try:
                 await camera.set_binning(*binning)
-                command.info(camera=camera.name,
-                             binning=tuple(binning))
+                command.info(camera=camera.name, binning=tuple(binning))
             except (CameraError, AssertionError) as ee:
-                command.error(camera=camera.name,
-                              error=str(ee))
+                command.error(camera=camera.name, error=str(ee))
                 failed = True
 
     if failed:
-        return command.fail('failed to set binning for one or more cameras.')
+        return command.fail("failed to set binning for one or more cameras.")
     else:
         return command.finish()
 
 
 @click.command(cls=CluCommand)
-@click.argument('CAMERAS', nargs=-1, type=str, required=False)
-@click.argument('AREA', nargs=4, type=int, required=False)
-@click.option('--reset', '-r', is_flag=True, default=False,
-              show_default=True, help='Restores the original image area.')
+@click.argument("CAMERAS", nargs=-1, type=str, required=False)
+@click.argument("AREA", nargs=4, type=int, required=False)
+@click.option(
+    "--reset",
+    "-r",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Restores the original image area.",
+)
 async def area(command, cameras, area, reset):
     """Controls the camera image area.
 
@@ -334,28 +399,27 @@ async def area(command, cameras, area, reset):
     for camera in cameras:
 
         if not area and reset is False:
-            command.info(camera=camera.name,
-                         area=tuple(await camera.get_image_area()))
+            command.info(camera=camera.name, area=tuple(await camera.get_image_area()))
         else:
             if reset:
                 area = None
             try:
                 await camera.set_image_area(area)
-                command.info(camera=camera.name,
-                             area=tuple(await camera.get_image_area()))
+                command.info(
+                    camera=camera.name, area=tuple(await camera.get_image_area())
+                )
             except CameraError as ee:
-                command.error(camera=camera.name,
-                              error=str(ee))
+                command.error(camera=camera.name, error=str(ee))
                 failed = True
 
     if failed:
-        return command.fail('failed to set binning for one or more cameras.')
+        return command.fail("failed to set binning for one or more cameras.")
     else:
         return command.finish()
 
 
 _MIXIN_TO_COMMANDS = {
-    'ShutterMixIn': [shutter],
-    'CoolerMixIn': [temperature],
-    'ImageAreaMixIn': [binning, area]
+    "ShutterMixIn": [shutter],
+    "CoolerMixIn": [temperature],
+    "ImageAreaMixIn": [binning, area],
 }

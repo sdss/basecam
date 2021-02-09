@@ -8,15 +8,16 @@
 
 
 _MAGIC_CARDS = {
-
-    'EXPTIME': ('{__exposure__.exptime}', 'Exposure time of single integration [s]'),
-    'EXPTIMEN': ('{__exposure__.exptime_n}', 'Total exposure time [s]'),
-    'STACK': ('{__exposure__.stack}', 'Number of stacked frames'),
-    'STACKFUN': ('{__exposure__.stack_function}', 'Function used for stacking'),
-    'OBSTIME': ('{__exposure__.obstime.tai}', 'Time of the start of the exposure [TAI]'),
-    'IMAGETYP': ('{__exposure__.image_type}', 'The image type of the file'),
-    'CAMNAME': ('{__camera__.name}', 'Camera name'),
-    'CAMUID': ('{__camera__.uid}', 'Camera UID'),
-    'VCAM': ('{__camera__.__version__}', 'The version of camera library')
-
+    "EXPTIME": ("{__exposure__.exptime}", "Exposure time of single integration [s]"),
+    "EXPTIMEN": ("{__exposure__.exptime_n}", "Total exposure time [s]"),
+    "STACK": ("{__exposure__.stack}", "Number of stacked frames"),
+    "STACKFUN": ("{__exposure__.stack_function}", "Function used for stacking"),
+    "OBSTIME": (
+        "{__exposure__.obstime.tai}",
+        "Time of the start of the exposure [TAI]",
+    ),
+    "IMAGETYP": ("{__exposure__.image_type}", "The image type of the file"),
+    "CAMNAME": ("{__camera__.name}", "Camera name"),
+    "CAMUID": ("{__camera__.uid}", "Camera UID"),
+    "VCAM": ("{__camera__.__version__}", "The version of camera library"),
 }

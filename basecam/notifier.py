@@ -11,7 +11,7 @@ import contextlib
 import enum
 
 
-__all__ = ['EventNotifier', 'EventListener']
+__all__ = ["EventNotifier", "EventListener"]
 
 
 class EventNotifier(object):
@@ -36,7 +36,7 @@ class EventNotifier(object):
 
         """
 
-        assert isinstance(listener, EventListener), 'invalid listener type.'
+        assert isinstance(listener, EventListener), "invalid listener type."
 
         if listener not in self.listeners:
             self.listeners.append(listener)
@@ -45,7 +45,7 @@ class EventNotifier(object):
         """Removes a listener."""
 
         if listener not in self.listeners:
-            raise ValueError('listener is not registered.')
+            raise ValueError("listener is not registered.")
 
         self.listeners.remove(listener)
 
@@ -61,7 +61,7 @@ class EventNotifier(object):
 
         """
 
-        assert isinstance(event, enum.Enum), 'event is not an enum.'
+        assert isinstance(event, enum.Enum), "event is not an enum."
 
         for listener in self.listeners:
 
@@ -172,7 +172,7 @@ class EventListener(asyncio.Queue):
         if callback in self.callbacks:
             self.callbacks.remove(callback)
         else:
-            raise ValueError('callback not registered.')
+            raise ValueError("callback not registered.")
 
     async def wait_for(self, events, timeout=None):
         """Blocks until a certain event happens.
