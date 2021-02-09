@@ -6,13 +6,22 @@
 # @Filename: exposure.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
+from __future__ import annotations
+
 import asyncio
 import functools
 import os
 import pathlib
 import re
 
+from typing import Callable, Optional
+
 import astropy
+import astropy.io.fits
+import astropy.time
+import numpy
+
+import basecam.camera
 
 from .exceptions import ExposureError
 from .models import FITSModel
@@ -30,19 +39,19 @@ class Exposure(object):
 
     Parameters
     ----------
-    camera : .BaseCamera
+    camera
         The instance of a subclass of `.BaseCamera` that took this exposure.
-    filename : str
+    filename
         The filename of the FITS image generated.
-    data : numpy.array
+    data
         The exposure raw data, as a 2D array.
-    fits_model : `.FITSModel`
+    fits_model
         The `model <.FITSModel>` to create the FITS image. If `None`, a single
         extension with a basic header will be used.
 
     Attributes
     ----------
-    image_type : str
+    image_type
         The type of image, one of ``bias``, ``flat``, ``dark``, ``object``.
     exptime : float
         The exposure time, in seconds, of a single integration.
@@ -52,44 +61,46 @@ class Exposure(object):
         image.
     stack : int
         Number of exposures stacked.
-    stack_function : str
+    stack_function
         Name of the function used for stacking.
-    filename : str
+    filename
         The path where to write the image.
-
     """
 
-    def __init__(self, camera, filename=None, data=None, fits_model=None):
+    def __init__(
+        self,
+        camera: basecam.camera.BaseCamera,
+        filename: Optional[str] = None,
+        data: Optional[numpy.ndarray] = None,
+        fits_model: Optional[FITSModel] = None,
+    ):
 
         self.camera = camera
         self.data = data
         self.fits_model = fits_model
         self.filename = filename
 
-        self._obstime = None
+        self._obstime: astropy.time.Time = astropy.time.Time.now()
 
-        self.exptime = None
-        self.exptime_n = None
-        self.stack = 1
-        self.stack_function = None
+        self.exptime: Optional[float] = None
+        self.exptime_n: Optional[float] = None
+        self.stack: int = 1
+        self.stack_function: Optional[Callable[..., numpy.ndarray]] = None
 
-        self.image_type = None
-
-        self.obstime = astropy.time.Time.now()
+        self.image_type: Optional[str] = None
 
     @property
-    def obstime(self):
+    def obstime(self) -> astropy.time.Time:
         """The time at the beginning of the observation.
 
         It must be an `astropy.time.Time` object or a datetime in ISO
         format; in the latter case, UTC scale is assumed.
-
         """
 
         return self._obstime
 
     @obstime.setter
-    def obstime(self, value):
+    def obstime(self, value: astropy.time.Time):
 
         if isinstance(value, astropy.time.Time):
             self._obstime = value
@@ -98,20 +109,19 @@ class Exposure(object):
         else:
             raise ExposureError(f"invalid obstime {value}")
 
-    def to_hdu(self, context={}):
+    def to_hdu(self, context={}) -> astropy.io.fits.HDUList:
         """Return an `~astropy.io.fits.HDUList` for the image.
 
         Parameters
         ----------
-        context : dict
+        context
             A dictionary of arguments used to evaluate the FITS model.
 
         Returns
         -------
-        hdulist : `~astropy.io.fits.HDUList`
+        hdulist
             A list of HDUs in which the FITS data model has been evaluated
             for this exposure.
-
         """
 
         fits_model = self.fits_model
@@ -121,28 +131,33 @@ class Exposure(object):
 
         return fits_model.to_hdu(self, context=context)
 
-    async def write(self, filename=None, context={}, overwrite=False, checksum=True):
+    async def write(
+        self,
+        filename: Optional[str] = None,
+        context={},
+        overwrite=False,
+        checksum=True,
+    ) -> astropy.io.fits.HDUList:
         """Writes the image to disk.
 
         Parameters
         ----------
-        filename : str
+        filename
             The path where to write the file. If not provided, uses
             ``Exposure.filename``.
-        context : dict
+        context
             A dictionary of arguments used to evaluate the FITS model.
-        overwrite : bool
+        overwrite
             Whether to overwrite the image if it exists.
-        checksum : bool
+        checksum
             When `True` adds both ``DATASUM`` and ``CHECKSUM`` cards to the
             headers of all HDUs written to the file.
 
         Returns
         -------
-        hdulist : `~astropy.io.fits.HDUList`
+        hdulist
             A list of HDUs in which the FITS data model has been evaluated
             for this exposure.
-
         """
 
         filename = filename or self.filename
@@ -170,21 +185,21 @@ class ImageNamer(object):
 
     Parameters
     ----------
-    basename : str
+    basename
         The basename of the image filenames. Must contain a placeholder
         ``num`` in the place where to insert the sequence number. For example,
         ``'test-{num:04d}.fits'`` will produce image names ``test-0001.fits``,
         ``test-0002.fits``, etc. It's also possible to use placeholders for
         camera values, e.g. ``{camera.name}-{num}.fits``.
-    dirname : str
+    dirname
         The directory for the images. Can include an expression based on the
         ``date`` substitution which is a `~astropy.time.Time.now` object. For
         example: ``dirname='/data/{camera.uid}/{int(date.mjd)}'``.
-    overwrite : bool
+    overwrite
         If `True`, the sequence will start at 1 regardless of the existing
         images. If `False`, the first element in the sequence will be selected
         to avoid colliding with any image already existing in the directory.
-    camera : .BaseCamera
+    camera
         A `.BaseCamera` instance. It can also be passed when calling the
         instance.
 
@@ -195,28 +210,27 @@ class ImageNamer(object):
     PosixPath('testdir/my_camera-0001.fits')
     >>> namer(camera=camera)
     PosixPath('testdir/my_camera-0002.fits')
-
     """
 
     def __init__(
         self,
-        basename="{camera.name}-{num:04d}.fits",
-        dirname=".",
-        overwrite=False,
-        camera=None,
+        basename: str = "{camera.name}-{num:04d}.fits",
+        dirname: str = ".",
+        overwrite: bool = False,
+        camera: Optional[basecam.camera.BaseCamera] = None,
     ):
 
         assert re.match(r".+(\{num.+\}).+", basename), "invalid basename."
 
         # We want to expand everything except the num first so we "double-escape" it.
-        self.basename = re.sub(r"(\{num.+\})", r"{\1}", basename)
-        self.dirname = pathlib.Path(dirname)
-        self.overwrite = overwrite
+        self.basename: str = re.sub(r"(\{num.+\})", r"{\1}", basename)
+        self.dirname: pathlib.Path | str = pathlib.Path(dirname)
+        self.overwrite: bool = overwrite
 
         self._last_num = 0
         self.camera = camera
 
-    def _eval_dirname(self):
+    def _eval_dirname(self) -> pathlib.Path:
         """Returns the evaluated dirname."""
 
         date = astropy.time.Time.now()
@@ -225,7 +239,7 @@ class ImageNamer(object):
             eval(f'f"{self.dirname}"', {}, {"date": date, "camera": self.camera})
         )
 
-    def _get_num(self, basename):
+    def _get_num(self, basename: str) -> int:
         """Returns the counter value."""
 
         if self.overwrite:
@@ -244,7 +258,10 @@ class ImageNamer(object):
         values = [int(regex.search(file).group(1)) for file in match_files]
         return max(values) + 1
 
-    def __call__(self, camera=None):
+    def __call__(
+        self,
+        camera: Optional[basecam.camera.BaseCamera] = None,
+    ) -> pathlib.Path:
 
         camera = camera or self.camera
 

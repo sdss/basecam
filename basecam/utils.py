@@ -10,6 +10,8 @@ import asyncio
 import logging
 from contextlib import suppress
 
+from sdsstools.logger import SDSSLogger
+
 
 __all__ = ["LoggerMixIn", "Poller", "cancel_task"]
 
@@ -18,6 +20,7 @@ class LoggerMixIn(object):
     """A mixin to provide easy logging with a header."""
 
     log_header = ""
+    logger: SDSSLogger
 
     def log(self, message, level=logging.DEBUG, use_header=True):
         """Logs a message with a header."""
@@ -130,10 +133,10 @@ class Poller(object):
         if not self.running:
             return
 
-        self._task.cancel()
-
-        with suppress(asyncio.CancelledError):
-            await self._task
+        if self._task:
+            self._task.cancel()
+            with suppress(asyncio.CancelledError):
+                await self._task
 
     async def call_now(self):
         """Calls the callback immediately."""

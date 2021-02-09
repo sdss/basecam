@@ -42,7 +42,11 @@ class CameraSystemTester(CameraSystem):
 
 
 class VirtualCamera(
-    BaseCamera, ExposureTypeMixIn, ShutterMixIn, CoolerMixIn, ImageAreaMixIn
+    BaseCamera,
+    ExposureTypeMixIn,
+    ShutterMixIn,
+    CoolerMixIn,
+    ImageAreaMixIn,
 ):
     """A virtual camera that does not require hardware.
 
@@ -67,6 +71,8 @@ class VirtualCamera(
 
         self._binning = (1, 1)
         self._image_area = (1, 640, 1, 480)
+
+        self.data = None
 
         super().__init__(*args, **kwargs)
 
@@ -116,7 +122,7 @@ class VirtualCamera(
         data = data[0 : self.height, 0 : self.width]
 
         # For some tests, we want to set out custom data.
-        if hasattr(self, "data"):
+        if self.data:
             data = self.data
 
         self._notify(CameraEvent.EXPOSURE_READING)
@@ -179,9 +185,7 @@ def event_loop(request):
 @pytest.fixture(scope="function")
 async def camera_system(config, event_loop):
 
-    camera_system = CameraSystemTester(
-        VirtualCamera, camera_config=config, loop=event_loop
-    ).setup()
+    camera_system = CameraSystemTester(VirtualCamera, camera_config=config).setup()
 
     yield camera_system
 
@@ -218,10 +222,10 @@ async def actor_setup(config):
 
     camera_system = CameraSystemTester(VirtualCamera, camera_config=config).setup()
 
-    actor = CameraActor.from_config(config, camera_system)
-    actor = await clu.testing.setup_test_actor(actor)
+    actor = CameraActor.from_config(config, camera_system)  # type: ignore
+    actor = await clu.testing.setup_test_actor(actor)  # type: ignore
 
-    actor._default_cameras = actor.default_cameras
+    actor._default_cameras = actor.default_cameras  # type: ignore
 
     yield actor
 

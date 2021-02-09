@@ -175,7 +175,7 @@ class Extension(object):
         if isinstance(self.data, str):
             if self.data == "raw":
                 data = exposure.data
-            elif self.data == "none":
+            else:
                 data = None
         elif self.data is None:
             data = exposure.data if primary else None
@@ -347,6 +347,7 @@ class Card(object):
     ):
 
         if isinstance(name, (list, tuple)):
+            name_ = "UNKNOWN"
             try:
                 name_ = name[0]
                 value = name[1]
@@ -603,7 +604,7 @@ class MacroCard(object, metaclass=abc.ABCMeta):
 
     def __repr__(self):
 
-        return f"<{self.__class__.__name__ (name=self.name)}>"
+        return f"<{self.__class__.__name__} (name={self.name})>"
 
     @abc.abstractmethod
     def macro(self, exposure, context={}):

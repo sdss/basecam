@@ -71,6 +71,7 @@ async def test_get_cameras_no_default(command, fail_command, check_cameras):
         command, fail_command=fail_command, check_cameras=check_cameras
     )
 
+    assert cameras
     assert len(cameras) == 1
     assert cameras[0] == command.actor.camera_system.cameras[0]
 

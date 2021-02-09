@@ -6,16 +6,35 @@
 # @Filename: camera.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
+from __future__ import annotations
+
 import abc
 import asyncio
 import logging
+import pathlib
 import time
 import warnings
 from logging import INFO, WARNING
 
+from typing import (
+    Any,
+    Callable,
+    ClassVar,
+    Literal,
+    Optional,
+    Protocol,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
+
 import numpy
 
 from sdsstools import get_logger, read_yaml_file
+from sdsstools.logger import SDSSLogger
+
+from basecam.models.base import FITSModel
 
 from .events import CameraEvent, CameraSystemEvent
 from .exceptions import (
@@ -33,6 +52,11 @@ from .utils import LoggerMixIn, Poller
 __all__ = ["CameraSystem", "BaseCamera"]
 
 
+AnyPath = Union[str, pathlib.Path]
+_T_CameraSystem = TypeVar("_T_CameraSystem", bound="CameraSystem")
+_T_BaseCamera = TypeVar("_T_BaseCamera", bound="BaseCamera")
+
+
 class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
     """A base class for the camera system.
 
@@ -44,49 +68,46 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
     Parameters
     ----------
-    camera_class : `.BaseCamera` subclass
+    camera_class
         The subclass of `.BaseCamera` to use with this camera system.
-    camera_config : dict or path
+    camera_config
         A dictionary with the configuration parameters for the multiple
         cameras that can be present in the system, or the path to a YAML file.
         Refer to the documentation for details on the accepted format.
-    include : list
+    include
         List of camera UIDs that can be connected.
-    exclude : list
+    exclude
         List of camera UIDs that will be ignored.
-    logger : ~logging.Logger
+    logger
         The logger instance to use. If `None`, a new logger will be created.
-    log_header : str
+    log_header
         A string to be prefixed to each message logged.
-    log_file : str
-        The path to which to log.
-    verbose : bool
-        Whether to log to stdout.
-    loop
-        The asyncio event loop.
-
+    log_file
+        The path to which to log. If set, the log will be saved to that file path.
+    verbose
+        Logging level for the console handler  If `False`, only warnings and errors
+        will be logged to the console.
     """
 
-    camera_class = None
+    camera_class: Type[BaseCamera] | None = None
     include = None
     exclude = None
 
     def __init__(
         self,
-        camera_class=None,
-        camera_config=None,
-        include=None,
-        exclude=None,
-        logger=None,
-        log_header=None,
-        log_file=None,
-        verbose=False,
-        loop=None,
+        camera_class: Optional[Type[BaseCamera]] = None,
+        camera_config: Optional[AnyPath | dict[str, Any]] = None,
+        include: Optional[list[Any]] = None,
+        exclude: Optional[list[Any]] = None,
+        logger: Optional[SDSSLogger] = None,
+        log_header: Optional[str] = None,
+        log_file: Optional[AnyPath] = None,
+        verbose: Optional[bool | int] = False,
     ):
 
         self.camera_class = self.camera_class or camera_class
 
-        if not issubclass(self.camera_class, BaseCamera):
+        if not self.camera_class or not issubclass(self.camera_class, BaseCamera):
             raise ValueError("camera_class must be a subclass of BaseCamera.")
 
         self.include = self.include or include
@@ -94,7 +115,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         logger_name = self.__class__.__name__.upper()
         self.log_header = log_header or f"[{logger_name.upper()}]: "
-        self.logger = logger or get_logger(logger_name)
+        self.logger = logger or cast(SDSSLogger, get_logger(logger_name))
 
         if verbose:
             self.logger.sh.setLevel(int(verbose))
@@ -107,18 +128,18 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
                 self.logger.fh.formatter.converter = time.gmtime
                 self.log(f"logging to {log_file}")
 
-        self.loop = loop or asyncio.get_event_loop()
+        self.loop = asyncio.get_event_loop()
         self.loop.set_exception_handler(self.logger.asyncio_exception_handler)
 
         #: list: The list of cameras being handled.
-        self.cameras = []
+        self.cameras: list[BaseCamera] = []
 
         self._camera_poller = None
 
         #: .EventNotifier: Notifies of `.CameraSystemEvent` and `.CameraEvent` events.
         self.notifier = EventNotifier()
 
-        self._config = None
+        self._config: Optional[dict[str, Any]] = None
 
         if camera_config:
             if isinstance(camera_config, dict):
@@ -127,7 +148,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
                 self._config = read_yaml_file(camera_config)
                 self.log(f"read configuration file from {camera_config}")
 
-        # If the config has a section named cameras, prefer that.
+        # If the config has a section named "cameras", prefer that.
         if self._config:
             if isinstance(self._config.get("cameras", None), dict):
                 self._config = self._config["cameras"]
@@ -144,22 +165,25 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         return self
 
-    def get_camera_config(self, name=None, uid=None):
+    def get_camera_config(
+        self,
+        name: Optional[str] = None,
+        uid: Optional[str] = None,
+    ) -> dict[str, Any] | None:
         """Gets camera parameters from the configuration.
 
         Parameters
         ----------
-        name : str
+        name
             The name of the camera.
-        uid : str
+        uid
             The unique identifier of the camera.
 
         Returns
         -------
-        camera_params : `dict`
+        camera_params
             A dictionary with the camera parameters. If the camera is not
             present in the configuration, returns `None`.
-
         """
 
         assert name or uid, "either a name or unique identifier are required."
@@ -184,7 +208,10 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
             return None
 
-    async def start_camera_poller(self, interval=1.0):
+    async def start_camera_poller(
+        self: _T_CameraSystem,
+        interval: float = 1.0,
+    ) -> _T_CameraSystem:
         """Monitors changes in the camera list.
 
         Issues calls to `.list_available_cameras` on an interval and compares
@@ -201,10 +228,9 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        interval : float
+        interval
             Interval, in seconds, on which the connected cameras are polled
             for changes.
-
         """
 
         if self._camera_poller is None:
@@ -226,7 +252,6 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
         """Checks the list of connected cameras.
 
         This is an internal function to be used only by the camera poller.
-
         """
 
         try:
@@ -270,21 +295,25 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
                 await self.add_camera(uid=uid)
 
     @abc.abstractmethod
-    def list_available_cameras(self):
+    def list_available_cameras(self) -> list[str]:
         """Lists the connected cameras as reported by the camera system.
 
         Returns
         -------
-        connected_cameras : `list`
+        connected_cameras
             A list of unique identifiers of cameras connected to the system.
-
         """
 
         raise NotImplementedError
 
     async def add_camera(
-        self, name=None, uid=None, force=False, autoconnect=True, **kwargs
-    ):
+        self,
+        name: Optional[str] = None,
+        uid: Optional[str] = None,
+        force: bool = False,
+        autoconnect: bool = True,
+        **kwargs,
+    ) -> BaseCamera:
         """Adds a new `camera <.BaseCamera>` instance to `.cameras`.
 
         The configuration values (if any) found in the configuration that
@@ -294,14 +323,14 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        name : str
+        name
             The name of the camera.
-        uid : str
+        uid
             The unique identifier for the camera.
-        force : bool
+        force
             Forces the camera to stay in the `.CameraSystem` list even if it
             does not appear in the system camera list.
-        autoconnect : bool
+        autoconnect
             Whether to autoconnect the camera.
         kwargs
             Other arguments to be passed to `.BaseCamera` during
@@ -312,7 +341,6 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
         -------
         camera
             The new camera instance.
-
         """
 
         assert name or uid, "either name or uid are required."
@@ -355,16 +383,19 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         return camera
 
-    async def remove_camera(self, name=None, uid=None):
+    async def remove_camera(
+        self,
+        name: Optional[str] = None,
+        uid: Optional[str] = None,
+    ):
         """Removes a camera, cancelling any ongoing process.
 
         Parameters
         ----------
-        name : str
+        name
             The name of the camera.
-        uid : str
+        uid
             The unique identifier for the camera.
-
         """
 
         for camera in self.cameras:
@@ -385,7 +416,11 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         raise ValueError(f"camera {name} is not connected.")
 
-    def get_camera(self, name=None, uid=None):
+    def get_camera(
+        self,
+        name: Optional[str] = None,
+        uid: Optional[str] = None,
+    ) -> BaseCamera | Literal[False]:
         """Gets a camera matching a name or UID.
 
         If only one camera is connected and the method is called without
@@ -393,17 +428,17 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        name : str
+        name
             The name of the camera.
-        uid : str
+        uid
             The unique identifier for the camera.
 
         Returns
         -------
-        camera : `.BaseCamera`
+        camera
             The connected camera (must be one of the cameras in `.cameras`)
-            whose name or UID matches the input parameters.
-
+            whose name or UID matches the input parameters. Returns `False` if the
+            camera was not found.
         """
 
         if name is None and uid is None and len(self.cameras) == 1:
@@ -419,34 +454,33 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
         return False
 
-    def on_camera_connected(self, uid):
+    def on_camera_connected(self, uid: str) -> asyncio.Task[BaseCamera]:
         """Event handler for a newly connected camera.
 
         Parameters
         ----------
-        uid : str
+        uid
             The unique identifier for the camera.
 
         Returns
         -------
-        task : `asyncio.Task`
+        task
             The task calling `.add_camera`.
-
         """
 
         return self.loop.create_task(self.add_camera(uid=uid))
 
-    def on_camera_disconnected(self, uid):
+    def on_camera_disconnected(self, uid: str) -> asyncio.Task[None]:
         """Event handler for a camera that was disconnected.
 
         Parameters
         ----------
-        uid : str
+        uid
             The unique identifier for the camera.
 
         Returns
         -------
-        task : `asyncio.Task`
+        task
             The task calling `.remove_camera`.
 
         """
@@ -461,7 +495,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
 
     @property
     @abc.abstractmethod
-    def __version__(self):
+    def __version__(self) -> str:
         """The version of the camera library."""
 
         raise NotImplementedError
@@ -477,19 +511,19 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
     ----------
     uid
         The unique identifier for the camera.
-    camera_system : `.CameraSystem` instance
+    camera_system
         The camera system handling this camera.
-    name : str
+    name
         The name of the camera. If not set, the ``uid`` will be used.
-    force : bool
+    force
         Forces the camera to stay in the `.CameraSystem` list even if it
         does not appear in the system camera list.
-    image_namer : .ImageNamer or dict
+    image_namer
         An instance of `.ImageNamer` used to sequentially assign predefined
         names to new exposure images, or a dictionary of parameters to be
         passed to `.ImageNamer` to create a new instance. If not set, creates
         an image namer with format ``{camera.name}-{num:04d}.fits``.
-    camera_params : dict
+    camera_params
         Parameters used to define how to connect to the camera, its geometry,
         initialisation parameters, etc. The format of the parameters must
         follow the structure of the configuration file.
@@ -506,19 +540,22 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         new exposures. If not provided, uses ``'{camera.name}-{num:04d}.fits'``
         where ``camera.name`` is the name of the camera, and ``num`` is a
         sequential counter.
-
     """
 
-    fits_model = basic_fits_model
-    image_namer = None
+    fits_model: FITSModel = basic_fits_model
+    image_namer: ImageNamer = ImageNamer(
+        "{camera.name}-{num:04d}.fits",
+        dirname=".",
+        overwrite=False,
+    )
 
     def __init__(
         self,
-        uid,
-        camera_system,
-        name=None,
-        force=False,
-        image_namer=None,
+        uid: str,
+        camera_system: CameraSystem,
+        name: Optional[str] = None,
+        force: bool = False,
+        image_namer: Optional[ImageNamer | dict] = None,
         camera_params={},
     ):
 
@@ -545,18 +582,8 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             self.image_namer.camera = self
         elif isinstance(image_namer, dict):
             self.image_namer = ImageNamer(**image_namer, camera=self)
-        elif image_namer is None and self.image_namer is None:
-            self.image_namer = ImageNamer(
-                "{camera.name}-{num:04d}.fits",
-                dirname=".",
-                overwrite=False,
-                camera=self,
-            )
-        elif self.image_namer is not None:
-            self.image_namer.camera = self
-        else:
-            raise CameraError("invalid image_namer parameters.")
 
+        self.image_namer.camera = self
         self.__version__ = self.camera_system.__version__
 
         # Get the same logger as the camera system but use the UID or
@@ -564,19 +591,22 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         self.log_header = f"[{self.name.upper()}]: "
         self.logger = self.camera_system.logger
 
-    async def connect(self, force=False, **kwargs):
+    async def connect(
+        self: _T_BaseCamera,
+        force: bool = False,
+        **kwargs,
+    ) -> _T_BaseCamera:
         """Connects the camera and performs all the necessary setup.
 
         Parameters
         ----------
-        force : bool
+        force
             Forces the camera to reconnect even if it's already connected.
-        kwargs : dict
+        kwargs
             A series of keyword arguments to be passed to the internal
             implementation of ``connect`` for a the camera. If provided,
             they override the ``connection`` settings in the
             configuration for this camera.
-
         """
 
         if self.connected and not force:
@@ -598,7 +628,11 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         return self
 
-    def _notify(self, event, extra_payload=None):
+    def _notify(
+        self,
+        event: CameraEvent,
+        extra_payload: Optional[dict[str, Any]] = None,
+    ):
         """Notifies an event."""
 
         payload = self._get_basic_payload()
@@ -606,7 +640,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         self.camera_system.notifier.notify(event, payload)
 
-    def _get_basic_payload(self):
+    def _get_basic_payload(self) -> dict[str, Any]:
         """Returns a dictionary with basic payload for notifying events."""
 
         return {"uid": self.uid, "name": self.name, "camera": self}
@@ -616,20 +650,18 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         """Internal method to connect the camera.
 
         Must raise `.CameraConnectionError` if the connection fails.
-
         """
 
         raise NotImplementedError
 
-    def get_status(self, update=False):
+    def get_status(self, update: bool = False) -> dict[str, Any]:
         """Returns a dictionary with the camera status values.
 
         Parameters
         ----------
-        update : bool
+        update
             If `True`, retrieves the status from the camera; otherwise returns
             the last cached status.
-
         """
 
         if update or not self._status:
@@ -637,32 +669,31 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         return self._status
 
-    def _status_internal(self):
+    def _status_internal(self) -> dict[str, Any]:
         """Gets a dictionary with the status of the camera.
 
         This method is intended to be overridden by the specific camera.
 
         Returns
         -------
-        status : `dict`
+        status
             A dictionary with status values from the camera (e.g.,
             temperature, cooling status, firmware information, etc.)
-
         """
 
         return {}
 
     async def expose(
         self,
-        exptime,
-        image_type="object",
-        stack=1,
-        stack_function=numpy.median,
-        fits_model=None,
-        filename=None,
-        write=False,
+        exptime: float,
+        image_type: str = "object",
+        stack: int = 1,
+        stack_function: Callable[..., numpy.ndarray] = numpy.median,
+        fits_model: Optional[FITSModel] = None,
+        filename: Optional[str] = None,
+        write: bool = False,
         **kwargs,
-    ):
+    ) -> Exposure:
         """Exposes the camera.
 
         This is the general method to expose the camera. It receives the
@@ -677,33 +708,32 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        exptime : float
+        exptime
             The exposure time for the image, in seconds.
-        image_type : str
+        image_type
             The type of image (``{'bias', 'dark', 'object', 'flat'}``).
-        stack : int
+        stack
             Number of images to stack.
         stack_function
             The function to apply to the several images taken to generate the
             final stacked image. Defaults to the median.
-        fits_model : .FITSModel
+        fits_model
             A `.FITSModel` that can be used to override the default model
             for the camera.
-        filename : str
+        filename
             The path where to write the image. If not given, a new name is
             automatically assigned based on the camera instance of
             `.ImageNamer`.
-        write : bool
+        write
             If `True`, writes the image to disk immediately.
-        kwargs : dict
+        kwargs
             Other keyword arguments to pass to the internal expose method.
 
         Returns
         -------
-        exposure : `.Exposure`
+        exposure
             An `.Exposure` object containing the image data, exposure time,
             and header datamodel.
-
         """
 
         exptime = exptime or 0.0
@@ -759,7 +789,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         return exposure
 
     @abc.abstractmethod
-    async def _expose_internal(self, exposure, **kwargs):
+    async def _expose_internal(self, exposure: Exposure, **kwargs) -> Exposure:
         """Internal method to handle camera exposures.
 
         This method handles the entire process of exposing and reading the
@@ -782,16 +812,15 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        exposure : .Exposure
+        exposure
             The exposure being taken.
-        kwargs : dict
+        kwargs
             Other keyword arguments to configure the exposure.
-
         """
 
         raise NotImplementedError
 
-    async def disconnect(self):
+    async def disconnect(self) -> bool:
         """Shuts down the camera."""
 
         try:
@@ -809,7 +838,6 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         """Internal method to disconnect a camera.
 
         Must raise a `.CameraConnectionError` if the shutdown fails.
-
         """
 
         pass

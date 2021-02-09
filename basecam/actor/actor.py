@@ -10,6 +10,7 @@ import logging
 
 from clu import BaseActor, JSONActor
 from clu.tools import ActorHandler
+from sdsstools.logger import SDSSLogger
 
 from basecam import EventListener
 from basecam.exceptions import CameraWarning
@@ -62,6 +63,7 @@ class BaseCameraActor:
         self.listener = EventListener()
         self.camera_system.notifier.register_listener(self.listener)
 
+        self.log: SDSSLogger
         self.parser = command_parser or commands.camera_parser
 
         super().__init__(*args, **kwargs)

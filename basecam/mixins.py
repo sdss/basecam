@@ -6,8 +6,14 @@
 # @Filename: mixins.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
+from __future__ import annotations
+
 import abc
 import asyncio
+
+from typing import Callable, Union
+
+from basecam.camera import BaseCamera
 
 from .events import CameraEvent
 from .utils import cancel_task
@@ -71,39 +77,43 @@ class ShutterMixIn(object, metaclass=abc.ABCMeta):
 class ExposureTypeMixIn(object):
     """Methods to take exposures with different image_types."""
 
-    async def bias(self, *args, **kwargs):
+    expose: Callable
+
+    async def bias(self, **kwargs):
         """Take a bias image."""
 
         kwargs.pop("image_type", None)
 
-        return await self.expose(*args, 0.0, image_type="bias", **kwargs)
+        return await self.expose(0.0, image_type="bias", **kwargs)
 
-    async def dark(self, *args, **kwargs):
+    async def dark(self, exp_time: float, **kwargs):
         """Take a dark image."""
 
         kwargs.pop("image_type", None)
 
-        return await self.expose(*args, image_type="dark", **kwargs)
+        return await self.expose(exp_time, image_type="dark", **kwargs)
 
-    async def flat(self, *args, **kwargs):
+    async def flat(self, exp_time: float, **kwargs):
         """Take a flat image."""
 
         kwargs.pop("image_type", None)
 
-        return await self.expose(*args, image_type="flat", **kwargs)
+        return await self.expose(exp_time, image_type="flat", **kwargs)
 
-    async def object(self, *args, **kwargs):
+    async def object(self: BaseCamera | ExposureTypeMixIn, exp_time: float, **kwargs):
         """Take a science image."""
 
         kwargs.pop("image_type", None)
 
-        return await self.expose(*args, image_type="object", **kwargs)
+        return await self.expose(exp_time, image_type="object", **kwargs)
 
 
 class CoolerMixIn(object, metaclass=abc.ABCMeta):
     """Methods to control the cooling system of the camera."""
 
     _set_temperature_task = None
+
+    _notify: Callable
 
     async def set_temperature(self, temperature):
         """Sets a new temperature goal for the camera.
@@ -133,7 +143,8 @@ class CoolerMixIn(object, metaclass=abc.ABCMeta):
 
         self._notify(CameraEvent.NEW_SET_POINT, {"temperature": temperature})
 
-        self._set_temperature_task = self.loop.create_task(_wait_for_temp(temperature))
+        loop = asyncio.get_event_loop()
+        self._set_temperature_task = loop.create_task(_wait_for_temp(temperature))
         await self._set_temperature_task
 
     @abc.abstractmethod
