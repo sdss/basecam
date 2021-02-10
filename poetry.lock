@@ -1061,7 +1061,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "7c5fb1cc10d5547d7c8629398178015f2577ab95e04c2a061f1d1ab0106e8035"
+content-hash = "24e62c4a1333b12c4e46ddaf9793372ba0b771249b41c608deec5af6858bca4b"
 
 [metadata.files]
 aio-pika = [

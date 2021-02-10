@@ -16,7 +16,7 @@ import time
 import warnings
 from logging import INFO, WARNING
 
-from typing import Any, Callable, Literal, Optional, Type, TypeVar, Union, cast
+from typing import Any, Callable, Optional, Type, TypeVar, Union, cast
 
 import numpy
 
@@ -36,6 +36,12 @@ from .exposure import Exposure, ImageNamer
 from .models import basic_fits_model
 from .notifier import EventNotifier
 from .utils import LoggerMixIn, Poller
+
+
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
 
 
 __all__ = ["CameraSystem", "BaseCamera"]
