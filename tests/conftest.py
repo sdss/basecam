@@ -72,7 +72,7 @@ class VirtualCamera(
         self._binning = (1, 1)
         self._image_area = (1, 640, 1, 480)
 
-        self.data = None
+        self.data = False
 
         super().__init__(*args, **kwargs)
 
@@ -122,7 +122,7 @@ class VirtualCamera(
         data = data[0 : self.height, 0 : self.width]
 
         # For some tests, we want to set out custom data.
-        if self.data:
+        if self.data is not False:
             data = self.data
 
         self._notify(CameraEvent.EXPOSURE_READING)

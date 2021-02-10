@@ -560,9 +560,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         self.camera_params = camera_params
         if "uid" in camera_params and camera_params["uid"] != self.uid:
-            raise CameraError(
-                "Mismatching UIDs between input " "and camera parameters."
-            )
+            raise CameraError("Mismatching UIDs between input and camera parameters.")
 
         self._status = {}
 
@@ -571,6 +569,10 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             self.image_namer.camera = self
         elif isinstance(image_namer, dict):
             self.image_namer = ImageNamer(**image_namer, camera=self)
+        elif image_namer is None:
+            pass
+        else:
+            raise CameraError(f"Invalid image namer {image_namer!r}")
 
         self.image_namer.camera = self
         self.__version__ = self.camera_system.__version__
