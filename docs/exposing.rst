@@ -7,10 +7,10 @@ Exposing
 FITS models
 -----------
 
-.. _magic-cards:
+.. _default-cards:
 
-Magic cards
-^^^^^^^^^^^
+Decault cards
+^^^^^^^^^^^^^
 
 
 Naming images

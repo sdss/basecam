@@ -6,7 +6,7 @@
 # @Filename: models.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
-from .base import Extension, FITSModel, HeaderModel
+from .base import Card, Extension, FITSModel, HeaderModel
 
 
 #: A basic header model with camera and exposure information.
@@ -20,11 +20,15 @@ basic_header_model = HeaderModel(
         "EXPTIMEN",
         "STACK",
         "STACKFUN",
-        ("TIMESYS", "TAI", "The time scale system"),
-        (
+        Card(
+            "TIMESYS",
+            value="TAI",
+            comment="The time scale system",
+        ),
+        Card(
             "DATE-OBS",
-            "{__exposure__.obstime.tai.isot}",
-            "Date (in TIMESYS) the exposure started",
+            value="{__exposure__.obstime.tai.isot}",
+            comment="Date (in TIMESYS) the exposure started",
         ),
     ]
 )

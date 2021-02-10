@@ -13,11 +13,11 @@ import pytest
 
 from basecam import models
 from basecam.exceptions import CardError, CardWarning
+from basecam.models import Card
 
 
 class MacroCardTest(models.MacroCard):
     def macro(self, exposure, **kwargs):
-
         return [("KEYWORD1", 1, "The first card"), ("KEYWORD2", 2)]
 
 
@@ -125,7 +125,7 @@ def test_basic_header_model(exposure):
 def test_header_model_insert(exposure):
 
     basic_header_model = models.models.basic_header_model
-    basic_header_model.insert(0, [("A", 1)])
+    basic_header_model.insert(0, Card("A", 1))
 
     header = basic_header_model.to_header(exposure)
     assert isinstance(header, astropy.io.fits.Header)
@@ -146,9 +146,9 @@ def test_header_describe(exposure):
     basic_header_model.append(
         models.CardGroup(
             [
-                ("PARAM1", "A parameter"),
-                ("PARAM2", "{__camera__.uid}", "Camera UID"),
-                "VCAM",
+                Card("PARAM1", "A parameter"),
+                Card("PARAM2", "{__camera__.uid}", "Camera UID"),
+                Card("VCAM"),
             ]
         )
     )
@@ -190,7 +190,7 @@ def test_macro_with_group_title(exposure):
 def test_card_group(exposure):
 
     card_group = models.CardGroup(
-        [("KEYW1", 1, "The first card"), models.Card(("KEYW2", 2))], name="card_group"
+        [Card("KEYW1", 1, "The first card"), Card("KEYW2", 2)], name="card_group"
     )
 
     assert len(card_group) == 2
@@ -206,8 +206,8 @@ def test_card_group(exposure):
 
 def test_card_group_append(exposure):
 
-    card_group = models.CardGroup([("KEYW1", 1, "The first card")])
-    card_group.append(("KEYW2", 2))
+    card_group = models.CardGroup([Card("KEYW1", 1, "The first card")])
+    card_group.append(Card("KEYW2", 2))
 
     assert len(card_group) == 2
     assert card_group[1].name == "KEYW2"
@@ -215,8 +215,8 @@ def test_card_group_append(exposure):
 
 def test_card_group_insert(exposure):
 
-    card_group = models.CardGroup([("KEYW1", 1, "The first card")])
-    card_group.insert(0, ("KEYW2", 2))
+    card_group = models.CardGroup([Card("KEYW1", 1, "The first card")])
+    card_group.insert(0, Card("KEYW2", 2))
 
     assert len(card_group) == 2
     assert card_group[0].name == "KEYW2"
@@ -229,25 +229,30 @@ def test_evaluate_callable(exposure):
     name, value, comment = card.evaluate(exposure)
 
     assert name == "testcall"
-    assert comment is None
+    assert comment == ""
     assert value == 3
 
 
 def test_card_evaluate(exposure):
 
-    card = models.Card("TESTCARD", value="2+2", evaluate=True)
+    card = Card("TESTCARD", value="2+2", evaluate=True)
     assert card.evaluate(exposure)[1] == 4
 
 
-def test_card_magic_evaluate(exposure):
+def test_card_default_evaluate(exposure):
 
-    models.magic._MAGIC_CARDS["TESTCARD"] = ("2+2", "", {"evaluate": True})
+    models.DEFAULT_CARDS["TESTCARD"] = models.DefaultCard(
+        "TESTCARD",
+        value="2+2",
+        comment="",
+        evaluate=True,
+    )
 
     card = models.Card("TESTCARD")
     assert card.evaluate(exposure)[1] == 4
 
 
-def test_magic_card_raises():
+def test_default_card_raises():
 
     with pytest.raises(ValueError):
         models.Card("VCAM", value="a value")
@@ -259,3 +264,10 @@ def test_card_name_trimming():
         card = models.Card("AVERYLARGENAME", "value")
 
     assert card.name == "AVERYLAR"
+
+
+def test_card_no_default(exposure):
+    card = models.Card("MYCARD", value="{the_value}")
+
+    with pytest.raises(KeyError):
+        assert card.evaluate(exposure=exposure)

@@ -6,20 +6,32 @@
 # @Filename: base.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
+from __future__ import annotations
+
 import abc
 import functools
 import warnings
 from contextlib import contextmanager
+
+from typing import Any, Iterable, Optional
 
 import astropy.io.fits
 import astropy.table
 import numpy
 
 from ..exceptions import CardError, CardWarning
-from .magic import _MAGIC_CARDS
 
 
-__all__ = ["FITSModel", "Extension", "HeaderModel", "Card", "CardGroup", "MacroCard"]
+__all__ = [
+    "FITSModel",
+    "Extension",
+    "HeaderModel",
+    "Card",
+    "DefaultCard",
+    "CardGroup",
+    "MacroCard",
+    "DEFAULT_CARDS",
+]
 
 
 class FITSModel(list):
@@ -218,12 +230,6 @@ class HeaderModel(list):
 
         if isinstance(input_card, (Card, CardGroup, MacroCard)):
             return input_card
-        elif isinstance(input_card, (list, tuple)):
-            if isinstance(input_card[0], (list, tuple)):
-                card = CardGroup(input_card)
-            else:
-                card = Card(input_card)
-            return card
         elif isinstance(input_card, str):
             return Card(input_card)
         else:
@@ -313,79 +319,78 @@ class Card(object):
     - A string to be evaluated using Python's `eval` function. For example,
       ``value='__camera__.get_temperature()'``.
 
-    If the ``name`` of the card is one of the :ref:`Magic Cards <magic-cards>`,
+    If the ``name`` of the card is one of the :ref:`Default Cards <default-cards>`,
     the value and comment are automatically defined and do not need to be
     specified.
 
     Parameters
     ----------
-    name : str
+    name
         The name of the card. Will be trimmed to 8 characters. Can be one of
-        the :ref:`Magic Cards <magic-cards>` names, which defines the value
+        the :ref:`Default Cards <default-cards>` names, which defines the value
         and comment.
     value
         A Python literal, callable, or string, as described above.
-    comment : str
+    comment
         A short comment describing the card value.
-    fargs : tuple
+    default
+        Default value to use if the card value contains placeholders that are not
+        provided while the card is evaluated.
+    fargs
         If ``value`` is a callable, the arguments to pass to it when it gets
         called. The arguments are evaluated following the same rules as with
         the ``value`` before being passed to the callable.
-    evaluate : bool
+    evaluate
         If `True`, assumes the value is a string to be evaluated in realtime.
         The context is used as ``locals`` for the evaluation. For security,
         ``globals`` are not available.
-    context : dict
+    context
         A dictionary of parameters used to fill the value replacement fields.
         Two values, ``__exposure__`` and ``__camera__``, are always defined.
         This context can be updated during the evaluation of the card.
 
     """
 
-    def __init__(
-        self, name, value=None, comment=None, fargs=None, evaluate=False, context=None
-    ):
+    def __new__(cls, name: str | Iterable, *args, **kwargs):
+
+        if isinstance(name, str):
+            if cls == Card and name.upper() in DEFAULT_CARDS:
+                if len(args) != 0 or len(kwargs) != 0:
+                    raise ValueError(
+                        f"{name.upper()} is a default card and does "
+                        "not accept additional arguments."
+                    )
+                if name.upper() in DEFAULT_CARDS:
+                    return DEFAULT_CARDS[name.upper()]
 
         if isinstance(name, (list, tuple)):
-            name_ = "UNKNOWN"
-            try:
-                name_ = name[0]
-                value = name[1]
-                comment = name[2]
-                fargs = name[3].get("fargs", None)
-                context = name[3].get("context", {})
-                evaluate = name[3].get("evaluate", False)
-            except IndexError:
-                pass
-            finally:
-                name = name_
+            return cls(*name)
+
+        return super().__new__(cls)
+
+    def __init__(
+        self,
+        name: str,
+        value: Any = "",
+        comment: str = "",
+        default: Any = None,
+        fargs: Optional[tuple] = None,
+        evaluate: bool = False,
+        context: dict[str, Any] = {},
+    ):
+
+        if hasattr(self, "name"):
+            return
 
         self.name = name
-
         if len(self.name) > 8:
             warnings.warn(f"trimming {self.name} to 8 characters", CardWarning)
             self.name = self.name[:8]
 
-        if self.is_magic():
+        self.value = value
+        self.comment = comment
 
-            if value:
-                raise ValueError(f"cannot override value of magic card {self.name!r}")
-
-            magic_params = _MAGIC_CARDS[self.name.upper()]
-            self.value, magic_comment = magic_params[0:2]
-
-            self.comment = comment or magic_comment
-
-            if len(magic_params) == 3:
-                fargs = magic_params[2].get("fargs", None)
-                context = magic_params[2].get("context", {})
-                evaluate = magic_params[2].get("evaluate", False)
-
-        else:
-
-            self.value = value
-            self.comment = comment
-
+        self._default = default
         self._fargs = fargs
         self._evaluate = evaluate
 
@@ -393,12 +398,7 @@ class Card(object):
 
     def __repr__(self):
 
-        return f"<Card (name={self.name!r}, value={self.value!r})>"
-
-    def is_magic(self):
-        """Returns `True` if the card name matches a magic card."""
-
-        return self.name.upper() in _MAGIC_CARDS
+        return f"<{self.__class__.__name__} (name={self.name!r}, value={self.value!r})>"
 
     @contextmanager
     def set_exposure(self, exposure, context={}):
@@ -517,8 +517,6 @@ class CardGroup(list):
 
         if isinstance(card, Card):
             return card
-        elif isinstance(card, (list, tuple, str)):
-            return Card(card)
         else:
             raise CardError(f"invalid card {card}")
 
@@ -671,3 +669,56 @@ class MacroCard(object, metaclass=abc.ABCMeta):
             header.insert(0, ("COMMENT", "{s:#^30}".format(s=f" {self.name} ")))
 
         return header
+
+
+class DefaultCard(Card):
+    pass
+
+
+DEFAULT_CARDS = {
+    "EXPTIME": DefaultCard(
+        "EXPTIME",
+        value="{__exposure__.exptime}",
+        comment="Exposure time of single integration [s]",
+    ),
+    "EXPTIMEN": DefaultCard(
+        "EXPTIMEN",
+        value="{__exposure__.exptime_n}",
+        comment="Total exposure time [s]",
+    ),
+    "STACK": DefaultCard(
+        "STACK",
+        value="{__exposure__.stack}",
+        comment="Number of stacked frames",
+    ),
+    "STACKFUN": DefaultCard(
+        "STACKFUN",
+        value="{__exposure__.stack_function}",
+        comment="Function used for stacking",
+    ),
+    "OBSTIME": DefaultCard(
+        "OBSTIME",
+        value="{__exposure__.obstime.tai}",
+        comment="Time of the start of the exposure [TAI]",
+    ),
+    "IMAGETYP": DefaultCard(
+        "IMAGETYP",
+        value="{__exposure__.image_type}",
+        comment="The image type of the file",
+    ),
+    "CAMNAME": DefaultCard(
+        "CAMNAME",
+        value="{__camera__.name}",
+        comment="Camera name",
+    ),
+    "CAMUID": DefaultCard(
+        "CAMUID",
+        value="{__camera__.uid}",
+        comment="Camera UID",
+    ),
+    "VCAM": DefaultCard(
+        "VCAM",
+        value="{__camera__.__version__}",
+        comment="The version of camera library",
+    ),
+}
