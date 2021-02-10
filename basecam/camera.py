@@ -23,7 +23,7 @@ import numpy
 from sdsstools import get_logger, read_yaml_file
 from sdsstools.logger import SDSSLogger
 
-from basecam.models.base import FITSModel
+from basecam.models.fits import FITSModel
 
 from .events import CameraEvent, CameraSystemEvent
 from .exceptions import (

@@ -8,14 +8,15 @@
 
 import pytest
 
-from basecam.exceptions import ExposureError
+from basecam.exceptions import ExposureError, ExposureWarning
 from basecam.exposure import ImageNamer
 
 
 def test_exposure_no_model(exposure):
 
     exposure.fits_model = None
-    hdulist = exposure.to_hdu()
+    with pytest.warns(ExposureWarning):
+        hdulist = exposure.to_hdu()
 
     assert len(hdulist) == 1
     assert hdulist[0].data is not None

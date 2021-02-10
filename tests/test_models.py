@@ -112,7 +112,7 @@ def test_fits_model_multi_extension_compressed(exposure):
 
 def test_basic_header_model(exposure):
 
-    basic_header_model = models.models.basic_header_model
+    basic_header_model = models.basic_header_model
     basic_header_model.append(MacroCardTest())
     basic_header_model.append(models.Card("TEST", "test"))
 
@@ -124,7 +124,7 @@ def test_basic_header_model(exposure):
 
 def test_header_model_insert(exposure):
 
-    basic_header_model = models.models.basic_header_model
+    basic_header_model = models.basic_header_model
     basic_header_model.insert(0, Card("A", 1))
 
     header = basic_header_model.to_header(exposure)
@@ -135,13 +135,13 @@ def test_header_model_insert(exposure):
 def test_header_invalid_card():
 
     with pytest.raises(CardError):
-        basic_header_model = models.models.basic_header_model
+        basic_header_model = models.basic_header_model
         basic_header_model.insert(0, {})
 
 
 def test_header_describe(exposure):
 
-    basic_header_model = models.models.basic_header_model
+    basic_header_model = models.basic_header_model
     basic_header_model.append(MacroCardTest())
     basic_header_model.append(
         models.CardGroup(
@@ -266,8 +266,24 @@ def test_card_name_trimming():
     assert card.name == "AVERYLAR"
 
 
-def test_card_no_default(exposure):
-    card = models.Card("MYCARD", value="{the_value}")
+@pytest.mark.parametrize(
+    "value",
+    [
+        "{the_value}",
+        "{__something__.attr}",
+        "{__something__}",
+    ],
+)
+def test_card_no_default(exposure, value):
+    card = models.Card("MYCARD", value=value)
 
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError) as err:
         assert card.evaluate(exposure=exposure)
+
+    assert "The context does not include all the Card value placeholders" in str(err)
+
+
+def test_card_default(exposure):
+    card = models.Card("MYCARD", value="{some_value_not_passed}", default="a_default")
+    result = card.evaluate(exposure=exposure)
+    assert result.value == "a_default"

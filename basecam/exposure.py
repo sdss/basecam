@@ -13,6 +13,7 @@ import functools
 import os
 import pathlib
 import re
+import warnings
 
 from typing import Callable, Optional
 
@@ -22,9 +23,9 @@ import astropy.time
 import numpy
 
 import basecam.camera
+import basecam.models
 
-from .exceptions import ExposureError
-from .models import FITSModel
+from .exceptions import ExposureError, ExposureWarning
 
 
 __all__ = ["Exposure", "ImageNamer"]
@@ -72,14 +73,14 @@ class Exposure(object):
         camera: basecam.camera.BaseCamera,
         filename: Optional[str] = None,
         data: Optional[numpy.ndarray] = None,
-        fits_model: Optional[FITSModel] = None,
+        fits_model: Optional[basecam.models.FITSModel] = None,
     ):
-
+        print(fits_model)
         self.camera = camera
         self.data = data
-        self.fits_model = fits_model
+        self.fits_model = fits_model or basecam.models.FITSModel()
         self.filename = filename
-
+        print(self.fits_model)
         self._obstime: astropy.time.Time = astropy.time.Time.now()
 
         self.exptime: Optional[float] = None
@@ -127,7 +128,10 @@ class Exposure(object):
         fits_model = self.fits_model
 
         if not fits_model:
-            fits_model = FITSModel()
+            warnings.warn(
+                "No FITS model defined. Reverting to default one.", ExposureWarning
+            )
+            fits_model = basecam.models.FITSModel()
 
         return fits_model.to_hdu(self, context=context)
 
