@@ -75,12 +75,12 @@ class Exposure(object):
         data: Optional[numpy.ndarray] = None,
         fits_model: Optional[basecam.models.FITSModel] = None,
     ):
-        print(fits_model)
+
         self.camera = camera
         self.data = data
         self.fits_model = fits_model or basecam.models.FITSModel()
         self.filename = filename
-        print(self.fits_model)
+
         self._obstime: astropy.time.Time = astropy.time.Time.now()
 
         self.exptime: Optional[float] = None
