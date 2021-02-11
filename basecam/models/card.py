@@ -155,9 +155,9 @@ class Card(object):
 
         try:
             self._exposure = exposure
-            self.context.update(
-                {"__exposure__": self._exposure, "__camera__": self._exposure.camera}
-            )
+            self.context.update({"__exposure__": self._exposure})
+            if hasattr(self._exposure, "camera") and self._exposure.camera:
+                self.context.update({"__camera__": self._exposure.camera})
             self.context.update(context)
             yield
         finally:
@@ -452,11 +452,13 @@ DEFAULT_CARDS = {
         "STACK",
         value="{__exposure__.stack}",
         comment="Number of stacked frames",
+        default=1,
     ),
     "STACKFUN": DefaultCard(
         "STACKFUN",
         value="{__exposure__.stack_function}",
         comment="Function used for stacking",
+        default="NA",
     ),
     "OBSTIME": DefaultCard(
         "OBSTIME",
@@ -472,15 +474,18 @@ DEFAULT_CARDS = {
         "CAMNAME",
         value="{__camera__.name}",
         comment="Camera name",
+        default="NA",
     ),
     "CAMUID": DefaultCard(
         "CAMUID",
         value="{__camera__.uid}",
         comment="Camera UID",
+        default="NA",
     ),
     "VCAM": DefaultCard(
         "VCAM",
         value="{__camera__.__version__}",
         comment="The version of camera library",
+        default="NA",
     ),
 }

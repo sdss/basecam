@@ -14,6 +14,7 @@ import pytest
 from basecam import models
 from basecam.exceptions import CardError, CardWarning
 from basecam.models import Card
+from basecam.models.card import DefaultCard
 
 
 class MacroCardTest(models.MacroCard):
@@ -287,3 +288,10 @@ def test_card_default(exposure):
     card = models.Card("MYCARD", value="{some_value_not_passed}", default="a_default")
     result = card.evaluate(exposure=exposure)
     assert result.value == "a_default"
+
+
+def test_default_card_default_value(exposure):
+    del exposure.camera
+    card = models.Card("CAMUID")
+    assert isinstance(card, DefaultCard)
+    assert card.evaluate(exposure).value == "NA"
