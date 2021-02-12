@@ -13,7 +13,6 @@ import astropy
 import astropy.io.fits
 import numpy
 import pytest
-from asynctest import patch
 
 from basecam import (
     CameraConnectionError,
@@ -41,21 +40,25 @@ async def test_status(camera):
     assert status["temperature"] == 25.0
 
 
-async def test_connect_fails(camera):
+async def test_connect_fails(camera, mocker):
 
-    with patch.object(camera, "_connect_internal", side_effect=CameraConnectionError):
-
+    with mocker.patch.object(
+        camera,
+        "_connect_internal",
+        side_effect=CameraConnectionError,
+    ):
         with pytest.raises(CameraConnectionError):
             # Force reconnect.
             await camera.connect(force=True)
 
 
-async def test_disconnect_fails(camera):
+async def test_disconnect_fails(camera, mocker):
 
-    with patch.object(
-        camera, "_disconnect_internal", side_effect=CameraConnectionError
+    with mocker.patch.object(
+        camera,
+        "_disconnect_internal",
+        side_effect=CameraConnectionError,
     ):
-
         with pytest.raises(CameraConnectionError):
             await camera.disconnect()
 

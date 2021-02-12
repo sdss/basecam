@@ -8,7 +8,6 @@
 
 import asyncio
 
-import asynctest
 import pytest
 
 from basecam.events import CameraSystemEvent
@@ -75,9 +74,9 @@ async def test_listener(camera_system, listener):
     assert len(events) > n_events
 
 
-async def test_callback_function(camera_system, listener):
+async def test_callback_function(camera_system, listener, mocker):
 
-    func_callback = asynctest.MagicMock()
+    func_callback = mocker.MagicMock()
 
     listener.register_callback(func_callback)
 

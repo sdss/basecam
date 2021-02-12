@@ -9,7 +9,6 @@
 import asyncio
 
 import pytest
-from asynctest import patch
 
 from basecam.events import CameraEvent
 
@@ -17,12 +16,13 @@ from basecam.events import CameraEvent
 pytestmark = pytest.mark.asyncio
 
 
-async def test_bias(camera):
+async def test_bias(camera, mocker):
 
-    with patch.object(
-        camera, "_set_shutter_internal", wraps=camera._set_shutter_internal
+    with mocker.patch.object(
+        camera,
+        "_set_shutter_internal",
+        wraps=camera._set_shutter_internal,
     ) as mock:
-
         # Open the shutter
         await camera.open_shutter()
 
@@ -37,12 +37,13 @@ async def test_bias(camera):
         assert calls[1][1][0] is False
 
 
-async def test_dark(camera):
+async def test_dark(camera, mocker):
 
-    with patch.object(
-        camera, "_set_shutter_internal", wraps=camera._set_shutter_internal
+    with mocker.patch.object(
+        camera,
+        "_set_shutter_internal",
+        wraps=camera._set_shutter_internal,
     ) as mock:
-
         exposure = await camera.dark(5)
         hdu = exposure.to_hdu()
 
@@ -53,12 +54,13 @@ async def test_dark(camera):
         assert len(calls) == 0
 
 
-async def test_flat(camera):
+async def test_flat(camera, mocker):
 
-    with patch.object(
-        camera, "_set_shutter_internal", wraps=camera._set_shutter_internal
+    with mocker.patch.object(
+        camera,
+        "_set_shutter_internal",
+        wraps=camera._set_shutter_internal,
     ) as mock:
-
         exposure = await camera.flat(5)
         hdu = exposure.to_hdu()
 
@@ -71,12 +73,13 @@ async def test_flat(camera):
         assert calls[1][1][0] is False
 
 
-async def test_object(camera):
+async def test_object(camera, mocker):
 
-    with patch.object(
-        camera, "_set_shutter_internal", wraps=camera._set_shutter_internal
+    with mocker.patch.object(
+        camera,
+        "_set_shutter_internal",
+        wraps=camera._set_shutter_internal,
     ) as mock:
-
         exposure = await camera.object(5)
         hdu = exposure.to_hdu()
 

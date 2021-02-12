@@ -44,7 +44,6 @@ isort = ">=5.0.0"
 codecov = ">=2.0.15"
 coverage = {version = ">=5.0", extras = ["toml"]}
 ipdb = ">=0.12.3"
-asynctest = ">=0.13.0"
 sphinx = ">=3.0.0"
 black = {version = "^20.8b1", allow-prereleases = true}
 

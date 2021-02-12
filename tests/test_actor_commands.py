@@ -12,7 +12,6 @@ import types
 
 import astropy.io.fits
 import pytest
-from asynctest import patch
 
 from basecam import CameraConnectionError, CameraError, ExposureError
 from basecam.actor.tools import get_cameras
@@ -178,11 +177,11 @@ async def test_reconnect(actor):
     assert command.status.did_succeed
 
 
-async def test_reconnect_disconnect_fails(actor):
+async def test_reconnect_disconnect_fails(actor, mocker):
 
     camera = actor.camera_system.cameras[0]
 
-    with patch.object(
+    with mocker.patch.object(
         camera, "_disconnect_internal", side_effect=CameraConnectionError
     ):
 
@@ -192,12 +191,15 @@ async def test_reconnect_disconnect_fails(actor):
         assert command.status.did_succeed
 
 
-async def test_reconnect_connect_fails(actor):
+async def test_reconnect_connect_fails(actor, mocker):
 
     camera = actor.camera_system.cameras[0]
 
-    with patch.object(camera, "_connect_internal", side_effect=CameraConnectionError):
-
+    with mocker.patch.object(
+        camera,
+        "_connect_internal",
+        side_effect=CameraConnectionError,
+    ):
         command = await actor.invoke_mock_command("reconnect")
 
         assert "failed to connect" in actor.mock_replies
@@ -240,7 +242,7 @@ async def test_expose(actor, tmp_path, image_type):
     hdu = astropy.io.fits.open(filename)
     assert hdu[0].data is not None
     assert hdu[0].header["IMAGETYP"] == image_type
-    assert hdu[0].header["EXPTIME"] == "1.0" if image_type != "bias" else "0.0"
+    assert hdu[0].header["EXPTIME"] == 1.0 if image_type != "bias" else 0.0
 
     if image_type == "bias":
         assert "seeting exposure time for bias to 0 seconds." in actor.mock_replies
@@ -257,16 +259,16 @@ async def test_expose_stack(actor):
 
     hdu = astropy.io.fits.open(image_name)
     assert hdu[0].data is not None
-    assert hdu[0].header["EXPTIME"] == "1.0"
-    assert hdu[0].header["EXPTIMEN"] == "2.0"
-    assert hdu[0].header["STACK"] == "2"
+    assert hdu[0].header["EXPTIME"] == 1.0
+    assert hdu[0].header["EXPTIMEN"] == 2.0
+    assert hdu[0].header["STACK"] == 2
 
 
-async def test_expose_fails(actor):
+async def test_expose_fails(actor, mocker):
 
     camera = actor.camera_system.cameras[0]
 
-    with patch.object(camera, "_expose_internal", side_effect=ExposureError):
+    with mocker.patch.object(camera, "_expose_internal", side_effect=ExposureError):
 
         command = await actor.invoke_mock_command("expose 1")
 
@@ -312,11 +314,11 @@ async def test_set_shutter(actor, shutter_position):
     )
 
 
-async def test_set_shutter_fails(actor):
+async def test_set_shutter_fails(actor, mocker):
 
     camera = actor.camera_system.cameras[0]
 
-    with patch.object(camera, "_set_shutter_internal", side_effect=CameraError):
+    with mocker.patch.object(camera, "_set_shutter_internal", side_effect=CameraError):
 
         command = await actor.invoke_mock_command("shutter --open")
         assert command.status.did_fail
@@ -341,11 +343,11 @@ async def test_set_temperature(actor):
     assert actor.camera_system.cameras[0].temperature == 100
 
 
-async def test_set_temperature_fails(actor):
+async def test_set_temperature_fails(actor, mocker):
 
     camera = actor.camera_system.cameras[0]
 
-    with patch.object(
+    with mocker.patch.object(
         camera,
         "_set_temperature_internal",
         side_effect=CameraError("failed to set temperature"),
@@ -375,11 +377,11 @@ async def test_set_binning(actor):
     assert actor.mock_replies[1]["binning"] == [2, 2]
 
 
-async def test_set_binning_fails(actor):
+async def test_set_binning_fails(actor, mocker):
 
     camera = actor.camera_system.cameras[0]
 
-    with patch.object(camera, "_set_binning_internal", side_effect=CameraError):
+    with mocker.patch.object(camera, "_set_binning_internal", side_effect=CameraError):
 
         command = await actor.invoke_mock_command("binning 2 2")
 
@@ -417,12 +419,15 @@ async def test_set_area_reset(actor):
     assert actor.mock_replies[1]["area"] == [1, camera.width, 1, camera.height]
 
 
-async def test_set_area_fails(actor):
+async def test_set_area_fails(actor, mocker):
 
     camera = actor.camera_system.cameras[0]
 
-    with patch.object(camera, "_set_image_area_internal", side_effect=CameraError):
-
+    with mocker.patch.object(
+        camera,
+        "_set_image_area_internal",
+        side_effect=CameraError,
+    ):
         command = await actor.invoke_mock_command("area 10 100 20 40")
 
         assert command.status.did_fail
