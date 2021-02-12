@@ -191,7 +191,7 @@ def test_macro_with_group_title(exposure):
 def test_card_group(exposure):
 
     card_group = models.CardGroup(
-        [Card("KEYW1", 1, "The first card"), Card("KEYW2", 2)], name="card_group"
+        [Card("KEYW1", 1, "The first card"), ("KEYW2", 2)], name="card_group"
     )
 
     assert len(card_group) == 2
@@ -199,6 +199,7 @@ def test_card_group(exposure):
     assert isinstance(card_group[1], models.Card)
 
     assert card_group[0].name == "KEYW1"
+    assert card_group[1].name == "KEYW2"
 
     header = card_group.to_header(exposure)
     assert isinstance(header, astropy.io.fits.Header)
@@ -295,3 +296,24 @@ def test_default_card_default_value(exposure):
     card = models.Card("CAMUID")
     assert isinstance(card, DefaultCard)
     assert card.evaluate(exposure).value == "NA"
+
+
+def test_placeholder_fails_with_default(exposure):
+    card = models.Card("MYCARD", value="{__exposure__.blah}", default="a_default")
+    result = card.evaluate(exposure=exposure)
+    assert result.value == "a_default"
+
+
+def test_placeholder_fails_no_default(exposure):
+    card = models.Card("MYCARD", value="{__exposure__.blah}")
+    with pytest.raises(AttributeError):
+        card.evaluate(exposure=exposure)
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [("true", True), ("false", False), ("TRUE", True)],
+)
+def test_autocast_boolean(value, expected, exposure):
+    card = models.Card("MYCARD", value=value, autocast=True)
+    assert card.evaluate(exposure).value == expected

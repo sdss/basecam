@@ -39,6 +39,9 @@ async def test_status(camera):
     status = camera.get_status()
     assert status["temperature"] == 25.0
 
+    status_2 = camera.status
+    assert status == status_2
+
 
 async def test_connect_fails(camera, mocker):
 
