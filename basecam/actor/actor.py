@@ -6,13 +6,16 @@
 # @Filename: actor.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
+from __future__ import annotations
+
 import logging
 
+import clu.parser
 from clu import BaseActor, JSONActor
 from clu.tools import ActorHandler
 from sdsstools.logger import SDSSLogger
 
-from basecam import EventListener
+from basecam import CameraSystem, EventListener
 from basecam.exceptions import CameraWarning
 
 from . import commands
@@ -36,12 +39,12 @@ class BaseCameraActor:
 
     Parameters
     ----------
-    camera_system : .CameraSystem
+    camera_system
         The camera system, already instantiated.
-    default_cameras : list of `str`
+    default_cameras
         A list of camera names or UIDs that define what cameras to use by
         default in most command.
-    command_parser : ~clu.parser.CluGroup
+    command_parser
         The list of commands to use. It must be a command group deriving from
         `~clu.parser.CluGroup` containing all the commands to use. If
         ``commands=None``, uses the internal command set.
@@ -51,7 +54,12 @@ class BaseCameraActor:
     """
 
     def __init__(
-        self, camera_system, *args, default_cameras=None, command_parser=None, **kwargs
+        self,
+        camera_system: CameraSystem,
+        *args,
+        default_cameras: list[str] | str | None = None,
+        command_parser: clu.parser.CluGroup = None,
+        **kwargs,
     ):
 
         self._check_is_subclass()
@@ -111,7 +119,7 @@ class BaseCameraActor:
                 for command in commands._MIXIN_TO_COMMANDS[mixin_name]:
                     self.parser.add_command(command)
 
-    def set_default_cameras(self, cameras=None):
+    def set_default_cameras(self, cameras: str | list[str] | None = None):
         """Sets the camera(s) that will be used by default.
 
         These cameras will be used by default when a command is issued without
