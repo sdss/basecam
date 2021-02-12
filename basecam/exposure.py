@@ -226,13 +226,27 @@ class ImageNamer(object):
 
         assert re.match(r".+(\{num.+\}).+", basename), "invalid basename."
 
-        # We want to expand everything except the num first so we "double-escape" it.
-        self.basename: str = re.sub(r"(\{num.+\})", r"{\1}", basename)
+        self._basename: str
+        self.basename = basename
+
         self.dirname: pathlib.Path | str = pathlib.Path(dirname)
         self.overwrite: bool = overwrite
 
         self._last_num = 0
         self.camera = camera
+
+    @property
+    def basename(self) -> str:
+        """The image name pattern."""
+
+        return self._basename
+
+    @basename.setter
+    def basename(self, value: str):
+        """Sets the basename."""
+        print("hi")
+        # We want to expand everything except the num first so we "double-escape" it.
+        self._basename = re.sub(r"(\{num.+\})", r"{\1}", value)
 
     def _eval_dirname(self) -> pathlib.Path:
         """Returns the evaluated dirname."""
