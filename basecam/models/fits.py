@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import functools
 
+from typing import Any, Literal, Optional, Union
+
 import astropy.io.fits
 import astropy.table
 import numpy
@@ -17,7 +19,7 @@ import numpy
 import basecam.exposure
 
 from ..exceptions import CardError
-from .card import Card, CardGroup, MacroCard
+from .card import DEFAULT_CARDS, Card, CardGroup, MacroCard
 
 
 __all__ = [
@@ -26,7 +28,15 @@ __all__ = [
     "HeaderModel",
 ]
 
+
 Exposure = basecam.exposure.Exposure
+
+ImageHDUType = Union[
+    astropy.io.fits.ImageHDU,
+    astropy.io.fits.CompImageHDU,
+    astropy.io.fits.PrimaryHDU,
+]
+_CardTypes = Union[Card, CardGroup, MacroCard, str]
 
 
 class FITSModel(list):
@@ -41,7 +51,6 @@ class FITSModel(list):
     extension
         A list of HDU extensions defined as `.Extension` objects. If none is
         defined, a single, basic extension is added.
-
     """
 
     def __init__(self, extensions: list[Extension] = None):
@@ -53,25 +62,28 @@ class FITSModel(list):
         if len(self) == 0:
             self.append(Extension(data="raw", name="DATA"))
 
-    def to_hdu(self, exposure: Exposure, context={}):
+    def to_hdu(
+        self,
+        exposure: Exposure,
+        context: dict[str, Any] = {},
+    ) -> astropy.io.fits.HDUList:
         """Returns an `~astropy.io.fits.HDUList` from an exposure.
 
         Parameters
         ----------
-        exposure : .Exposure
+        exposure
             The exposure for which the FITS model is evaluated.
-        context : dict
+        context
             A dictionary of parameters used to fill the card replacement
             fields.
 
         Returns
         -------
-        hdulist : `~astropy.io.fits.HDUList`
+        hdulist
             A list of HDUs, each one define by its corresponding `.Extension`
             instance. The first extension is created as a
             `~astropy.io.fits.PrimaryHDU` unless it is compressed, in which
             case an empty primary HDU is prepended.
-
         """
 
         hdus = []
@@ -94,25 +106,30 @@ class Extension(object):
 
     Parameters
     ----------
-    data : str or numpy.ndarray
+    data
         The data for this FITS extension. Can be an array or a macro string
         indicating the type of data to store in the extension. Available macros
         are: ``'raw'`` for the raw image, or ``'none'`` for empty data. If
         `None`, the raw data will only be added to the primary HDU.
-    header_model : .HeaderModel
+    header_model
         A `.HeaderModel` for this extension.
-    name : str
+    name
         The name of the HDU.
-    compressed : bool or str
+    compressed
         If `False`, the extension data will not be compressed. Otherwise, a
         string with one of the ``compression_type`` in
         `~astropy.io.fits.CompImageHDU`.
-
     """
 
     __VALID_DATA_VALUES = ["raw", "none"]
 
-    def __init__(self, data=None, header_model=None, name=None, compressed=False):
+    def __init__(
+        self,
+        data: Literal["raw"] | Literal["none"] | None = None,
+        header_model: HeaderModel = None,
+        name: Optional[str] = None,
+        compressed: bool | str = False,
+    ):
 
         if isinstance(data, numpy.ndarray):
             self.data = data
@@ -129,22 +146,27 @@ class Extension(object):
 
         return f"<Extension (name={self.name!r}, compressed={self.compressed})>"
 
-    def to_hdu(self, exposure, primary=False, context={}):
+    def to_hdu(
+        self,
+        exposure: Exposure,
+        primary: bool = False,
+        context: dict[str, Any] = {},
+    ) -> ImageHDUType:
         """Evaluates the extension as an HDU.
 
         Parameters
         ----------
-        exposure : .Exposure
+        exposure
             The exposure for which we want to evaluate the extension.
-        primary : bool
+        primary
             Whether this is the primary extension.
-        context : dict
+        context
             A dictionary of arguments used to evaluate the parameters in
             the extension.
 
         Returns
         -------
-        hdu : `~astropy.io.fits.ImageHDU`
+        hdu
             An `~astropy.io.fits.ImageHDU` with the data and header evaluated
             for ``exposure``, or `~astropy.io.fits.CompImageHDU` if
             ``compressed=True``.
@@ -176,7 +198,11 @@ class Extension(object):
 
         return hdu
 
-    def get_data(self, exposure, primary=False):
+    def get_data(
+        self,
+        exposure: Exposure,
+        primary: bool = False,
+    ) -> None | numpy.ndarray:
         """Returns the data as a numpy array."""
 
         if isinstance(self.data, str):
@@ -197,62 +223,67 @@ class HeaderModel(list):
 
     Parameters
     ----------
-    cards : list
-        A list of `.Card`, `.CardGroup`, or `MacroCard` instances. Elements
-        can also be a tuple of two or three elements (for name, value, and
-        optionally a comment).
+    cards
+        A list of `.Card`, `.CardGroup`, or `MacroCard` instances. It can also be a
+        string with the name of a :ref:`default card <default-cards>`.
 
     Examples
     --------
-    >>> header_model = HeaderModel([('TELESCOP', 'APO-2.5', 'The telescope'),
-                                    ('OBSERVATORY', 'APO'),
+    >>> header_model = HeaderModel([Card('TELESCOP', 'APO-2.5', 'The telescope'),
+                                    Card('OBSERVATORY', 'APO'),
+                                    'EXPTIME',
                                     Card('camname', '{(camera).name}')])
 
 
     """
 
-    def __init__(self, cards=None):
+    def __init__(self, cards: list[_CardTypes] = []):
 
-        cards = [self._process_input(card) for card in cards or []]
+        cards = [self._process_input(card) for card in cards]
         list.__init__(self, cards)
 
     def __repr__(self):
 
         return f"<HeaderModel {list.__repr__(self)!s}>"
 
-    def _process_input(self, input_card):
+    def _process_input(self, input_card: _CardTypes) -> _CardTypes:
         """Processes the input and converts it into a valid card."""
 
         if isinstance(input_card, (Card, CardGroup, MacroCard)):
             return input_card
         elif isinstance(input_card, str):
-            return Card(input_card)
+            if input_card not in DEFAULT_CARDS:
+                raise CardError(f"{input_card} is not a default card.")
+            return Card(input_card.upper())
         else:
             raise CardError(f"invalid input {input_card!r}")
 
-    def append(self, card):
+    def append(self, card: _CardTypes):
         list.append(self, self._process_input(card))
 
-    def insert(self, idx, card):
+    def insert(self, idx: int, card: _CardTypes):
         list.insert(self, idx, self._process_input(card))
 
-    def to_header(self, exposure, context={}):
+    def to_header(
+        self,
+        exposure: Exposure,
+        context: dict[str, Any] = {},
+    ) -> astropy.io.fits.Header:
         """Evaluates the header model for an exposure and returns a header.
 
         Parameters
         ----------
-        exposure : .Exposure
+        exposure
             The exposure for which we want to evaluate the model.
-        context : dict
+        context
             A dictionary of arguments used to evaluate the parameters in
             the model.
 
         Returns
         -------
-        header : `~astropy.io.fits.Header`
+        header
             A `~astropy.io.fits.Header`, created by evaluating the model for
             the input exposure.
-
         """
 
         header = astropy.io.fits.Header()
