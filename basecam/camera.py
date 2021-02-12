@@ -16,7 +16,7 @@ import time
 import warnings
 from logging import INFO, WARNING
 
-from typing import Any, Callable, Optional, Type, TypeVar, Union, cast
+from typing import Any, Callable, Generic, Optional, Type, TypeVar, Union, cast
 
 import numpy
 
@@ -52,7 +52,7 @@ _T_CameraSystem = TypeVar("_T_CameraSystem", bound="CameraSystem")
 _T_BaseCamera = TypeVar("_T_BaseCamera", bound="BaseCamera")
 
 
-class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
+class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
     """A base class for the camera system.
 
     Provides an abstract class for the camera system, including camera
@@ -84,13 +84,13 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
         will be logged to the console.
     """
 
-    camera_class: Type[BaseCamera] | None = None
+    camera_class: Type[_T_BaseCamera] | None = None
     include = None
     exclude = None
 
     def __init__(
         self,
-        camera_class: Optional[Type[BaseCamera]] = None,
+        camera_class: Optional[Type[_T_BaseCamera]] = None,
         camera_config: Optional[AnyPath | dict[str, Any]] = None,
         include: Optional[list[Any]] = None,
         exclude: Optional[list[Any]] = None,
@@ -100,7 +100,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
         verbose: Optional[bool | int] = False,
     ):
 
-        self.camera_class = self.camera_class or camera_class
+        self.camera_class = camera_class or self.camera_class
 
         if not self.camera_class or not issubclass(self.camera_class, BaseCamera):
             raise ValueError("camera_class must be a subclass of BaseCamera.")
@@ -127,7 +127,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
         self.loop.set_exception_handler(self.logger.asyncio_exception_handler)
 
         #: list: The list of cameras being handled.
-        self.cameras: list[BaseCamera] = []
+        self.cameras: list[_T_BaseCamera] = []
 
         self._camera_poller = None
 
