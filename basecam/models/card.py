@@ -13,7 +13,7 @@ import re
 import warnings
 from contextlib import contextmanager
 
-from typing import Any, Iterable, NamedTuple, Optional
+from typing import Any, Iterable, NamedTuple, Optional, Type, cast
 
 import astropy.io.fits
 
@@ -83,6 +83,10 @@ class Card(object):
     default
         Default value to use if the card value contains placeholders that are not
         provided while the card is evaluated.
+    type
+        The type of the card value. The value will be casted after processing.
+    autocast
+        If `True` and ``type`` is not defined, tries to cast the value.
     fargs
         If ``value`` is a callable, the arguments to pass to it when it gets
         called. The arguments are evaluated following the same rules as with
@@ -115,6 +119,8 @@ class Card(object):
         name: str,
         value: Any = "",
         comment: str = "",
+        type: Optional[Type[type]] = None,
+        autocast: bool = True,
         default: Any = None,
         fargs: Optional[tuple] = None,
         evaluate: bool = False,
@@ -133,13 +139,14 @@ class Card(object):
         self.comment = comment
 
         self._default = default
+        self._type = type
+        self._autocast = autocast
         self._fargs = fargs
         self._evaluate = evaluate
 
         self.context = context or {}
 
     def __repr__(self):
-
         return f"<{self.__class__.__name__} (name={self.name!r}, value={self.value!r})>"
 
     @contextmanager
@@ -198,9 +205,6 @@ class Card(object):
     def _evaluate_value(self, value, use_fargs=True):
         """Evaluates a value, expanding its template."""
 
-        if isinstance(value, (list, tuple)):
-            return (self._evaluate_value(v) for v in value)
-
         if callable(value):
             return self._evaluate_callable(value, use_fargs=use_fargs)
 
@@ -233,7 +237,35 @@ class Card(object):
         """
 
         with self.set_exposure(exposure, context):
-            rendered_value = self._evaluate_value(self.value)
+            try:
+                rendered_value = self._evaluate_value(self.value)
+            except BaseException as err:
+                if self._default:
+                    rendered_value = self._default
+                    warnings.warn(
+                        f"Failed evaluating card "
+                        f"({self.name!r}, {self.value!r}): {str(err)}",
+                        CardWarning,
+                    )
+                else:
+                    raise
+
+        if self._type:
+            rendered_value = self._type(rendered_value)
+        elif self._autocast and isinstance(rendered_value, str):
+            rendered_value = cast(str, rendered_value)
+            if re.match("^true$", rendered_value, re.IGNORECASE):
+                rendered_value = True
+            elif re.match("^false$", rendered_value, re.IGNORECASE):
+                rendered_value = False
+            else:
+                try:
+                    rendered_value = int(rendered_value)
+                except ValueError:
+                    try:
+                        rendered_value = float(rendered_value)
+                    except ValueError:
+                        pass
 
         return EvaluatedCard(self.name, rendered_value, self.comment)
 
@@ -432,7 +464,7 @@ class DefaultCard(Card):
     pass
 
 
-DEFAULT_CARDS = {
+DEFAULT_CARDS: dict[str, DefaultCard] = {
     "EXPTIME": DefaultCard(
         "EXPTIME",
         value="{__exposure__.exptime}",
@@ -480,7 +512,7 @@ DEFAULT_CARDS = {
     "VCAM": DefaultCard(
         "VCAM",
         value="{__camera__.__version__}",
-        comment="The version of camera library",
+        comment="Version of the camera library",
         default="NA",
     ),
 }

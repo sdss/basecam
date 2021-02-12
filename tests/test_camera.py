@@ -72,7 +72,7 @@ async def test_expose(camera):
 
     header = hdu[0].header
     assert isinstance(header, astropy.io.fits.Header)
-    assert header["EXPTIME"] == "1.0"
+    assert header["EXPTIME"] == 1.0
     assert header["IMAGETYP"] == "object"
     assert header["DATE-OBS"] == tai_time
     assert header["CAMNAME"] == camera.name
@@ -161,9 +161,9 @@ async def test_expose_stack_two(camera):
     assert exposure.data.dtype == numpy.dtype("float64")
 
     hdu = exposure.to_hdu()
-    assert hdu[0].header["EXPTIME"] == "1.0"
-    assert hdu[0].header["EXPTIMEN"] == "2.0"
-    assert hdu[0].header["STACK"] == "2"
+    assert hdu[0].header["EXPTIME"] == 1.0
+    assert hdu[0].header["EXPTIMEN"] == 2.0
+    assert hdu[0].header["STACK"] == 2
     assert hdu[0].header["STACKFUN"] == "median"
 
 

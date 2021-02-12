@@ -245,9 +245,11 @@ async def test_expose(actor, tmp_path, image_type):
     hdu = astropy.io.fits.open(filename)
     assert hdu[0].data is not None
     assert hdu[0].header["IMAGETYP"] == image_type
-    assert hdu[0].header["EXPTIME"] == 1.0 if image_type != "bias" else 0.0
 
-    if image_type == "bias":
+    if image_type != "bias":
+        assert hdu[0].header["EXPTIME"] == 1.0
+    else:
+        assert hdu[0].header["EXPTIME"] == 0.0
         assert "seeting exposure time for bias to 0 seconds." in actor.mock_replies
 
 
