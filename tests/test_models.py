@@ -148,7 +148,7 @@ def test_header_describe(exposure):
         models.CardGroup(
             [
                 Card("PARAM1", "A parameter"),
-                Card("PARAM2", "{__camera__.uid}", "Camera UID"),
+                ("PARAM2", "{__camera__.uid}", "Camera UID"),
                 Card("VCAM"),
             ]
         )

@@ -11,9 +11,10 @@ from __future__ import annotations
 import abc
 import re
 import warnings
+from collections.abc import Iterable
 from contextlib import contextmanager
 
-from typing import Any, Iterable, NamedTuple, Optional, cast
+from typing import Any, NamedTuple, Optional, cast
 
 import astropy.io.fits
 
@@ -99,10 +100,9 @@ class Card(object):
         A dictionary of parameters used to fill the value replacement fields.
         Two values, ``__exposure__`` and ``__camera__``, are always defined.
         This context can be updated during the evaluation of the card.
-
     """
 
-    def __new__(cls, name: str | Iterable, *args, **kwargs):
+    def __new__(cls, name: str | Iterable[Any], *args, **kwargs):
 
         if isinstance(name, str):
             if cls == Card and name.upper() in DEFAULT_CARDS:
@@ -116,7 +116,7 @@ class Card(object):
 
     def __init__(
         self,
-        name: str,
+        name: str | Iterable[Any],
         value: Any = "",
         comment: str = "",
         type: Optional[type] = None,
@@ -129,6 +129,8 @@ class Card(object):
 
         if hasattr(self, "name"):
             return
+
+        assert isinstance(name, str)
 
         self.name = name
         if len(self.name) > 8:
@@ -233,13 +235,12 @@ class Card(object):
         -------
         EvaluatedCard
             A tuple with the name, evaluated value, and comment for this card.
-
         """
 
         with self.set_exposure(exposure, context):
             try:
                 rendered_value = self._evaluate_value(self.value)
-            except BaseException as err:
+            except BaseException:
                 if self._default:
                     rendered_value = self._default
                 else:
@@ -273,21 +274,27 @@ class CardGroup(list):
 
     Parameters
     ----------
-    cards : list
+    cards
         A list of `.Card` instances. Elements can also be a tuple of two or
         three elements (for name, value, and optionally a comment).
-    name : str
+    name
         A name for the card group.
-    use_group_title : bool
+    use_group_title
         Whether to prepend a COMMENT card with the group title when creating
         a header.
-
     """
 
-    def __init__(self, cards, name=None, use_group_title=True):
+    name: Optional[str] = None
 
-        self.name = name
-        self.use_group_title = use_group_title
+    def __init__(
+        self,
+        cards: Iterable[Card | Iterable],
+        name: Optional[str] = None,
+        use_group_title: bool = True,
+    ):
+
+        self.name = name or self.name
+        self.use_group_title: bool = use_group_title
 
         cards = [self._process_input(card) for card in cards or []]
         list.__init__(self, cards)
@@ -296,18 +303,20 @@ class CardGroup(list):
 
         return f"<CardGroup {list.__repr__(self)!s}>"
 
-    def _process_input(self, card):
+    def _process_input(self, card: Card | Iterable):
         """Processes the input and converts it into a valid card."""
 
         if isinstance(card, Card):
             return card
+        elif isinstance(card, Iterable):
+            return Card(card)
         else:
             raise CardError(f"invalid card {card}")
 
-    def append(self, card):
+    def append(self, card: Card):
         list.append(self, self._process_input(card))
 
-    def insert(self, idx, card):
+    def insert(self, idx, card: Card):
         list.insert(self, idx, self._process_input(card))
 
     def evaluate(self, exposure, context={}):
@@ -325,7 +334,6 @@ class CardGroup(list):
         list
             A list of tuples with the name, evaluated value, and comment
             for each card.
-
         """
 
         return [card.evaluate(exposure, context=context) for card in self]
@@ -378,9 +386,11 @@ class MacroCard(object, metaclass=abc.ABCMeta):
 
     """
 
+    name = None
+
     def __init__(self, name=None, use_group_title=True, **kwargs):
 
-        self.name = name
+        self.name = name or self.name
         self.use_group_title = use_group_title
         self.kwargs = kwargs
 
@@ -389,7 +399,7 @@ class MacroCard(object, metaclass=abc.ABCMeta):
         return f"<{self.__class__.__name__} (name={self.name})>"
 
     @abc.abstractmethod
-    def macro(self, exposure, context={}):
+    def macro(self, exposure: Exposure, context: dict[str, Any] = {}):
         """The macro.
 
         Must return a list of tuples with the format
@@ -397,53 +407,55 @@ class MacroCard(object, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        exposure : .Exposure
+        exposure
             The exposure for which we want to evaluate the macro.
-        context : dict
+        context
             A dictionary of parameters that can be used by the macro.
-
         """
 
         raise NotImplementedError
 
-    def evaluate(self, exposure, context={}):
+    def evaluate(self, exposure: Exposure, context: dict[str, Any] = {}) -> list[tuple]:
         """Evaluates the macro. Equivalent to calling `.macro` directly.
 
         Parameters
         ----------
-        exposure : .Exposure
+        exposure
             The exposure for which we want to evaluate the macro.
-        context : dict
+        context
             A dictionary of parameters that can be used by the macro.
 
         Returns
         -------
-        cards : `list`
+        tuples
             A list of tuples with the format ``(keyword, value, comment)``
             or ``(keyword, value)``.
-
         """
 
         return self.macro(exposure, context=context)
 
-    def to_header(self, exposure, context={}, use_group_title=None):
+    def to_header(
+        self,
+        exposure: Exposure,
+        context: dict[str, Any] = {},
+        use_group_title=False,
+    ) -> astropy.io.fits.Header:
         """Evaluates the macro and returns a header.
 
         Parameters
         ----------
-        exposure : .Exposure
+        exposure
             The exposure for which we want to evaluate the macro.
-        context : dict
+        context
             A dictionary of arguments used to evaluate the macro.
-        use_group_title : bool
+        use_group_title
             Whether to prepend a COMMENT card with the macro title when
             creating the header.
 
         Returns
         -------
-        header : `~astropy.io.fits.Header`
+        header
             A header composed from the cards in the macro.
-
         """
 
         header = astropy.io.fits.Header(self.evaluate(exposure, context=context))
@@ -470,7 +482,7 @@ DEFAULT_CARDS: dict[str, DefaultCard] = {
         "EXPTIMEN",
         value="{__exposure__.exptime_n}",
         comment="Total exposure time [s]",
-        type=float,
+        default=-999,
     ),
     "STACK": DefaultCard(
         "STACK",

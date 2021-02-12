@@ -261,5 +261,6 @@ def exposure(camera):
     exp.data = numpy.zeros((10, 10), dtype=numpy.uint16)
     exp.obstime = astropy.time.Time.now()
     exp.image_type = "object"
+    exp.exptime = 1.0
 
     yield exp
