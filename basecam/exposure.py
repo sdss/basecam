@@ -238,13 +238,11 @@ class ImageNamer(object):
     @property
     def basename(self) -> str:
         """The image name pattern."""
-
         return self._basename
 
     @basename.setter
     def basename(self, value: str):
         """Sets the basename."""
-        print("hi")
         # We want to expand everything except the num first so we "double-escape" it.
         self._basename = re.sub(r"(\{num.+\})", r"{\1}", value)
 
