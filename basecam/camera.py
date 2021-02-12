@@ -773,7 +773,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         exposure.stack = stack
         exposure.stack_function = stack_function.__name__
 
-        exposure.filename = filename or self.image_namer()
+        exposure.filename = filename or self.image_namer(self)
 
         self._notify(CameraEvent.EXPOSURE_READ)
 
