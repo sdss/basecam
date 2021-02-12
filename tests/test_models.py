@@ -253,10 +253,10 @@ def test_card_default_evaluate(exposure):
     assert card.evaluate(exposure)[1] == 4
 
 
-def test_default_card_raises():
+def test_default_card_overridden():
 
-    with pytest.raises(ValueError):
-        models.Card("VCAM", value="a value")
+    card = models.Card("VCAM", value="a value")
+    assert card.value == "a value"
 
 
 def test_card_name_trimming():

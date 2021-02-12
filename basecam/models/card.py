@@ -102,12 +102,7 @@ class Card(object):
 
         if isinstance(name, str):
             if cls == Card and name.upper() in DEFAULT_CARDS:
-                if len(args) != 0 or len(kwargs) != 0:
-                    raise ValueError(
-                        f"{name.upper()} is a default card and does "
-                        "not accept additional arguments."
-                    )
-                if name.upper() in DEFAULT_CARDS:
+                if len(args) == 0 and len(kwargs) == 0:
                     return DEFAULT_CARDS[name.upper()]
 
         if isinstance(name, (list, tuple)):
