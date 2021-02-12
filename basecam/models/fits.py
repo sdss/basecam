@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import functools
 
-from typing import Any, Literal, Optional, Union
+from typing import Any, Optional, Union
 
 import astropy.io.fits
 import astropy.table
@@ -20,6 +20,12 @@ import basecam.exposure
 
 from ..exceptions import CardError
 from .card import DEFAULT_CARDS, Card, CardGroup, MacroCard
+
+
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
 
 
 __all__ = [
