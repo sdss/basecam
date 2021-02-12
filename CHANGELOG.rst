@@ -4,6 +4,7 @@
 Changelog
 =========
 
+* :release:`0.4.0 <2021-02-12>`
 * :feature:`-` `.Card` now accepts a ``type`` to which to be cast. By default ``autocast=True`` will try to cast the value to the correct type after evaluating.
 * :feature:`-` `.Card` now accepts a default value to which it reverts if the value cannot be evaluated correctly.
 * :feature:`-` Allow re-setting the `.ImageNamer` basename dynamically. call `.ImageNamer` with the camera by default.
