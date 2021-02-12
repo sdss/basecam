@@ -650,6 +650,11 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         raise NotImplementedError
 
+    @property
+    def status(self):
+        """Returns the cached status. Equivalent to ``get_status(update=False)``."""
+        return self.get_status(update=False)
+
     def get_status(self, update: bool = False) -> dict[str, Any]:
         """Returns a dictionary with the camera status values.
 
