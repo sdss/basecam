@@ -32,10 +32,13 @@ Exposure
 Models
 ------
 
-.. automodule:: basecam.models.base
+.. automodule:: basecam.models.fits
     :members:
 
-.. automodule:: basecam.models.models
+.. automodule:: basecam.models.card
+    :members:
+
+.. automodule:: basecam.models.builtin
     :members:
 
 Notifier
