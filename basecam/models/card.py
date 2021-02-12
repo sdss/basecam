@@ -13,7 +13,7 @@ import re
 import warnings
 from contextlib import contextmanager
 
-from typing import Any, Iterable, NamedTuple, Optional, Type, cast
+from typing import Any, Iterable, NamedTuple, Optional, cast
 
 import astropy.io.fits
 
@@ -119,7 +119,7 @@ class Card(object):
         name: str,
         value: Any = "",
         comment: str = "",
-        type: Optional[Type[type]] = None,
+        type: Optional[type] = None,
         autocast: bool = True,
         default: Any = None,
         fargs: Optional[tuple] = None,
@@ -242,11 +242,6 @@ class Card(object):
             except BaseException as err:
                 if self._default:
                     rendered_value = self._default
-                    warnings.warn(
-                        f"Failed evaluating card "
-                        f"({self.name!r}, {self.value!r}): {str(err)}",
-                        CardWarning,
-                    )
                 else:
                     raise
 
@@ -469,17 +464,20 @@ DEFAULT_CARDS: dict[str, DefaultCard] = {
         "EXPTIME",
         value="{__exposure__.exptime}",
         comment="Exposure time of single integration [s]",
+        type=float,
     ),
     "EXPTIMEN": DefaultCard(
         "EXPTIMEN",
         value="{__exposure__.exptime_n}",
         comment="Total exposure time [s]",
+        type=float,
     ),
     "STACK": DefaultCard(
         "STACK",
         value="{__exposure__.stack}",
         comment="Number of stacked frames",
         default=1,
+        type=int,
     ),
     "STACKFUN": DefaultCard(
         "STACKFUN",
