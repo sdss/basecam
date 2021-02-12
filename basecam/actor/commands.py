@@ -42,7 +42,7 @@ async def list_(command):
     "--force",
     is_flag=True,
     default=False,
-    help="Forces a camera to be set as default " "even if it is not connected.",
+    help="Forces a camera to be set as default even if it is not connected.",
 )
 async def set_default(command, cameras, force):
     """Set default cameras."""
@@ -223,7 +223,7 @@ async def expose(command, cameras, exptime, image_type, filename, stack):
 
     if filename and len(cameras) > 1:
         return command.fail(
-            "--filename can only be used when exposing " "a single camera."
+            "--filename can only be used when exposing a single camera."
         )
 
     failed = False

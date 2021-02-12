@@ -141,7 +141,7 @@ class BaseCameraActor:
         for camera in self.default_cameras:
             if camera not in connected_cameras:
                 self.log.warning(
-                    f"camera {camera!r} made default " "but is not connected."
+                    f"camera {camera!r} made default but is not connected."
                 )
 
 

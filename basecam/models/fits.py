@@ -279,8 +279,6 @@ class HeaderModel(list):
             elif isinstance(card, MacroCard):
                 rows.append(("### MACRO", card.__class__.__name__, ""))
             else:
-                raise CardError(
-                    f"invalid card {card}. " "This should not have happened."
-                )
+                raise CardError(f"invalid card {card}. This should not have happened.")
 
         return astropy.table.Table(rows=rows, names=["name", "value", "comment"])

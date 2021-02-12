@@ -253,7 +253,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
             uids = self.list_available_cameras()
         except NotImplementedError:
             self.log(
-                "get_connected cameras is not implemented. " "Stopping camera poller.",
+                "get_connected cameras is not implemented. Stopping camera poller.",
                 logging.ERROR,
             )
             # It's important to not do await self.stop_camera_poller()
@@ -267,8 +267,7 @@ class CameraSystem(LoggerMixIn, metaclass=abc.ABCMeta):
         for camera in self.cameras:
             if camera.uid not in uids and not camera.force:
                 self.log(
-                    f"camera with UID {camera.uid!r} ({camera.name}) "
-                    "has been removed.",
+                    f"camera with UID {camera.uid!r} ({camera.name}) has been removed.",
                     logging.INFO,
                 )
                 to_remove.append(camera.name)
