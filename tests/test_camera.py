@@ -42,25 +42,19 @@ async def test_status(camera):
 
 async def test_connect_fails(camera, mocker):
 
-    with mocker.patch.object(
-        camera,
-        "_connect_internal",
-        side_effect=CameraConnectionError,
-    ):
-        with pytest.raises(CameraConnectionError):
-            # Force reconnect.
-            await camera.connect(force=True)
+    mocker.patch.object(camera, "_connect_internal", side_effect=CameraConnectionError)
+    with pytest.raises(CameraConnectionError):
+        # Force reconnect.
+        await camera.connect(force=True)
 
 
 async def test_disconnect_fails(camera, mocker):
 
-    with mocker.patch.object(
-        camera,
-        "_disconnect_internal",
-        side_effect=CameraConnectionError,
-    ):
-        with pytest.raises(CameraConnectionError):
-            await camera.disconnect()
+    mocker.patch.object(
+        camera, "_disconnect_internal", side_effect=CameraConnectionError
+    )
+    with pytest.raises(CameraConnectionError):
+        await camera.disconnect()
 
 
 async def test_expose(camera):

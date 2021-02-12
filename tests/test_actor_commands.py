@@ -181,29 +181,32 @@ async def test_reconnect_disconnect_fails(actor, mocker):
 
     camera = actor.camera_system.cameras[0]
 
-    with mocker.patch.object(
-        camera, "_disconnect_internal", side_effect=CameraConnectionError
-    ):
+    mocker.patch.object(
+        camera,
+        "_disconnect_internal",
+        side_effect=CameraConnectionError,
+    )
 
-        command = await actor.invoke_mock_command("reconnect")
+    command = await actor.invoke_mock_command("reconnect")
 
-        assert "failed to disconnect" in actor.mock_replies
-        assert command.status.did_succeed
+    assert "failed to disconnect" in actor.mock_replies
+    assert command.status.did_succeed
 
 
 async def test_reconnect_connect_fails(actor, mocker):
 
     camera = actor.camera_system.cameras[0]
 
-    with mocker.patch.object(
+    mocker.patch.object(
         camera,
         "_connect_internal",
         side_effect=CameraConnectionError,
-    ):
-        command = await actor.invoke_mock_command("reconnect")
+    )
 
-        assert "failed to connect" in actor.mock_replies
-        assert command.status.did_fail
+    command = await actor.invoke_mock_command("reconnect")
+
+    assert "failed to connect" in actor.mock_replies
+    assert command.status.did_fail
 
 
 async def test_reconnect_timesout(actor):
@@ -268,11 +271,11 @@ async def test_expose_fails(actor, mocker):
 
     camera = actor.camera_system.cameras[0]
 
-    with mocker.patch.object(camera, "_expose_internal", side_effect=ExposureError):
+    mocker.patch.object(camera, "_expose_internal", side_effect=ExposureError)
 
-        command = await actor.invoke_mock_command("expose 1")
+    command = await actor.invoke_mock_command("expose 1")
 
-        assert command.status.did_fail
+    assert command.status.did_fail
 
 
 async def test_expose_filename_fails(actor, tmp_path):
@@ -318,10 +321,10 @@ async def test_set_shutter_fails(actor, mocker):
 
     camera = actor.camera_system.cameras[0]
 
-    with mocker.patch.object(camera, "_set_shutter_internal", side_effect=CameraError):
+    mocker.patch.object(camera, "_set_shutter_internal", side_effect=CameraError)
 
-        command = await actor.invoke_mock_command("shutter --open")
-        assert command.status.did_fail
+    command = await actor.invoke_mock_command("shutter --open")
+    assert command.status.did_fail
 
 
 async def test_get_temperature(actor):
@@ -347,16 +350,16 @@ async def test_set_temperature_fails(actor, mocker):
 
     camera = actor.camera_system.cameras[0]
 
-    with mocker.patch.object(
+    mocker.patch.object(
         camera,
         "_set_temperature_internal",
         side_effect=CameraError("failed to set temperature"),
-    ):
+    )
 
-        command = await actor.invoke_mock_command("temperature 100")
+    command = await actor.invoke_mock_command("temperature 100")
 
-        assert command.status.did_fail
-        assert "failed to set temperature" in actor.mock_replies[1]["error"]
+    assert command.status.did_fail
+    assert "failed to set temperature" in actor.mock_replies[1]["error"]
 
 
 async def test_get_binning(actor):
@@ -381,11 +384,11 @@ async def test_set_binning_fails(actor, mocker):
 
     camera = actor.camera_system.cameras[0]
 
-    with mocker.patch.object(camera, "_set_binning_internal", side_effect=CameraError):
+    mocker.patch.object(camera, "_set_binning_internal", side_effect=CameraError)
 
-        command = await actor.invoke_mock_command("binning 2 2")
+    command = await actor.invoke_mock_command("binning 2 2")
 
-        assert command.status.did_fail
+    assert command.status.did_fail
 
 
 async def test_get_area(actor):
@@ -423,11 +426,12 @@ async def test_set_area_fails(actor, mocker):
 
     camera = actor.camera_system.cameras[0]
 
-    with mocker.patch.object(
+    mocker.patch.object(
         camera,
         "_set_image_area_internal",
         side_effect=CameraError,
-    ):
-        command = await actor.invoke_mock_command("area 10 100 20 40")
+    )
 
-        assert command.status.did_fail
+    command = await actor.invoke_mock_command("area 10 100 20 40")
+
+    assert command.status.did_fail
