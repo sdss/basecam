@@ -118,7 +118,7 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
             self.logger.sh.setLevel(logging.WARNING)
 
         if log_file:
-            self.logger.start_file_logger(log_file)
+            self.logger.start_file_logger(str(log_file))
             if self.logger.fh:
                 self.logger.fh.formatter.converter = time.gmtime
                 self.log(f"logging to {log_file}")
@@ -140,7 +140,7 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
             if isinstance(camera_config, dict):
                 self._config = camera_config.copy()
             else:
-                self._config = read_yaml_file(camera_config)
+                self._config = cast(dict[str, Any], read_yaml_file(str(camera_config)))
                 self.log(f"read configuration file from {camera_config}")
 
         # If the config has a section named "cameras", prefer that.
@@ -540,8 +540,8 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         sequential counter.
     """
 
-    fits_model: FITSModel = basic_fits_model
-    image_namer: ImageNamer = ImageNamer(
+    fits_model = basic_fits_model
+    image_namer = ImageNamer(
         "{camera.name}-{num:04d}.fits",
         dirname=".",
         overwrite=False,
