@@ -17,6 +17,7 @@ from contextlib import contextmanager
 from typing import Any, NamedTuple, Optional, cast
 
 import astropy.io.fits
+import astropy.wcs
 
 from ..exceptions import CardError, CardWarning
 from ..exposure import Exposure
@@ -27,6 +28,7 @@ __all__ = [
     "DefaultCard",
     "CardGroup",
     "MacroCard",
+    "WCSCards",
     "DEFAULT_CARDS",
 ]
 
@@ -108,11 +110,9 @@ class Card(object):
             if cls == Card and name.upper() in DEFAULT_CARDS:
                 if len(args) == 0 and len(kwargs) == 0:
                     return DEFAULT_CARDS[name.upper()]
+            return super().__new__(cls)
 
-        if isinstance(name, (list, tuple)):
-            return cls(*name)
-
-        return super().__new__(cls)
+        return cls(*name)
 
     def __init__(
         self,
@@ -338,24 +338,28 @@ class CardGroup(list):
 
         return [card.evaluate(exposure, context=context) for card in self]
 
-    def to_header(self, exposure, context={}, use_group_title=None):
+    def to_header(
+        self,
+        exposure: Exposure,
+        context: dict[str, Any] = {},
+        use_group_title: bool = False,
+    ) -> astropy.io.fits.Header:
         """Evaluates all the cards and returns a header.
 
         Parameters
         ----------
-        exposure : .Exposure
+        exposure
             The exposure for which we want to evaluate the cards.
-        context : dict
+        context
             A dictionary of arguments used to evaluate the cards.
-        use_group_title : bool
+        use_group_title
             Whether to prepend a COMMENT card with the group title when
             creating the header.
 
         Returns
         -------
-        header : `~astropy.io.fits.Header`
+        header
             A header composed from the cards in the group.
-
         """
 
         header = astropy.io.fits.Header(self.evaluate(exposure, context=context))
@@ -376,19 +380,23 @@ class MacroCard(object, metaclass=abc.ABCMeta):
 
     Parameters
     ----------
-    name : str
+    name
         A name for the macro group.
-    use_group_title : bool
+    use_group_title
         Whether to prepend a COMMENT card with the macro title when creating
         a header.
-    kwargs : dict
+    kwargs
         Additional arguments for the macro.
-
     """
 
     name = None
 
-    def __init__(self, name=None, use_group_title=True, **kwargs):
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        use_group_title: bool = False,
+        **kwargs,
+    ):
 
         self.name = name or self.name
         self.use_group_title = use_group_title
@@ -465,6 +473,24 @@ class MacroCard(object, metaclass=abc.ABCMeta):
             header.insert(0, ("COMMENT", "{s:#^30}".format(s=f" {self.name} ")))
 
         return header
+
+
+class WCSCards(MacroCard):
+    """A macro that adds WCS header information.
+
+    To use, just add ``WCSCards()`` to the header model and make sure the
+    ``Exposure.wcs`` is set. If ``Exposure.wcs=None``, a default WCS header will
+    be added.
+    """
+
+    name = "WCS information"
+
+    def macro(self, exposure: Exposure, context: dict[str, Any] = {}):
+        if exposure.wcs is None:
+            wcs = astropy.wcs.WCS()
+        else:
+            wcs = exposure.wcs
+        return list(wcs.to_header().cards)
 
 
 class DefaultCard(Card):
