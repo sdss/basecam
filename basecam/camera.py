@@ -16,7 +16,7 @@ import time
 import warnings
 from logging import INFO, WARNING
 
-from typing import Any, Callable, Generic, Optional, Type, TypeVar, Union, cast
+from typing import Any, Callable, Dict, Generic, Optional, Type, TypeVar, Union, cast
 
 import numpy
 
@@ -140,7 +140,7 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
             if isinstance(camera_config, dict):
                 self._config = camera_config.copy()
             else:
-                self._config = cast(dict[str, Any], read_yaml_file(str(camera_config)))
+                self._config = cast(Dict[str, Any], read_yaml_file(str(camera_config)))
                 self.log(f"read configuration file from {camera_config}")
 
         # If the config has a section named "cameras", prefer that.
