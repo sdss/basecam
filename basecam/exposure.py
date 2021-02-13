@@ -20,6 +20,7 @@ from typing import Callable, Optional
 import astropy
 import astropy.io.fits
 import astropy.time
+import astropy.wcs
 import numpy
 
 import basecam.camera
@@ -49,6 +50,8 @@ class Exposure(object):
     fits_model
         The `model <.FITSModel>` to create the FITS image. If `None`, a single
         extension with a basic header will be used.
+    wcs
+        The WCS object describing the astrometry of this exposure.
 
     Attributes
     ----------
@@ -66,6 +69,8 @@ class Exposure(object):
         Name of the function used for stacking.
     filename
         The path where to write the image.
+    wcs : ~astropy.wcs.WCS
+        The WCS object describing the astrometry of this exposure.
     """
 
     def __init__(
@@ -74,6 +79,7 @@ class Exposure(object):
         filename: Optional[str] = None,
         data: Optional[numpy.ndarray] = None,
         fits_model: Optional[basecam.models.FITSModel] = None,
+        wcs: Optional[astropy.wcs.WCS] = None,
     ):
 
         self.camera = camera
@@ -87,8 +93,9 @@ class Exposure(object):
         self.exptime_n: Optional[float] = None
         self.stack: int = 1
         self.stack_function: Optional[Callable[..., numpy.ndarray]] = None
-
         self.image_type: Optional[str] = None
+
+        self.wcs = wcs
 
     @property
     def obstime(self) -> astropy.time.Time:
