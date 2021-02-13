@@ -8,13 +8,15 @@
 
 import astropy.io.fits
 import astropy.table
+import astropy.wcs
 import numpy
 import pytest
 
 from basecam import models
 from basecam.exceptions import CardError, CardWarning
 from basecam.models import Card
-from basecam.models.card import DefaultCard
+from basecam.models.card import DefaultCard, WCSCards
+from basecam.models.fits import Extension, FITSModel, HeaderModel
 
 
 class MacroCardTest(models.MacroCard):
@@ -317,3 +319,34 @@ def test_placeholder_fails_no_default(exposure):
 def test_autocast_boolean(value, expected, exposure):
     card = models.Card("MYCARD", value=value, autocast=True)
     assert card.evaluate(exposure).value == expected
+
+
+def test_wcs_no_wcs(exposure):
+    model = FITSModel([Extension(data=None, header_model=HeaderModel([WCSCards()]))])
+    hdu = model.to_hdu(exposure)
+
+    header = hdu[0].header
+    assert "CRPIX1" in header
+    assert header["CDELT1"] == 1.0
+    assert "COMMENT" not in header
+
+
+def test_wcs_with_wcs(exposure):
+    exposure.wcs = astropy.wcs.WCS()
+    exposure.wcs.wcs.cdelt[0] = 10
+
+    model = FITSModel(
+        [
+            Extension(
+                data=None, header_model=HeaderModel([WCSCards(use_group_title=True)])
+            )
+        ]
+    )
+    hdu = model.to_hdu(exposure)
+
+    header = hdu[0].header
+    assert "CRPIX1" in header
+    assert header["CDELT1"] == 10.0
+
+    assert "COMMENT" in header
+    assert header["COMMENT"] == "{s:#^30}".format(s=" WCS information ")
