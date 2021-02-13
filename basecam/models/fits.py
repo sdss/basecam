@@ -57,12 +57,19 @@ class FITSModel(list):
     extension
         A list of HDU extensions defined as `.Extension` objects. If none is
         defined, a single, basic extension is added.
+    context
+        A default context to pass to the header model when evaluating it.
     """
 
-    def __init__(self, extensions: list[Extension] = None):
+    def __init__(
+        self,
+        extensions: list[Extension] = None,
+        context: dict[str, Any] = {},
+    ):
+
+        self.context: dict[str, Any] = context
 
         extensions = extensions or []
-
         list.__init__(self, extensions)
 
         if len(self) == 0:
@@ -81,7 +88,7 @@ class FITSModel(list):
             The exposure for which the FITS model is evaluated.
         context
             A dictionary of parameters used to fill the card replacement
-            fields.
+            fields. Updates the default context.
 
         Returns
         -------
@@ -94,6 +101,9 @@ class FITSModel(list):
 
         hdus = []
 
+        ucontext = self.context.copy()
+        ucontext.update(context)
+
         for i, ext in enumerate(self):
             if i == 0:
                 primary = True
@@ -102,7 +112,7 @@ class FITSModel(list):
                     hdus.append(astropy.io.fits.PrimaryHDU())
             else:
                 primary = False
-            hdus.append(ext.to_hdu(exposure, primary=primary, context=context))
+            hdus.append(ext.to_hdu(exposure, primary=primary, context=ucontext))
 
         return astropy.io.fits.HDUList(hdus)
 
@@ -176,7 +186,6 @@ class Extension(object):
             An `~astropy.io.fits.ImageHDU` with the data and header evaluated
             for ``exposure``, or `~astropy.io.fits.CompImageHDU` if
             ``compressed=True``.
-
         """
 
         if self.compressed:
@@ -239,8 +248,6 @@ class HeaderModel(list):
                                     Card('OBSERVATORY', 'APO'),
                                     'EXPTIME',
                                     Card('camname', '{(camera).name}')])
-
-
     """
 
     def __init__(self, cards: list[_CardTypes] = []):
