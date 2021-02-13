@@ -141,10 +141,10 @@ class Extension(object):
 
     def __init__(
         self,
-        data: Literal["raw"] | Literal["none"] | None = None,
+        data: Union[Literal["raw"], Literal["none"], None] = None,
         header_model: HeaderModel = None,
         name: Optional[str] = None,
-        compressed: bool | str = False,
+        compressed: Union[bool, str] = False,
     ):
 
         if isinstance(data, numpy.ndarray):
@@ -217,7 +217,7 @@ class Extension(object):
         self,
         exposure: Exposure,
         primary: bool = False,
-    ) -> None | numpy.ndarray:
+    ) -> Union[numpy.ndarray, None]:
         """Returns the data as a numpy array."""
 
         if isinstance(self.data, str):

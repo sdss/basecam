@@ -84,20 +84,20 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
         will be logged to the console.
     """
 
-    camera_class: Type[_T_BaseCamera] | None = None
+    camera_class: Union[Type[_T_BaseCamera], None] = None
     include = None
     exclude = None
 
     def __init__(
         self,
         camera_class: Optional[Type[_T_BaseCamera]] = None,
-        camera_config: Optional[AnyPath | dict[str, Any]] = None,
+        camera_config: Optional[Union[AnyPath, dict[str, Any]]] = None,
         include: Optional[list[Any]] = None,
         exclude: Optional[list[Any]] = None,
         logger: Optional[SDSSLogger] = None,
         log_header: Optional[str] = None,
         log_file: Optional[AnyPath] = None,
-        verbose: Optional[bool | int] = False,
+        verbose: Optional[Union[bool, int]] = False,
     ):
 
         self.camera_class = camera_class or self.camera_class
@@ -166,7 +166,7 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
         self,
         name: Optional[str] = None,
         uid: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+    ) -> Union[dict[str, Any], None]:
         """Gets camera parameters from the configuration.
 
         Parameters
@@ -416,7 +416,7 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
         self,
         name: Optional[str] = None,
         uid: Optional[str] = None,
-    ) -> BaseCamera | Literal[False]:
+    ) -> Union[BaseCamera, Literal[False]]:
         """Gets a camera matching a name or UID.
 
         If only one camera is connected and the method is called without
@@ -553,7 +553,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         camera_system: CameraSystem,
         name: Optional[str] = None,
         force: bool = False,
-        image_namer: Optional[ImageNamer | dict] = None,
+        image_namer: Optional[Union[ImageNamer, dict]] = None,
         camera_params={},
     ):
 

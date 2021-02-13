@@ -11,7 +11,7 @@ from __future__ import annotations
 import abc
 import asyncio
 
-from typing import Callable
+from typing import Callable, Union
 
 from basecam.camera import BaseCamera
 
@@ -100,7 +100,11 @@ class ExposureTypeMixIn(object):
 
         return await self.expose(exp_time, image_type="flat", **kwargs)
 
-    async def object(self: BaseCamera | ExposureTypeMixIn, exp_time: float, **kwargs):
+    async def object(
+        self: Union[BaseCamera, ExposureTypeMixIn],
+        exp_time: float,
+        **kwargs,
+    ):
         """Take a science image."""
 
         kwargs.pop("image_type", None)

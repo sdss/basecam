@@ -15,7 +15,7 @@ import pathlib
 import re
 import warnings
 
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 
 import astropy
 import astropy.io.fits
@@ -236,7 +236,7 @@ class ImageNamer(object):
         self._basename: str
         self.basename = basename
 
-        self.dirname: pathlib.Path | str = pathlib.Path(dirname)
+        self.dirname: Union[pathlib.Path, str] = pathlib.Path(dirname)
         self.overwrite: bool = overwrite
 
         self._last_num = 0

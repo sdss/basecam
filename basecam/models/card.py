@@ -14,7 +14,7 @@ import warnings
 from collections.abc import Iterable
 from contextlib import contextmanager
 
-from typing import Any, NamedTuple, Optional, cast
+from typing import Any, NamedTuple, Optional, Union, cast
 
 import astropy.io.fits
 import astropy.wcs
@@ -104,7 +104,7 @@ class Card(object):
         This context can be updated during the evaluation of the card.
     """
 
-    def __new__(cls, name: str | Iterable[Any], *args, **kwargs):
+    def __new__(cls, name: Union[str, Iterable[Any]], *args, **kwargs):
 
         if isinstance(name, str):
             if cls == Card and name.upper() in DEFAULT_CARDS:
@@ -116,7 +116,7 @@ class Card(object):
 
     def __init__(
         self,
-        name: str | Iterable[Any],
+        name: Union[str, Iterable[Any]],
         value: Any = "",
         comment: str = "",
         type: Optional[type] = None,
@@ -288,7 +288,7 @@ class CardGroup(list):
 
     def __init__(
         self,
-        cards: Iterable[Card | Iterable],
+        cards: Iterable[Union[Card, Iterable]],
         name: Optional[str] = None,
         use_group_title: bool = True,
     ):
@@ -303,7 +303,7 @@ class CardGroup(list):
 
         return f"<CardGroup {list.__repr__(self)!s}>"
 
-    def _process_input(self, card: Card | Iterable):
+    def _process_input(self, card: Union[Card, Iterable]):
         """Processes the input and converts it into a valid card."""
 
         if isinstance(card, Card):
