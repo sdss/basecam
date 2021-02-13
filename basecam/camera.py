@@ -151,13 +151,15 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
             if len(uids) != len(set(uids)):
                 raise ValueError("repeated UIDs in the configuration data.")
 
+        self.running: bool = False
+
     def setup(self):
         """Setup custom camera system.
 
         To be overridden by the subclass if needed. Must return ``self``.
-
         """
 
+        self.running = True
         return self
 
     def get_camera_config(
@@ -486,6 +488,8 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
 
         if self._camera_poller and self._camera_poller.running:
             await self.stop_camera_poller()
+
+        self.running = False
 
     @property
     @abc.abstractmethod
