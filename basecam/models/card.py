@@ -14,7 +14,7 @@ import warnings
 from collections.abc import Iterable
 from contextlib import contextmanager
 
-from typing import Any, NamedTuple, Optional, Union, cast
+from typing import Any, Dict, List, NamedTuple, Optional, Union, cast
 
 import astropy.io.fits
 import astropy.wcs
@@ -124,7 +124,7 @@ class Card(object):
         default: Any = None,
         fargs: Optional[tuple] = None,
         evaluate: bool = False,
-        context: dict[str, Any] = {},
+        context: Dict[str, Any] = {},
     ):
 
         if hasattr(self, "name"):
@@ -215,7 +215,7 @@ class Card(object):
     def evaluate(
         self,
         exposure: Exposure,
-        context: dict[str, Any] = {},
+        context: Dict[str, Any] = {},
     ) -> EvaluatedCard:
         """Evaluates the card.
 
@@ -341,7 +341,7 @@ class CardGroup(list):
     def to_header(
         self,
         exposure: Exposure,
-        context: dict[str, Any] = {},
+        context: Dict[str, Any] = {},
         use_group_title: bool = False,
     ) -> astropy.io.fits.Header:
         """Evaluates all the cards and returns a header.
@@ -407,7 +407,7 @@ class MacroCard(object, metaclass=abc.ABCMeta):
         return f"<{self.__class__.__name__} (name={self.name})>"
 
     @abc.abstractmethod
-    def macro(self, exposure: Exposure, context: dict[str, Any] = {}):
+    def macro(self, exposure: Exposure, context: Dict[str, Any] = {}):
         """The macro.
 
         Must return a list of item which can be tuples with the format
@@ -424,7 +424,7 @@ class MacroCard(object, metaclass=abc.ABCMeta):
 
         raise NotImplementedError
 
-    def evaluate(self, exposure: Exposure, context: dict[str, Any] = {}) -> list[tuple]:
+    def evaluate(self, exposure: Exposure, context: Dict[str, Any] = {}) -> List[tuple]:
         """Evaluates the macro. Equivalent to calling `.macro` directly.
 
         Parameters
@@ -455,7 +455,7 @@ class MacroCard(object, metaclass=abc.ABCMeta):
     def to_header(
         self,
         exposure: Exposure,
-        context: dict[str, Any] = {},
+        context: Dict[str, Any] = {},
         use_group_title=False,
     ) -> astropy.io.fits.Header:
         """Evaluates the macro and returns a header.
@@ -495,7 +495,7 @@ class WCSCards(MacroCard):
 
     name = "WCS information"
 
-    def macro(self, exposure: Exposure, context: dict[str, Any] = {}):
+    def macro(self, exposure: Exposure, context: Dict[str, Any] = {}):
         if exposure.wcs is None:
             wcs = astropy.wcs.WCS()
         else:
@@ -507,7 +507,7 @@ class DefaultCard(Card):
     pass
 
 
-DEFAULT_CARDS: dict[str, DefaultCard] = {
+DEFAULT_CARDS: Dict[str, DefaultCard] = {
     "EXPTIME": DefaultCard(
         "EXPTIME",
         value="{__exposure__.exptime}",

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import functools
 
-from typing import Any, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import astropy.io.fits
 import astropy.table
@@ -63,11 +63,11 @@ class FITSModel(list):
 
     def __init__(
         self,
-        extensions: list[Extension] = None,
-        context: dict[str, Any] = {},
+        extensions: List[Extension] = None,
+        context: Dict[str, Any] = {},
     ):
 
-        self.context: dict[str, Any] = context
+        self.context: Dict[str, Any] = context
 
         extensions = extensions or []
         list.__init__(self, extensions)
@@ -78,7 +78,7 @@ class FITSModel(list):
     def to_hdu(
         self,
         exposure: Exposure,
-        context: dict[str, Any] = {},
+        context: Dict[str, Any] = {},
     ) -> astropy.io.fits.HDUList:
         """Returns an `~astropy.io.fits.HDUList` from an exposure.
 
@@ -166,7 +166,7 @@ class Extension(object):
         self,
         exposure: Exposure,
         primary: bool = False,
-        context: dict[str, Any] = {},
+        context: Dict[str, Any] = {},
     ) -> ImageHDUType:
         """Evaluates the extension as an HDU.
 
@@ -250,7 +250,7 @@ class HeaderModel(list):
                                     Card('camname', '{(camera).name}')])
     """
 
-    def __init__(self, cards: list[_CardTypes] = []):
+    def __init__(self, cards: List[_CardTypes] = []):
 
         cards = [self._process_input(card) for card in cards]
         list.__init__(self, cards)
@@ -282,7 +282,7 @@ class HeaderModel(list):
     def to_header(
         self,
         exposure: Exposure,
-        context: dict[str, Any] = {},
+        context: Dict[str, Any] = {},
     ) -> astropy.io.fits.Header:
         """Evaluates the header model for an exposure and returns a header.
 

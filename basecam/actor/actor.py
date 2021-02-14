@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 
-from typing import Union
+from typing import List, Union
 
 import clu.parser
 from clu import BaseActor, JSONActor
@@ -59,7 +59,7 @@ class BaseCameraActor:
         self,
         camera_system: CameraSystem,
         *args,
-        default_cameras: Union[list[str], str, None] = None,
+        default_cameras: Union[List[str], str, None] = None,
         command_parser: clu.parser.CluGroup = None,
         **kwargs,
     ):
@@ -121,7 +121,7 @@ class BaseCameraActor:
                 for command in commands._MIXIN_TO_COMMANDS[mixin_name]:
                     self.parser.add_command(command)
 
-    def set_default_cameras(self, cameras: Union[str, list[str], None] = None):
+    def set_default_cameras(self, cameras: Union[str, List[str], None] = None):
         """Sets the camera(s) that will be used by default.
 
         These cameras will be used by default when a command is issued without

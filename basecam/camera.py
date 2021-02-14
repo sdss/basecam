@@ -16,7 +16,18 @@ import time
 import warnings
 from logging import INFO, WARNING
 
-from typing import Any, Callable, Dict, Generic, Optional, Type, TypeVar, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import numpy
 
@@ -91,9 +102,9 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
     def __init__(
         self,
         camera_class: Optional[Type[_T_BaseCamera]] = None,
-        camera_config: Optional[Union[AnyPath, dict[str, Any]]] = None,
-        include: Optional[list[Any]] = None,
-        exclude: Optional[list[Any]] = None,
+        camera_config: Optional[Union[AnyPath, Dict[str, Any]]] = None,
+        include: Optional[List[Any]] = None,
+        exclude: Optional[List[Any]] = None,
         logger: Optional[SDSSLogger] = None,
         log_header: Optional[str] = None,
         log_file: Optional[AnyPath] = None,
@@ -127,14 +138,14 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
         self.loop.set_exception_handler(self.logger.asyncio_exception_handler)
 
         #: list: The list of cameras being handled.
-        self.cameras: list[_T_BaseCamera] = []
+        self.cameras: List[_T_BaseCamera] = []
 
         self._camera_poller = None
 
         #: .EventNotifier: Notifies of `.CameraSystemEvent` and `.CameraEvent` events.
         self.notifier = EventNotifier()
 
-        self._config: Optional[dict[str, Any]] = None
+        self._config: Optional[Dict[str, Any]] = None
 
         if camera_config:
             if isinstance(camera_config, dict):
@@ -166,7 +177,7 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
         self,
         name: Optional[str] = None,
         uid: Optional[str] = None,
-    ) -> Union[dict[str, Any], None]:
+    ) -> Union[Dict[str, Any], None]:
         """Gets camera parameters from the configuration.
 
         Parameters
@@ -291,7 +302,7 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
                 await self.add_camera(uid=uid)
 
     @abc.abstractmethod
-    def list_available_cameras(self) -> list[str]:
+    def list_available_cameras(self) -> List[str]:
         """Lists the connected cameras as reported by the camera system.
 
         Returns
@@ -631,7 +642,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
     def _notify(
         self,
         event: CameraEvent,
-        extra_payload: Optional[dict[str, Any]] = None,
+        extra_payload: Optional[Dict[str, Any]] = None,
     ):
         """Notifies an event."""
 
@@ -640,7 +651,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         self.camera_system.notifier.notify(event, payload)
 
-    def _get_basic_payload(self) -> dict[str, Any]:
+    def _get_basic_payload(self) -> Dict[str, Any]:
         """Returns a dictionary with basic payload for notifying events."""
 
         return {"uid": self.uid, "name": self.name, "camera": self}
@@ -659,7 +670,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         """Returns the cached status. Equivalent to ``get_status(update=False)``."""
         return self.get_status(update=False)
 
-    def get_status(self, update: bool = False) -> dict[str, Any]:
+    def get_status(self, update: bool = False) -> Dict[str, Any]:
         """Returns a dictionary with the camera status values.
 
         Parameters
@@ -674,7 +685,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
 
         return self._status
 
-    def _status_internal(self) -> dict[str, Any]:
+    def _status_internal(self) -> Dict[str, Any]:
         """Gets a dictionary with the status of the camera.
 
         This method is intended to be overridden by the specific camera.
