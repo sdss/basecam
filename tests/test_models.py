@@ -354,3 +354,16 @@ def test_wcs_with_wcs(exposure):
 
     assert "COMMENT" in header
     assert header["COMMENT"] == "{s:#^30}".format(s=" WCS information ")
+
+
+def test_header_model_None(exposure):
+    header_model = HeaderModel([Card("KEY1", 1), None, Card("KEY2", 2)])
+    header = header_model.to_header(exposure)
+
+    assert len(header) == 2
+
+
+def test_header_bad_default_card(exposure):
+    with pytest.raises(CardError) as err:
+        HeaderModel([Card("KEY1", 1), "BADCARD"])
+    assert "is not a default card" in str(err)

@@ -42,7 +42,7 @@ ImageHDUType = Union[
     astropy.io.fits.CompImageHDU,
     astropy.io.fits.PrimaryHDU,
 ]
-_CardTypes = Union[Card, CardGroup, MacroCard, str]
+_CardTypes = Union[Card, CardGroup, MacroCard, str, None]
 
 
 class FITSModel(list):
@@ -268,6 +268,8 @@ class HeaderModel(list):
             if input_card not in DEFAULT_CARDS:
                 raise CardError(f"{input_card} is not a default card.")
             return Card(input_card.upper())
+        elif input_card is None:
+            return None
         else:
             raise CardError(f"invalid input {input_card!r}")
 
