@@ -410,8 +410,9 @@ class MacroCard(object, metaclass=abc.ABCMeta):
     def macro(self, exposure: Exposure, context: dict[str, Any] = {}):
         """The macro.
 
-        Must return a list of tuples with the format
-        ``(keyword, value, comment)`` or ``(keyword, value)``.
+        Must return a list of item which can be tuples with the format
+        ``(keyword, value, comment)`` or ``(keyword, value)``, `.Card` instances,
+        or `.CardGroup` instances. Cards and card groups will be evaluated.
 
         Parameters
         ----------
@@ -440,7 +441,16 @@ class MacroCard(object, metaclass=abc.ABCMeta):
             or ``(keyword, value)``.
         """
 
-        return self.macro(exposure, context=context)
+        cards = self.macro(exposure, context=context)
+        new_cards = []
+        for card in cards:
+            if isinstance(card, Card):
+                new_cards.append(card.evaluate(exposure, context=context))
+            elif isinstance(card, CardGroup):
+                new_cards += card.evaluate(exposure, context=context)
+            else:
+                new_cards.append(card)
+        return new_cards
 
     def to_header(
         self,

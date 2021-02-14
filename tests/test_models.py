@@ -15,13 +15,17 @@ import pytest
 from basecam import models
 from basecam.exceptions import CardError, CardWarning
 from basecam.models import Card
-from basecam.models.card import DefaultCard, WCSCards
+from basecam.models.card import CardGroup, DefaultCard, WCSCards
 from basecam.models.fits import Extension, FITSModel, HeaderModel
 
 
 class MacroCardTest(models.MacroCard):
     def macro(self, exposure, **kwargs):
-        return [("KEYWORD1", 1, "The first card"), ("KEYWORD2", 2)]
+        return [
+            ("KEYWORD1", 1, "The first card"),
+            Card("KEYWORD2", 2),
+            CardGroup([("KEYWORD3", 4), ("KEYWORD3", 4)]),
+        ]
 
 
 def test_fits_model():
@@ -175,7 +179,7 @@ def test_macro(exposure):
     header = macro.to_header(exposure)
     assert isinstance(header, astropy.io.fits.Header)
 
-    assert len(header) == 2
+    assert len(header) == 4
     assert header.cards["KEYWORD2"].comment == ""
 
 
@@ -184,7 +188,7 @@ def test_macro_with_group_title(exposure):
     macro = MacroCardTest(name="test_macro", use_group_title=True)
     header = macro.to_header(exposure)
 
-    assert len(header) == 3
+    assert len(header) == 5
 
     assert header.cards[0].keyword == "COMMENT"
     assert header.cards[0].value == "######### test_macro #########"

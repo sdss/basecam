@@ -5,6 +5,7 @@ Changelog
 =========
 
 * :feature:`13` Add a `.WCSCards` macro that expands into full WCS header information.
+* :feature:`-` Allow MacroCard.macro to return `.Card` or `.CardGroup`.
 
 * :release:`0.4.0 <2021-02-12>`
 * :feature:`-` `.Card` now accepts a ``type`` to which to be cast. By default ``autocast=True`` will try to cast the value to the correct type after evaluating.
