@@ -10,8 +10,8 @@ Changelog
 * :release:`0.4.0 <2021-02-12>`
 * :feature:`-` `.Card` now accepts a ``type`` to which to be cast. By default ``autocast=True`` will try to cast the value to the correct type after evaluating.
 * :feature:`-` `.Card` now accepts a default value to which it reverts if the value cannot be evaluated correctly.
-* :feature:`-` Allow re-setting the `.ImageNamer` basename dynamically. call `.ImageNamer` with the camera by default.
-* :support:`-` Simplify default cars.
+* :feature:`-` Allow re-setting the `.ImageNamer` basename dynamically. Call `.ImageNamer` with the camera by default.
+* :support:`-` Simplify default cards.
 * :support:`-` Format using ``black`` and add type hinting to most of the codebase.
 
 * :release:`0.3.3 <2020-12-07>`
