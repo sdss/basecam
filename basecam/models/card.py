@@ -508,6 +508,7 @@ class DefaultCard(Card):
     pass
 
 
+#: Default cards
 DEFAULT_CARDS: Dict[str, DefaultCard] = {
     "EXPTIME": DefaultCard(
         "EXPTIME",

@@ -73,16 +73,6 @@ Opens the camera and makes sure it's ready to be accessed. It must raise a `.Cam
 
 `._connect_internal` is called by the public method `.connect`, which takes care of passing the necessary arguments, notifying the :ref:`listeners <events>` of the `~.CameraEvent.CAMERA_CONNECTED` or `.CAMERA_CONNECT_FAILED` events. If the connection is successful, `.connect` will set ``BaseCamera.connected=True``.
 
-`def _uid_internal <._uid_internal>` (optional)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-This property is the internal counterpart of `~.uid`. It must return the camera unique identifier (UID; this can be any string, integer, or other type that is used to identify the camera). If not overridden it returns `None`. In this case, `~.uid` will try to retrieve the UID from the camera configuration. If that is not available; the camera will fail during the connection stage. ::
-
-    @property
-    def _uid_internal(self):
-
-        return self._device.serial
-
 `def _status_internal <._status_internal>` (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -152,7 +142,7 @@ Long running processes such as integration (if it's not asynchronous) and readin
 
 `.expose` sets ``Exposure.obstime`` just before calling `._expose_internal`. However, if you want additional precision on when the exposure exactly started, you can set the value again, which must be and `astropy.time.Time` object.
 
-Note that you don't need to care about stacking or saving the image; that's all taken care in `.expose` (the public interface is described in :ref:`exposing`). However, `._expose_internal` must take care of operating the shutter if this is not done automatically by the API when exposing. For this two attributes, ``has_shutter`` and ``auto_shutter``, can be set when subclassing `.BaseCamera` to indicate whether the camera has a shutter and if this opens and closes automatically when an exposure is commanded ::
+Note that you don't need to care about stacking or saving the image; that's all taken care in `.expose` (the public interface is described in :ref:`exposure`). However, `._expose_internal` must take care of operating the shutter if this is not done automatically by the API when exposing. For this two attributes, ``has_shutter`` and ``auto_shutter``, can be set when subclassing `.BaseCamera` to indicate whether the camera has a shutter and if this opens and closes automatically when an exposure is commanded ::
 
     class MyCamera(BaseCamera):
 
@@ -206,11 +196,6 @@ Summary of abstract methods
      - async method
      - No
      - Establish connection with the camera and make it ready.
-   * -
-     - `~.BaseCamera._uid_internal`
-     - property
-     - Yes
-     - Return the unique identifier of the camera. By default, returns `None`.
    * -
      - `~.BaseCamera._status_internal`
      - method

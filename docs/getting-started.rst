@@ -26,7 +26,7 @@ A minimal example
 
 Let's assume we have a camera that provides a functional programmatic API. This API can be written in C/C++ or we can use an already existing Python wrapping. We don't care how that API has been implemented or whether is part of the library we are trying to write or external. For now, we'll just assume that we can access the functions of that library through the module ``lib``.
 
-To wrap the camera API with ``basecam`` we need to subclass `.CameraSystem` and `.BaseCamera` abd override the internal :ref:`abstract methods <abstract-methods>` to connect it to the camera low-level implementation.
+To wrap the camera API with ``basecam`` we need to subclass `.CameraSystem` and `.BaseCamera` and override the internal :ref:`abstract methods <abstract-methods>` to connect it to the camera low-level implementation.
 
 .. code-block:: python
 
@@ -106,12 +106,12 @@ Now we can use the camera poller to automatically detect when cameras connect or
 
 `~.CameraSystem.start_camera_poller` periodically checks the list of available cameras; when a new camera is connected, it calls `~.CameraSystem.add_camera`. The configuration for the camera is accessible via ``BaseCamera.camera_config`` and the ``connection_params`` section is passed to `~.BaseCamera._connect_internal`. The configuration files is described in :ref:`configuration`.
 
-Note that when interacting with the camera system or the camera we do not use the internal methods we have overridden. To expose the camera, we call `~.BaseCamera.expose` which provides a common interface regardless of the specific camera. `~.BaseCamera.expose` returns an `.Exposure` object which contains the image and a `FITS model <.FITSModel>`. More details are provided in the :ref:`exposing` section.
+Note that when interacting with the camera system or the camera we do not use the internal methods we have overridden. To expose the camera, we call `~.BaseCamera.expose` which provides a common interface regardless of the specific camera. `~.BaseCamera.expose` returns an `.Exposure` object which contains the image and a `FITS model <.FITSModel>`. More details are provided in the :ref:`exposure` section.
 
 A more complete example
 -----------------------
 
-For a more complete example of a full implementation of a camera API with ``basecam`` we refer the reader to `flicamera <https://github.com/sdss/flicamera>`. ``flicamera`` provides a full wrapping of `Finger Lakes Instrumentation <http://www.flicamera.com/>`__ cameras as part of the SDSS-V project. The structure of the project is quite simple and can be summarised as follows ::
+For a more complete example of a full implementation of a camera API with ``basecam`` we refer the reader to `flicamera <https://github.com/sdss/flicamera>`__. ``flicamera`` provides a full wrapping of `Finger Lakes Instrumentation <http://www.flicamera.com/>`__ cameras as part of the SDSS-V project. The structure of the project is quite simple and can be summarised as follows ::
 
     flicamera
      |

@@ -23,10 +23,9 @@ Contents
 
   getting-started
   abstract
-  exposing
+  exposure
   configuration
   mixins
-  events
   actor
   api
 
