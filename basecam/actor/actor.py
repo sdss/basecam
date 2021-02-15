@@ -9,8 +9,9 @@
 from __future__ import annotations
 
 import logging
+import os
 
-from typing import List, Union
+from typing import List, Optional, Union
 
 import clu.parser
 from clu import BaseActor, JSONActor
@@ -26,7 +27,7 @@ from . import commands
 __all__ = ["BaseCameraActor", "CameraActor"]
 
 
-class BaseCameraActor:
+class BaseCameraActor(BaseActor):
     """Base class for a camera CLU-like actor class.
 
     Expands a `CLU <https://clu.readthedocs.io/en/latest/>`__ actor
@@ -50,9 +51,11 @@ class BaseCameraActor:
         The list of commands to use. It must be a command group deriving from
         `~clu.parser.CluGroup` containing all the commands to use. If
         ``commands=None``, uses the internal command set.
+    schema
+        The path to the JSONSchema file with the actor datamodel. If ``"internal"``,
+        uses the default ``basecam`` model; `None` disables model validation.
     args,kwars
         Arguments and keyword arguments to be passed to the actor class.
-
     """
 
     def __init__(
@@ -61,6 +64,7 @@ class BaseCameraActor:
         *args,
         default_cameras: Union[List[str], str, None] = None,
         command_parser: clu.parser.CluGroup = None,
+        schema: Optional[str] = "internal",
         **kwargs,
     ):
 
@@ -76,7 +80,10 @@ class BaseCameraActor:
         self.log: SDSSLogger
         self.parser = command_parser or commands.camera_parser
 
-        super().__init__(*args, **kwargs)
+        if schema == "internal":
+            schema = os.path.join(os.path.dirname(__file__), "schema.json")
+
+        super().__init__(*args, schema=schema, **kwargs)
 
         # Add commands that depend on what mixins the base camera has
         # been subclassed with.
@@ -105,6 +112,8 @@ class BaseCameraActor:
 
         # Check that at least one of the bases is a sublass of BaseActor
         for base in bases:
+            if base == BaseCameraActor:
+                continue
             if issubclass(base, BaseActor):
                 return
 

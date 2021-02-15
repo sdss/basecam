@@ -11,6 +11,7 @@ from __future__ import annotations
 import abc
 import asyncio
 import logging
+import os
 import pathlib
 import time
 import warnings
@@ -762,14 +763,25 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             warnings.warn("setting exposure time for bias to 0", ExposureWarning)
             exptime = 0.0
 
-        exposures = []
+        exposures: List[Exposure] = []
 
-        for __ in range(stack):
+        notif_payload = {
+            "exptime": exptime,
+            "remaining_time": exptime,
+            "image_type": image_type,
+            "n_stack": stack,
+            "current_stack": 1,
+        }
+
+        for idx in range(stack):
+
+            notif_payload.update({"n_stack": idx + 1})
 
             exposure = Exposure(self, fits_model=fits_model)
             exposure.image_type = image_type
             exposure.exptime = exptime
 
+            self._notify(CameraEvent.EXPOSURE_INTEGRATING, notif_payload)
             try:
                 await self._expose_internal(exposure, **kwargs)
             except ExposureError as e:
@@ -784,23 +796,29 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             exposures.append(exposure)
 
         if len(exposures) > 1:
-            data = [exp.data for exp in exposures]
+            data = [cast(numpy.ndarray, exp.data) for exp in exposures]
             stacked_data = stack_function(numpy.stack(data), axis=0)
             exposures[0].data = stacked_data
 
         exposure = exposures[0]
         exposure.exptime_n = exptime * stack
         exposure.stack = stack
-        exposure.stack_function = stack_function.__name__
+        exposure.stack_function = stack_function
 
-        exposure.filename = filename or self.image_namer(self)
+        exposure.filename = str(filename or self.image_namer(self))
 
-        self._notify(CameraEvent.EXPOSURE_READ)
+        notif_payload = {
+            "exptime_total": exposure.exptime_n,
+            "image_type": image_type,
+            "stack": stack,
+        }
+        self._notify(CameraEvent.EXPOSURE_DONE, notif_payload)
 
         if write:
-            self._notify(CameraEvent.EXPOSURE_WRITING)
+            filename = os.path.realpath(str(exposure.filename))
+            self._notify(CameraEvent.EXPOSURE_WRITING, {"filename": filename})
             await exposure.write()
-            self._notify(CameraEvent.EXPOSURE_WRITTEN)
+            self._notify(CameraEvent.EXPOSURE_WRITTEN, {"filename": filename})
 
         return exposure
 

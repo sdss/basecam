@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sdss-basecam"
-version = "0.4.1"
+version = "0.4.2-alpha.0"
 description = "A base library for camera wrapping and actor."
 authors = ["José Sánchez-Gallego <gallegoj@uw.edu>"]
 license = "BSD 3-Clause License"
@@ -20,7 +20,7 @@ classifiers = [
 packages = [
     { include = "basecam" }
 ]
-include = ["LICENSE.md"]
+include = ["basecam/actor/schema.json"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
@@ -48,6 +48,7 @@ sphinx = ">=3.0.0"
 black = {version = "^20.8b1", allow-prereleases = true}
 asynctest = "^0.13.0"
 sphinx-autodoc-typehints = "^1.11.1"
+sphinx-jsonschema = "^1.16.7"
 
 [tool.black]
 line-length = 88

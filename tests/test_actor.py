@@ -43,10 +43,27 @@ async def test_logger(actor):
     )
 
 
+async def test_check_abstract(camera_system):
+    with pytest.raises(TypeError):
+        BaseCameraActor(camera_system)
+
+
 async def test_check_subclass(camera_system):
+    class TestActor(BaseCameraActor, list):
+        def write(self):
+            pass
+
+        def new_command(self):
+            pass
+
+        def parse_command(self):
+            pass
+
+        def start(self):
+            pass
 
     with pytest.raises(RuntimeError):
-        BaseCameraActor(camera_system)
+        TestActor(camera_system)
 
 
 async def test_arguments_from_config(actor):

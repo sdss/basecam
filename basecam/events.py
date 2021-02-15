@@ -27,10 +27,12 @@ class CameraEvent(enum.Enum):
     CAMERA_DISCONNECTED = "disconnected"
     CAMERA_DISCONNECT_FAILED = "disconnect_failed"
 
+    EXPOSURE_IDLE = 'idle'
     EXPOSURE_FLUSHING = "flushing"
     EXPOSURE_INTEGRATING = "integrating"
     EXPOSURE_READING = "reading"
     EXPOSURE_READ = "read"
+    EXPOSURE_DONE = "done"
     EXPOSURE_FAILED = "failed"
     EXPOSURE_WRITING = "writing"
     EXPOSURE_WRITTEN = "written"

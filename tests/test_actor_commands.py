@@ -167,7 +167,11 @@ async def test_status(actor):
 
     assert command.status.did_succeed
     assert len(actor.mock_replies) == 3  # Running, status reply, and done reply.
-    assert actor.mock_replies[1]["status"] == {"temperature": 25.0, "cooler": 10.0}
+    assert actor.mock_replies[1]["status"] == {
+        "camera": "test_camera",
+        "temperature": 25.0,
+        "cooler": 10.0,
+    }
 
 
 async def test_reconnect(actor):
@@ -237,8 +241,8 @@ async def test_expose(actor, tmp_path, image_type):
 
     assert command.status.did_succeed
 
-    assert "integrating" in actor.mock_replies
-    assert "reading" in actor.mock_replies
+    assert any(["integrating" in str(mr) for mr in actor.mock_replies])
+    assert any(["reading" in str(mr) for mr in actor.mock_replies])
 
     image_type = image_type or "object"
 
@@ -259,7 +263,7 @@ async def test_expose_stack(actor):
 
     assert command.status.did_succeed
 
-    image_name = actor.mock_replies[-2]["filename"]
+    image_name = actor.mock_replies[-3]["filename"]["filename"]
     assert os.path.exists(image_name)
 
     hdu = astropy.io.fits.open(image_name)
@@ -306,7 +310,7 @@ async def test_get_shutter(actor):
 
     command = await actor.invoke_mock_command("shutter")
     assert command.status.did_succeed
-    assert actor.mock_replies[-2]["shutter"] is False
+    assert actor.mock_replies[-2]["shutter"]["shutter"] == "closed"
 
 
 @pytest.mark.parametrize("shutter_position", ("open", "close"))
@@ -336,7 +340,7 @@ async def test_get_temperature(actor):
     command = await actor.invoke_mock_command("temperature")
 
     assert command.status.did_succeed
-    assert actor.mock_replies[1]["temperature"] == temperature
+    assert actor.mock_replies[1]["temperature"]["ccd_temp"] == temperature
 
 
 async def test_set_temperature(actor):
@@ -361,7 +365,7 @@ async def test_set_temperature_fails(actor, mocker):
     command = await actor.invoke_mock_command("temperature 100")
 
     assert command.status.did_fail
-    assert "failed to set temperature" in actor.mock_replies[1]["error"]
+    assert "failed to set temperature" in actor.mock_replies[1]["error"]["error"]
 
 
 async def test_get_binning(actor):
@@ -370,7 +374,8 @@ async def test_get_binning(actor):
 
     assert command.status.did_succeed
 
-    assert actor.mock_replies[1]["binning"] == [1, 1]
+    assert actor.mock_replies[1]["binning"]["horizontal"] == 1
+    assert actor.mock_replies[1]["binning"]["vertical"] == 1
 
 
 async def test_set_binning(actor):
@@ -379,7 +384,8 @@ async def test_set_binning(actor):
 
     assert command.status.did_succeed
 
-    assert actor.mock_replies[1]["binning"] == [2, 2]
+    assert actor.mock_replies[1]["binning"]["horizontal"] == 2
+    assert actor.mock_replies[1]["binning"]["vertical"] == 2
 
 
 async def test_set_binning_fails(actor, mocker):
@@ -401,7 +407,7 @@ async def test_get_area(actor):
 
     assert command.status.did_succeed
 
-    assert actor.mock_replies[1]["area"] == [1, camera.width, 1, camera.height]
+    assert actor.mock_replies[1]["area"]["area"] == [1, camera.width, 1, camera.height]
 
 
 async def test_set_area(actor):
@@ -410,7 +416,7 @@ async def test_set_area(actor):
 
     assert command.status.did_succeed
 
-    assert actor.mock_replies[1]["area"] == [10, 100, 20, 40]
+    assert actor.mock_replies[1]["area"]["area"] == [10, 100, 20, 40]
 
 
 async def test_set_area_reset(actor):
@@ -421,7 +427,7 @@ async def test_set_area_reset(actor):
 
     assert command.status.did_succeed
 
-    assert actor.mock_replies[1]["area"] == [1, camera.width, 1, camera.height]
+    assert actor.mock_replies[1]["area"]["area"] == [1, camera.width, 1, camera.height]
 
 
 async def test_set_area_fails(actor, mocker):

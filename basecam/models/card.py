@@ -529,7 +529,7 @@ DEFAULT_CARDS: Dict[str, DefaultCard] = {
     ),
     "STACKFUN": DefaultCard(
         "STACKFUN",
-        value="{__exposure__.stack_function}",
+        value="{__exposure__.stack_function.__name__}",
         comment="Function used for stacking",
         default="NA",
     ),
