@@ -73,6 +73,11 @@ class BaseCameraActor(BaseActor):
         assert camera_system is not None
         self.camera_system = camera_system
 
+        # Add actor to camera class context and all connected cameras.
+        self.camera_system.camera_class.fits_model.context.update({"__actor__": self})
+        for camera in self.camera_system.cameras:
+            camera.fits_model.context.update({"__actor__": self})
+
         #: An `.EventListener` that can be used to wait or respond to events.
         self.listener = EventListener()
         self.camera_system.notifier.register_listener(self.listener)
