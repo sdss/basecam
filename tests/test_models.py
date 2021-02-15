@@ -155,7 +155,7 @@ def test_header_describe(exposure):
             [
                 Card("PARAM1", "A parameter"),
                 ("PARAM2", "{__camera__.uid}", "Camera UID"),
-                Card("VCAM"),
+                "VCAM",
             ]
         )
     )

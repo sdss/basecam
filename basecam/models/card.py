@@ -276,7 +276,8 @@ class CardGroup(list):
     ----------
     cards
         A list of `.Card` instances. Elements can also be a tuple of two or
-        three elements (for name, value, and optionally a comment).
+        three elements (for name, value, and optionally a comment) or a string with
+        a default card.
     name
         A name for the card group.
     use_group_title
@@ -288,7 +289,7 @@ class CardGroup(list):
 
     def __init__(
         self,
-        cards: Iterable[Union[Card, Iterable]],
+        cards: Iterable[Union[Card, Iterable, str]],
         name: Optional[str] = None,
         use_group_title: bool = True,
     ):
@@ -308,7 +309,7 @@ class CardGroup(list):
 
         if isinstance(card, Card):
             return card
-        elif isinstance(card, Iterable):
+        elif isinstance(card, (Iterable, str)):
             return Card(card)
         else:
             raise CardError(f"invalid card {card}")
