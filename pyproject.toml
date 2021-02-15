@@ -20,7 +20,7 @@ classifiers = [
 packages = [
     { include = "basecam" }
 ]
-include = ["LICENSE.md"]
+include = ["basecam/actor/schema.json"]
 
 [tool.poetry.dependencies]
 python = "^3.7"

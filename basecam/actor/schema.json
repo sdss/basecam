@@ -1,0 +1,152 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "error": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "camera": { "type": "string" },
+            "error": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        { "type": "string" }
+      ],
+      "description": "An error message from the system or one of the cameras"
+    },
+    "default_cameras": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Current default cameras"
+    },
+    "cameras": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Connected cameras"
+    },
+    "camera_connected": {
+      "type": "string",
+      "description": "Name or UID of a newly connected camera"
+    },
+    "camera_disconnected": {
+      "type": "string",
+      "description": "Name or UID of a newly disconnected camera"
+    },
+    "status": {
+      "type": "object",
+      "properties": {
+        "camera": { "type": "string" }
+      },
+      "additionalProperties": true,
+      "description": "Status parameters for the given camera"
+    },
+    "exposure_state": {
+      "type": "object",
+      "properties": {
+        "camera": { "type": "string" },
+        "state": {
+          "type": "string",
+          "enum": [
+            "idle",
+            "integrating",
+            "reading",
+            "done",
+            "aborted",
+            "failed"
+          ],
+          "description": "Current stage of the exposure"
+        },
+        "image_type": { "type": "string" },
+        "exposure_time": {
+          "type": "number",
+          "description": "Exposure time for a single exposure (0 if none, short, or unknown)"
+        },
+        "remaining_time": {
+          "type": "number",
+          "description": "Remaining time for the current exposure (0 if none, short, or unknown)"
+        },
+        "current_stack": {
+          "type": "integer",
+          "description": "Current exposure in the stack (0 if not exposing or value not updated)"
+        },
+        "n_stack": {
+          "type": "integer",
+          "description": "Total number of exposures in the stack (0 if not exposing or value not updated)"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Status of current exposure"
+    },
+    "temperature": {
+      "type": "object",
+      "properties": {
+        "camera": { "type": "string" },
+        "ccd_temp": {
+          "type": "number",
+          "description": "Temperature of the CCD"
+        }
+      },
+      "additionalProperties": false
+    },
+    "filename": {
+      "type": "object",
+      "properties": {
+        "camera": { "type": "string" },
+        "filename": { "type": "string" }
+      },
+      "additionalProperties": false,
+      "description": "Last written file"
+    },
+    "binning": {
+      "type": "object",
+      "properties": {
+        "camera": { "type": "string" },
+        "horizontal": { "type": "integer" },
+        "vertical": { "type": "integer" }
+      },
+      "additionalProperties": false,
+      "description": "Binning status in pixels"
+    },
+    "area": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "camera": { "type": "string" },
+            "area": {
+              "type": "array",
+              "items": { "type": "integer" },
+              "minLength": 4,
+              "maxLength": 4
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "array",
+          "items": [
+            { "type": "string" },
+            { "type": "integer" },
+            { "type": "integer" },
+            { "type": "integer" },
+            { "type": "integer" }
+          ],
+          "minLength": 5,
+          "maxLength": 5
+        }
+      ],
+      "description": "Area read from the CCD chip, in pixels"
+    },
+    "shutter": {
+      "properties": {
+        "camera": { "type": "string" },
+        "shutter": { "type": "string", "enum": ["open", "closed"] }
+      },
+      "additionalProperties": false,
+      "description": "Status of the shutter"
+    }
+  },
+  "additionalProperties": false
+}
