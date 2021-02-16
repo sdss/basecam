@@ -24,7 +24,6 @@ Contents
   getting-started
   abstract
   exposure
-  configuration
   mixins
   actor
   api
