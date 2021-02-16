@@ -104,7 +104,7 @@ Now we can use the camera poller to automatically detect when cameras connect or
 
     >>> await camera_system.start_camera_poller()
 
-`~.CameraSystem.start_camera_poller` periodically checks the list of available cameras; when a new camera is connected, it calls `~.CameraSystem.add_camera`. The configuration for the camera is accessible via ``BaseCamera.camera_config`` and the ``connection_params`` section is passed to `~.BaseCamera._connect_internal`. The configuration files is described in :ref:`configuration`.
+`~.CameraSystem.start_camera_poller` periodically checks the list of available cameras; when a new camera is connected, it calls `~.CameraSystem.add_camera`. The configuration for the camera is accessible via ``BaseCamera.camera_config`` and the ``connection_params`` section is passed to `~.BaseCamera._connect_internal`.
 
 Note that when interacting with the camera system or the camera we do not use the internal methods we have overridden. To expose the camera, we call `~.BaseCamera.expose` which provides a common interface regardless of the specific camera. `~.BaseCamera.expose` returns an `.Exposure` object which contains the image and a `FITS model <.FITSModel>`. More details are provided in the :ref:`exposure` section.
 

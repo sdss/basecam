@@ -56,7 +56,7 @@ BaseCamera
 `async def _connect_internal <._connect_internal>`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Opens the camera and makes sure it's ready to be accessed. It must raise a `.CameraConnectionError` if the connection fails. The signature of the method must include any keyword parameter that is needed to connect the camera, which must be the same as the parameters in the ``connection_params`` section in the :ref:`camera configuration <configuration>`. ::
+Opens the camera and makes sure it's ready to be accessed. It must raise a `.CameraConnectionError` if the connection fails. The signature of the method must include any keyword parameter that is needed to connect the camera, which must be the same as the parameters in the ``connection_params`` section in the camera configuration.
 
     async def _connect_internal(self, serial=None):
 
