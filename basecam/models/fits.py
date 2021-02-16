@@ -135,6 +135,9 @@ class Extension(object):
         If `False`, the extension data will not be compressed. Otherwise, a
         string with one of the ``compression_type`` in
         `~astropy.io.fits.CompImageHDU`.
+    compression_params
+        Additional parameters to be passed to `~astropy.io.fits.CompImageHDU` if the
+        extension is compressed.
     """
 
     __VALID_DATA_VALUES = ["raw", "none"]
@@ -145,6 +148,7 @@ class Extension(object):
         header_model: HeaderModel = None,
         name: Optional[str] = None,
         compressed: Union[bool, str] = False,
+        compression_params: dict[str, Any] = {},
     ):
 
         if isinstance(data, numpy.ndarray):
@@ -156,7 +160,11 @@ class Extension(object):
         self.header_model = header_model
 
         self.name = name
+
         self.compressed = compressed
+        if self.compressed is True:
+            self.compressed = "GZIP_2"
+        self._compression_params = compression_params
 
     def __repr__(self):
 
@@ -191,7 +199,11 @@ class Extension(object):
         if self.compressed:
             HDUClass = astropy.io.fits.CompImageHDU
             if isinstance(self.compressed, str):
-                HDUClass = functools.partial(HDUClass, compression_type=self.compressed)
+                HDUClass = functools.partial(
+                    HDUClass,
+                    compression_type=self.compressed,
+                    **self._compression_params,
+                )
         else:
             if primary:
                 HDUClass = astropy.io.fits.PrimaryHDU

@@ -63,6 +63,11 @@ def test_model_compressed(exposure, compressed):
     assert isinstance(hdulist[1], astropy.io.fits.CompImageHDU)
     assert hdulist[1].data is not None
 
+    if compressed is True:
+        assert fits_model[0].compressed == "GZIP_2"
+    else:
+        assert fits_model[0].compressed == compressed
+
 
 def test_fits_model_multi_extension(exposure):
 
