@@ -904,6 +904,18 @@ test = ["pytest (>=3.1.0)", "typing-extensions (>=3.5)", "sphobjinv (>=2.0)", "S
 type_comments = ["typed-ast (>=1.4.0)"]
 
 [[package]]
+name = "sphinx-click"
+version = "2.5.0"
+description = "Sphinx extension that automatically documents click applications"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+pbr = ">=2.0"
+sphinx = ">=1.5,<4.0"
+
+[[package]]
 name = "sphinx-jsonschema"
 version = "1.16.7"
 description = "Sphinx extension to display JSON Schema"
@@ -1095,7 +1107,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "15ebba935bef7e345c1e2b639f5467d3f84281c6b1949e475af4117c65de13c7"
+content-hash = "84a1f9fd34745ce743c1c7433da680be7bac833eceb07a6f3162f0d98ba45f60"
 
 [metadata.files]
 aio-pika = [
@@ -1727,6 +1739,10 @@ sphinx = [
 sphinx-autodoc-typehints = [
     {file = "sphinx-autodoc-typehints-1.11.1.tar.gz", hash = "sha256:244ba6d3e2fdb854622f643c7763d6f95b6886eba24bec28e86edf205e4ddb20"},
     {file = "sphinx_autodoc_typehints-1.11.1-py3-none-any.whl", hash = "sha256:da049791d719f4c9813642496ee4764203e317f0697eb75446183fa2a68e3f77"},
+]
+sphinx-click = [
+    {file = "sphinx-click-2.5.0.tar.gz", hash = "sha256:8ba44ca446ba4bb0585069b8aabaa81e833472d6669b36924a398405311d206f"},
+    {file = "sphinx_click-2.5.0-py2.py3-none-any.whl", hash = "sha256:6848ba2d084ef2feebae0ce3603c1c02a2ba5ded54fb6c0cf24fd01204a945f3"},
 ]
 sphinx-jsonschema = [
     {file = "sphinx-jsonschema-1.16.7.tar.gz", hash = "sha256:3e3dd1aafd3384c6dbd193bf690004605b55205c4b0491d38fdb014765864a92"},
