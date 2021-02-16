@@ -7,6 +7,7 @@ Changelog
 * :feature:`16` Use JSONSchema validation for actor keyword datamodel. The datamodel of the actor has been updated. The schema should work for all CLU actors, including ``LegacyActor`` although in this case the keywords will be flattened into a list.
 * :support:`18` Improve notifications during an exposure.
 * :feature:`-` `.CardGroup` now accepts string items that are evaluated to default cards.
+* :feature:`-` Complete version of the documentation.
 
 * :release:`0.4.1 <2021-02-13>`
 * :feature:`13` Add a `.WCSCards` macro that expands into full WCS header information.
