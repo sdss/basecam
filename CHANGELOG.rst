@@ -5,6 +5,7 @@ Changelog
 =========
 
 * :feature:`19` `.Extension` now accepts `compression_params` that are passed to ``CompImageHDU``.
+* :feature:`20` Allow to dynamically add extra HDUs to `.Exposure`.
 
 * :release:`0.4.2 <2021-02-16>`
 * :feature:`16` Use JSONSchema validation for actor keyword datamodel. The datamodel of the actor has been updated. The schema should work for all CLU actors, including ``LegacyActor`` although in this case the keywords will be flattened into a list.

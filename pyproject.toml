@@ -74,7 +74,8 @@ include = [
     "basecam/*"
 ]
 omit = [
-    "*/__init__.py"
+    "*/__init__.py",
+    "*/actor/commands/__doc_parser.py"
 ]
 
 [tool.coverage.report]

@@ -13,20 +13,19 @@ import functools
 import os
 import pathlib
 import re
-import warnings
 
-from typing import Callable, Optional, Union
+from typing import Callable, List, Optional, Tuple, Union
 
 import astropy
-import astropy.io.fits
 import astropy.time
 import astropy.wcs
 import numpy
+from astropy.io.fits import BinTableHDU, HDUList, ImageHDU
 
 import basecam.camera
 import basecam.models
 
-from .exceptions import ExposureError, ExposureWarning
+from .exceptions import ExposureError
 
 
 __all__ = ["Exposure", "ImageNamer"]
@@ -84,7 +83,7 @@ class Exposure(object):
 
         self.camera = camera
         self.data = data
-        self.fits_model = fits_model or basecam.models.FITSModel()
+        self.fits_model = fits_model.copy() if fits_model else None
         self.filename = filename
 
         self._obstime: astropy.time.Time = astropy.time.Time.now()
@@ -94,6 +93,8 @@ class Exposure(object):
         self.stack: int = 1
         self.stack_function: Optional[Callable[..., numpy.ndarray]] = None
         self.image_type: Optional[str] = None
+
+        self._extra_hdus: List[Tuple[Union[BinTableHDU, ImageHDU], Optional[int]]] = []
 
         self.wcs = wcs
 
@@ -117,7 +118,27 @@ class Exposure(object):
         else:
             raise ExposureError(f"invalid obstime {value}")
 
-    def to_hdu(self, context={}) -> astropy.io.fits.HDUList:
+    def add_hdu(self, hdu: Union[BinTableHDU, ImageHDU], index: Optional[int] = None):
+        """Adds an HDU to the list of extensions.
+
+        Parameters
+        ----------
+        hdu
+            The `~astropy.io.fits.BinTableHDU` or `~astropy.io.fits.ImageHDU` HDU to
+            append.
+        index
+            The index where the extension will be added. Extra HDUs are inserted in
+            order after the FITS model has been generated. ``index=None`` appends the
+            new HDU at the end of the list. Note that ``astropy.io.fits`` may change
+            the final order of the extensions to ensure that a primary HDU remains
+            as the first HDU.
+        """
+
+        assert isinstance(hdu, (BinTableHDU, ImageHDU)), "invalid HDU type"
+
+        self._extra_hdus.append((hdu, index))
+
+    def to_hdu(self, context={}) -> HDUList:
         """Return an `~astropy.io.fits.HDUList` for the image.
 
         Parameters
@@ -132,15 +153,16 @@ class Exposure(object):
             for this exposure.
         """
 
-        fits_model = self.fits_model
+        fits_model = self.fits_model or basecam.models.FITSModel()
 
-        if not fits_model:
-            warnings.warn(
-                "No FITS model defined. Reverting to default one.", ExposureWarning
-            )
-            fits_model = basecam.models.FITSModel()
+        hdulist = fits_model.to_hdu(self, context=context)
+        for hdu, index in self._extra_hdus:
+            if index:
+                hdulist.insert(index, hdu)
+            else:
+                hdulist.append(hdu)
 
-        return fits_model.to_hdu(self, context=context)
+        return hdulist
 
     async def write(
         self,
@@ -148,7 +170,7 @@ class Exposure(object):
         context={},
         overwrite=False,
         checksum=True,
-    ) -> astropy.io.fits.HDUList:
+    ) -> HDUList:
         """Writes the image to disk.
 
         Parameters

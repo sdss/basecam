@@ -7,16 +7,17 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
 import pytest
+from astropy.io.fits import BinTableHDU
+from astropy.table import Table
 
-from basecam.exceptions import ExposureError, ExposureWarning
+from basecam.exceptions import ExposureError
 from basecam.exposure import ImageNamer
 
 
 def test_exposure_no_model(exposure):
 
     exposure.fits_model = None
-    with pytest.warns(ExposureWarning):
-        hdulist = exposure.to_hdu()
+    hdulist = exposure.to_hdu()
 
     assert len(hdulist) == 1
     assert hdulist[0].data is not None
@@ -59,6 +60,19 @@ def test_obstime_str(exposure):
     exposure.obstime = test_date
 
     assert exposure.obstime.utc.iso == test_date
+
+
+@pytest.mark.parametrize("index", [None, 1])
+def test_exposure_extra_hdu(exposure, index):
+
+    extra_hdu = BinTableHDU(Table(rows=[[1, 2, 3]], names=["a", "b", "c"]))
+    exposure.add_hdu(extra_hdu, index=index)
+
+    hdulist = exposure.to_hdu()
+    assert len(hdulist) == 2
+
+    hdu_index = 1 if index is None else index
+    assert isinstance(hdulist[hdu_index], BinTableHDU)
 
 
 def test_image_namer(tmp_path):
