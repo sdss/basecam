@@ -9,8 +9,9 @@
 from __future__ import annotations
 
 import functools
+from copy import copy
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, TypeVar, Union
 
 import astropy.io.fits
 import astropy.table
@@ -43,6 +44,7 @@ ImageHDUType = Union[
     astropy.io.fits.PrimaryHDU,
 ]
 _CardTypes = Union[Card, CardGroup, MacroCard, str, None]
+T = TypeVar("T", bound="FITSModel")
 
 
 class FITSModel(list):
@@ -74,6 +76,9 @@ class FITSModel(list):
 
         if len(self) == 0:
             self.append(Extension(data="raw", name="DATA"))
+
+    def copy(self: T) -> T:
+        return copy(self)
 
     def to_hdu(
         self,
