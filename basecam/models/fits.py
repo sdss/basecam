@@ -130,8 +130,7 @@ class Extension(object):
     data
         The data for this FITS extension. Can be an array or a macro string
         indicating the type of data to store in the extension. Available macros
-        are: ``'raw'`` for the raw image, or ``'none'`` for empty data. If
-        `None`, the raw data will only be added to the primary HDU.
+        are: ``'raw'`` or `None` for the raw image, or ``'none'`` for empty data.
     header_model
         A `.HeaderModel` for this extension.
     name
@@ -145,7 +144,7 @@ class Extension(object):
         extension is compressed.
     """
 
-    __VALID_DATA_VALUES = ["raw", "none"]
+    __VALID_DATA_VALUES = ["raw", "none", True, False]
 
     def __init__(
         self,
@@ -242,8 +241,10 @@ class Extension(object):
                 data = exposure.data
             else:
                 data = None
-        elif self.data is None:
-            data = exposure.data if primary else None
+        elif self.data is None or self.data is True:
+            data = exposure.data
+        elif self.data is False:
+            data = None
         else:
             data = self.data
 
