@@ -91,7 +91,15 @@ def report_exposure_state(command, event, payload):
     )
 
 
-async def expose_one_camera(command, camera, exptime, image_type, stack, filename):
+async def expose_one_camera(
+    command,
+    camera,
+    exptime,
+    image_type,
+    stack,
+    filename,
+    **extra_kwargs,
+):
     command.info(text=f"exposing camera {camera.name!r}")
     try:
         await camera.expose(
@@ -100,6 +108,7 @@ async def expose_one_camera(command, camera, exptime, image_type, stack, filenam
             stack=stack,
             filename=filename,
             write=True,
+            **extra_kwargs,
         )
         return True
     except ExposureError as ee:
@@ -109,7 +118,7 @@ async def expose_one_camera(command, camera, exptime, image_type, stack, filenam
 
 @camera_parser.command()
 @click.argument("CAMERAS", nargs=-1, type=str, required=False)
-@click.argument("EXPTIME", type=float, required=False)
+@click.argument("EXPTIME", type=float, required=True)
 @click.option(
     "--object",
     "image_type",
@@ -155,7 +164,15 @@ async def expose_one_camera(command, camera, exptime, image_type, stack, filenam
     show_default=True,
     help="Number of images to stack.",
 )
-async def expose(command, cameras, exptime, image_type, filename, stack):
+async def expose(
+    command,
+    cameras,
+    exptime,
+    image_type,
+    filename,
+    stack,
+    **exposure_kwargs,
+):
     """Exposes and writes an image to disk."""
 
     cameras = get_cameras(command, cameras=cameras, fail_command=True)
@@ -164,7 +181,7 @@ async def expose(command, cameras, exptime, image_type, filename, stack):
 
     if image_type == "bias":
         if exptime and exptime > 0:
-            command.warning("seeting exposure time for bias to 0 seconds.")
+            command.warning("setting exposure time for bias to 0 seconds.")
         exptime = 0.0
 
     if filename and len(cameras) > 1:
@@ -179,7 +196,15 @@ async def expose(command, cameras, exptime, image_type, filename, stack):
     for camera in cameras:
         jobs.append(
             asyncio.create_task(
-                expose_one_camera(command, camera, exptime, image_type, stack, filename)
+                expose_one_camera(
+                    command,
+                    camera,
+                    exptime,
+                    image_type,
+                    stack,
+                    filename,
+                    **exposure_kwargs,
+                )
             )
         )
     results = await asyncio.gather(*jobs)
