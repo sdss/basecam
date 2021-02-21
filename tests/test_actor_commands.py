@@ -254,7 +254,7 @@ async def test_expose(actor, tmp_path, image_type):
         assert hdu[0].header["EXPTIME"] == 1.0
     else:
         assert hdu[0].header["EXPTIME"] == 0.0
-        assert "seeting exposure time for bias to 0 seconds." in actor.mock_replies
+        assert "setting exposure time for bias to 0 seconds." in actor.mock_replies
 
 
 async def test_expose_stack(actor):
