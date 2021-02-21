@@ -208,6 +208,24 @@ If ``data=None`` (the default), ``Exposure.data`` will be used to create the ima
 
 The available compression algorithms are the same as astropy's `~astropy.io.fits.CompImageHDU`. Compressed HDUs cannot be the primary header of a FITS file, so in this case an empty HDU will be prepended as the primary extension.
 
+Additional HDUs
+^^^^^^^^^^^^^^^
+
+Sometimes one wants to add additional HDUs (be those images or binary tables) to an exposure. For example, one may perform source extraction after taking the exposure and want to store the resulting table of centroids in the resulting exposure. That can be accomplished by dynamically appending HDUs to `.Exposure` ::
+
+    def _expose_internal(self, exposure, **kwargs):
+        # Take the exposure (skipped for shortness)
+        ...
+
+        exposure.data = data
+
+        sources = get_sources(exposure.data)  # sources is an astropy Table
+        sources_hdu = astropy.io.fits.BinTableHDU(sources
+
+        exposure.add_hdu(sources_hdu)
+
+When we call ``.Exposure.to_hdu`` or ``.Exposure.write``, the binary table will be added after the extensions defined by the FITS model. `~.Exposure.add_hdu` accepts an ``index`` parameter that allows to specify where the extra HDU will be inserted. Note that FITS files require a primary HDU as the first extension, and that astropy may rearrange the HDUs to ensure it.
+
 Naming images
 -------------
 
