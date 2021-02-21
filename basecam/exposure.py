@@ -275,7 +275,7 @@ class ImageNamer(object):
         # We want to expand everything except the num first so we "double-escape" it.
         self._basename = re.sub(r"(\{num.+\})", r"{\1}", value)
 
-    def _eval_dirname(self) -> pathlib.Path:
+    def get_dirname(self) -> pathlib.Path:
         """Returns the evaluated dirname."""
 
         date = astropy.time.Time.now()
@@ -292,7 +292,7 @@ class ImageNamer(object):
 
         regex = re.compile(re.sub(r"\{num.+\}", "(?P<num>[0-9]*?)", basename))
 
-        dirname = self._eval_dirname()
+        dirname = self.get_dirname()
         all_files = list(map(str, dirname.glob("*")))
 
         match_files = list(filter(regex.search, all_files))
@@ -316,7 +316,7 @@ class ImageNamer(object):
             expanded_basename = self.basename.format()
 
         num = self._get_num(expanded_basename)
-        path = self._eval_dirname() / expanded_basename.format(num=num)
+        path = self.get_dirname() / expanded_basename.format(num=num)
         self._last_num = num
 
         return path
