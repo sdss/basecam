@@ -19,7 +19,7 @@ from .conftest import CameraSystemTester, VirtualCamera
 pytestmark = pytest.mark.asyncio
 
 
-class TestActorLegacy(BaseCameraActor, LegacyActor):
+class ActorLegacyTest(BaseCameraActor, LegacyActor):
     pass
 
 
@@ -33,7 +33,7 @@ async def actor_setup(config):
     """
     camera_system = CameraSystemTester(VirtualCamera, camera_config=config).setup()
 
-    actor = TestActorLegacy.from_config(config, camera_system)  # type: ignore
+    actor = ActorLegacyTest.from_config(config, camera_system)  # type: ignore
     actor = await clu.testing.setup_test_actor(actor)  # type: ignore
 
     actor._default_cameras = actor.default_cameras  # type: ignore
