@@ -26,6 +26,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        fetch-depth: 0
 
       - name: Cache Setup
         uses: actions/cache@v2
