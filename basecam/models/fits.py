@@ -115,6 +115,7 @@ class FITSModel(list):
                 if ext.compressed:
                     # Compressed HDU cannot be primary.
                     hdus.append(astropy.io.fits.PrimaryHDU())
+                    primary = False
             else:
                 primary = False
             hdus.append(ext.to_hdu(exposure, primary=primary, context=ucontext))
@@ -171,7 +172,6 @@ class Extension(object):
         self._compression_params = compression_params
 
     def __repr__(self):
-
         return f"<Extension (name={self.name!r}, compressed={self.compressed})>"
 
     def to_hdu(

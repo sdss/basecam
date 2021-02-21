@@ -73,8 +73,8 @@ def test_fits_model_multi_extension(exposure):
 
     fits_model = models.FITSModel(
         [
-            models.Extension(data="none"),
-            models.Extension(data=None),
+            models.Extension(data="none", name="FIRST"),
+            models.Extension(data=None, name="SECOND"),
             models.Extension(data="raw"),
             models.Extension(data=numpy.zeros((10, 10))),
         ]
@@ -86,10 +86,12 @@ def test_fits_model_multi_extension(exposure):
     assert len(hdulist) == 4
 
     assert isinstance(hdulist[0], astropy.io.fits.PrimaryHDU)
+    assert hdulist[0].name == "PRIMARY"
     assert hdulist[0].data is None
 
     assert isinstance(hdulist[1], astropy.io.fits.ImageHDU)
-    assert hdulist[1].data is None
+    assert hdulist[1].name == "SECOND"
+    assert hdulist[1].data is not None
 
     assert isinstance(hdulist[2], astropy.io.fits.ImageHDU)
     assert hdulist[2].data is not None
@@ -103,7 +105,7 @@ def test_fits_model_multi_extension_compressed(exposure):
     fits_model = models.FITSModel(
         [
             models.Extension(data=None, compressed=True),
-            models.Extension(data=None, compressed=True),
+            models.Extension(data=False, compressed=True),
         ]
     )
 
