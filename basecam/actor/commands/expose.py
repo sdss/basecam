@@ -115,8 +115,9 @@ async def expose_one_camera(
     **extra_kwargs,
 ):
     command.info(text=f"exposing camera {camera.name!r}")
+    obj = click.get_current_context().obj
     try:
-        await camera.expose(
+        exposure = await camera.expose(
             exptime,
             image_type=image_type,
             stack=stack,
@@ -125,6 +126,9 @@ async def expose_one_camera(
             write=True,
             **extra_kwargs,
         )
+        post_process_cb = obj.get("post_process_callback", None)
+        if post_process_cb:
+            await post_process_cb(command, exposure)
         return True
     except ExposureError as ee:
         command.error(error={"camera": camera.name, "error": str(ee)})

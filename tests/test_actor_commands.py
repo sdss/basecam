@@ -8,6 +8,7 @@
 
 import asyncio
 import os
+import sys
 import types
 
 import astropy.io.fits
@@ -306,6 +307,17 @@ async def test_expose_filename_fails(actor, tmp_path):
     assert (
         "-filename can only be used when exposing a single camera" in actor.mock_replies
     )
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 8),
+    reason="Mocker fails with coroutines in PY<=37",
+)
+async def test_expose_post_process_callback(actor, mocker):
+    cb = mocker.AsyncMock()
+    actor.context_obj["post_process_callback"] = cb
+    await actor.invoke_mock_command("expose 1")
+    cb.assert_awaited()
 
 
 async def test_shutter_command_exists(actor):

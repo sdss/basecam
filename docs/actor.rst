@@ -98,6 +98,22 @@ The following commands are provided by default for any camera actor. They cover 
    :prog: basecam
    :show-nested:
 
+Expose post-process hook
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+In ``expose`` sometimes one wants to perform a final post-process step after the image has been written to disk but before the command is finished. For example, we may want to analyse the image and report the mean value. The ``expose`` command includes a post-process hook that allows to set a callback to call when the the exposure has been written ::
+
+    async def report_median(command, exposure):
+        mean = exposure.data.mean()
+        command.info(text=f"Image mean value is {mean:.2f}")
+
+    class MyActor(CameraActor):
+
+        def __init__(self, *args, **kwargs):
+            ...
+            self.context_obj['post_process_callback'] = report_median
+
+Here we use the ``context_obj`` dictionary that CLU passes to all the commands and we set the ``post_process_callback`` parameter with the coroutine we want to call. The hook in ``expose`` will then invoke the callback with the command and the `.Exposure` object.
 
 Adding new commands
 -------------------
