@@ -149,7 +149,7 @@ class Extension(object):
 
     def __init__(
         self,
-        data: Union[Literal["raw"], Literal["none"], None] = None,
+        data: Union[Literal["raw"], Literal["none"], None, bool] = None,
         header_model: HeaderModel = None,
         name: Optional[str] = None,
         compressed: Union[bool, str] = False,
@@ -246,7 +246,7 @@ class Extension(object):
         elif self.data is False:
             data = None
         else:
-            data = self.data
+            raise ValueError(f"Invalid data value {self.data!r}")
 
         return data
 
