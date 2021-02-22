@@ -116,7 +116,7 @@ Called by `.expose`. This method must implement the exposing and reading of a ca
         device.start_exposure(frametype)
 
         exposure.obstime = astropy.time.Time.now()
-        self._notify(CameraEvent.EXPOSURE_INTEGRATING)
+        self.notify(CameraEvent.EXPOSURE_INTEGRATING)
 
         start_time = time.time()
         time_left = exposure.exptime
@@ -128,7 +128,7 @@ Called by `.expose`. This method must implement the exposing and reading of a ca
             time_left = device.get_exposure_time_left() / 1000.
 
             if time_left == 0:
-                self._notify(CameraEvent.EXPOSURE_READING)
+                self.notify(CameraEvent.EXPOSURE_READING)
                 array = await self.loop.run_in_executor(None, device.read_frame)
                 exposure.data = array
                 return
@@ -165,12 +165,12 @@ Often we want to run additional processing on the exposure we have just taken. F
 
     async def _post_process_internal(self, exposure, **kwargs):
 
-        self._notify(CameraEvent.EXPOSURE_POST_PROCESSING)
+        self.notify(CameraEvent.EXPOSURE_POST_PROCESSING)
 
         bias = numpy.median(exposure.data)
         exposure.data -= bias
 
-        self._notify(CameraEvent.EXPOSURE_POST_PROCESS_DONE)
+        self.notify(CameraEvent.EXPOSURE_POST_PROCESS_DONE)
 
         return exposure
 
@@ -178,14 +178,14 @@ Alternatively, we could add the bias as a new extension, as descried in :ref:`ad
 
     async def _post_process_internal(self, exposure, **kwargs):
 
-        self._notify(CameraEvent.EXPOSURE_POST_PROCESSING)
+        self.notify(CameraEvent.EXPOSURE_POST_PROCESSING)
 
         bias_image = exposure.data.copy()
         bias_image[bias_image > 1000] = numpy.median(bias_image)  # do NOT do this!
 
         exposure.add_hdu(ImageHDU(data=bias_image, name='BIAS'))
 
-        self._notify(CameraEvent.EXPOSURE_POST_PROCESS_DONE)
+        self.notify(CameraEvent.EXPOSURE_POST_PROCESS_DONE)
 
         return exposure
 

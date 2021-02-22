@@ -137,7 +137,7 @@ class CoolerMixIn(object, metaclass=abc.ABCMeta):
         async def _wait_for_temp(temp):
             while abs(await self.get_temperature() - temp) > 0.1:
                 await asyncio.sleep(0.5)
-            self._notify(CameraEvent.SET_POINT_REACHED, {"temperature": temp})
+            self.notify(CameraEvent.SET_POINT_REACHED, {"temperature": temp})
 
         # If there is already a set point, cancel it (this does not cancel
         # the cooler changing the temperature).
@@ -145,7 +145,7 @@ class CoolerMixIn(object, metaclass=abc.ABCMeta):
 
         await self._set_temperature_internal(temperature)
 
-        self._notify(CameraEvent.NEW_SET_POINT, {"temperature": temperature})
+        self.notify(CameraEvent.NEW_SET_POINT, {"temperature": temperature})
 
         loop = asyncio.get_event_loop()
         self._set_temperature_task = loop.create_task(_wait_for_temp(temperature))

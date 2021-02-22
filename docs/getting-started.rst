@@ -55,10 +55,10 @@ To wrap the camera API with ``basecam`` we need to subclass `.CameraSystem` and 
 
             exptime = exposure.exptime
 
-            self._notify(CameraEvent.EXPOSURE_INTEGRATING)
+            self.notify(CameraEvent.EXPOSURE_INTEGRATING)
             await self.loop.run_in_executor(None, self.device.expose, exptime)
 
-            self._notify(CameraEvent.EXPOSURE_READING)
+            self.notify(CameraEvent.EXPOSURE_READING)
             array = await self.loop.run_in_executor(None, self.device.read_frame)
 
             exposure.data = array

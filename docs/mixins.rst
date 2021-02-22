@@ -16,9 +16,9 @@ For example, we can extend our initial camera example with a mixin that allows t
 
         async def _expose_internal(self, exposure):
             exptime = exposure.exptime
-            self._notify(CameraEvent.EXPOSURE_INTEGRATING)
+            self.notify(CameraEvent.EXPOSURE_INTEGRATING)
             await self.loop.run_in_executor(None, self.device.expose, exptime)
-            self._notify(CameraEvent.EXPOSURE_READING)
+            self.notify(CameraEvent.EXPOSURE_READING)
             array = await self.loop.run_in_executor(None, self.device.read_frame)
             exposure.data = array
             return

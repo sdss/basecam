@@ -105,8 +105,8 @@ class VirtualCamera(
         else:
             await self.set_shutter(True)
 
-        self._notify(CameraEvent.EXPOSURE_FLUSHING)
-        self._notify(CameraEvent.EXPOSURE_INTEGRATING)
+        self.notify(CameraEvent.EXPOSURE_FLUSHING)
+        self.notify(CameraEvent.EXPOSURE_INTEGRATING)
 
         # Creates a spiral pattern
         xx = numpy.arange(-5, 5, 0.1)
@@ -125,7 +125,7 @@ class VirtualCamera(
         if self.data is not False:
             data = self.data
 
-        self._notify(CameraEvent.EXPOSURE_READING)
+        self.notify(CameraEvent.EXPOSURE_READING)
 
         exposure.data = data
         exposure.obstime = astropy.time.Time("2000-01-01 00:00:00")
@@ -133,8 +133,8 @@ class VirtualCamera(
         await self.set_shutter(False)
 
     async def _post_process_internal(self, exposure: Exposure, **kwargs) -> Exposure:
-        self._notify(CameraEvent.EXPOSURE_POST_PROCESSING)
-        self._notify(CameraEvent.EXPOSURE_POST_PROCESS_DONE)
+        self.notify(CameraEvent.EXPOSURE_POST_PROCESSING)
+        self.notify(CameraEvent.EXPOSURE_POST_PROCESS_DONE)
         return exposure
 
     async def _set_shutter_internal(self, shutter_open):

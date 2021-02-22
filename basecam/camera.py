@@ -632,15 +632,15 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             self.connected = True
         except CameraConnectionError as ee:
             self.connected = False
-            self._notify(CameraEvent.CAMERA_CONNECT_FAILED)
+            self.notify(CameraEvent.CAMERA_CONNECT_FAILED)
             raise CameraConnectionError(f"failed to connect: {ee}")
 
         self.log("camera connected.")
-        self._notify(CameraEvent.CAMERA_CONNECTED)
+        self.notify(CameraEvent.CAMERA_CONNECTED)
 
         return self
 
-    def _notify(
+    def notify(
         self,
         event: CameraEvent,
         extra_payload: Optional[Dict[str, Any]] = None,
@@ -786,16 +786,16 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             exposure.image_type = image_type
             exposure.exptime = exptime
 
-            self._notify(CameraEvent.EXPOSURE_INTEGRATING, notif_payload)
+            self.notify(CameraEvent.EXPOSURE_INTEGRATING, notif_payload)
             try:
                 await self._expose_internal(exposure, **kwargs)
             except ExposureError as e:
-                self._notify(CameraEvent.EXPOSURE_FAILED, {"error": str(e)})
+                self.notify(CameraEvent.EXPOSURE_FAILED, {"error": str(e)})
                 raise
 
             if exposure.data is None:
                 error = "data was not taken."
-                self._notify(CameraEvent.EXPOSURE_FAILED, {"error": error})
+                self.notify(CameraEvent.EXPOSURE_FAILED, {"error": error})
                 raise ExposureError(error)
 
             exposures.append(exposure)
@@ -817,20 +817,20 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             "image_type": image_type,
             "stack": stack,
         }
-        self._notify(CameraEvent.EXPOSURE_DONE, notif_payload)
+        self.notify(CameraEvent.EXPOSURE_DONE, notif_payload)
 
         if postprocess:
             try:
                 exposure = await self._post_process_internal(exposure, **kwargs)
             except ExposureError:
-                self._notify(CameraEvent.EXPOSURE_POST_PROCESS_FAILED)
+                self.notify(CameraEvent.EXPOSURE_POST_PROCESS_FAILED)
                 raise
 
         if write:
             filename = os.path.realpath(str(exposure.filename))
-            self._notify(CameraEvent.EXPOSURE_WRITING, {"filename": filename})
+            self.notify(CameraEvent.EXPOSURE_WRITING, {"filename": filename})
             await exposure.write()
-            self._notify(CameraEvent.EXPOSURE_WRITTEN, {"filename": filename})
+            self.notify(CameraEvent.EXPOSURE_WRITTEN, {"filename": filename})
 
         return exposure
 
@@ -885,11 +885,11 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         try:
             await self._disconnect_internal()
         except CameraConnectionError as ee:
-            self._notify(CameraEvent.CAMERA_DISCONNECT_FAILED)
+            self.notify(CameraEvent.CAMERA_DISCONNECT_FAILED)
             raise CameraConnectionError(f"failed to disconnect: {ee}")
 
         self.log("camera has been disconnected.")
-        self._notify(CameraEvent.CAMERA_DISCONNECTED)
+        self.notify(CameraEvent.CAMERA_DISCONNECTED)
 
         return True
 
