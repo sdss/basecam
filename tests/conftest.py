@@ -132,6 +132,11 @@ class VirtualCamera(
 
         await self.set_shutter(False)
 
+    async def _post_process_internal(self, exposure: Exposure, **kwargs) -> Exposure:
+        self._notify(CameraEvent.EXPOSURE_POST_PROCESSING)
+        self._notify(CameraEvent.EXPOSURE_POST_PROCESS_DONE)
+        return exposure
+
     async def _set_shutter_internal(self, shutter_open):
 
         self._shutter_position = shutter_open

@@ -158,6 +158,39 @@ These parameters can also be set in the configuration file ::
         }
     }
 
+`async def _post_process_internal <._post_process_internal>` (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Often we want to run additional processing on the exposure we have just taken. For example, we may want to substract a bias level, or do source extraction. One way of accomplishing that is to override the `._post_process_internal` method. If overloaded, the method is called after `._expose_internal` is complete but before the exposure is returned or written to disk. `._post_process_internal` is called with the `.Exposure` object and additional arguments that have been pased to `.expose` (these are the same keyword arguments also passed to `._expose_internal`). The method must return the exposure again and must take care of issuing event notifications. ::
+
+    async def _post_process_internal(self, exposure, **kwargs):
+
+        self._notify(CameraEvent.EXPOSURE_POST_PROCESSING)
+
+        bias = numpy.median(exposure.data)
+        exposure.data -= bias
+
+        self._notify(CameraEvent.EXPOSURE_POST_PROCESS_DONE)
+
+        return exposure
+
+Alternatively, we could add the bias as a new extension, as descried in :ref:`additional-hdus` ::
+
+    async def _post_process_internal(self, exposure, **kwargs):
+
+        self._notify(CameraEvent.EXPOSURE_POST_PROCESSING)
+
+        bias_image = exposure.data.copy()
+        bias_image[bias_image > 1000] = numpy.median(bias_image)  # do NOT do this!
+
+        exposure.add_hdu(ImageHDU(data=bias_image, name='BIAS'))
+
+        self._notify(CameraEvent.EXPOSURE_POST_PROCESS_DONE)
+
+        return exposure
+
+If post-processing fails, there are two possibilities. One can raise an `.ExposureError` which will be propagated and will prevent the exposure from being returned or written to disk. Alternatively one can notify using `.EXPOSURE_POST_PROCESS_FAILED` but return the original image.
+
 `async def _disconnect_internal <._disconnect_internal>` (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -206,6 +239,11 @@ Summary of abstract methods
      - async method
      - No
      - Expose and read the camera and populate `Exposure.data <.Exposure>`. Must notify of integrating and reading stages.
+   * -
+     - `~.BaseCamera._post_process_internal`
+     - async method
+     - Yes
+     - Run additional post-processing steps on the newly exposed frame.
    * -
      - `~.BaseCamera._disconnect_internal`
      - async method

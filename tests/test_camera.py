@@ -7,6 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
 import os
+import sys
 import warnings
 
 import astropy
@@ -258,3 +259,24 @@ async def test_camera_exception_unknown():
         Test().warns_camera_warning()
 
     assert "UNKNOWN - " in ww[0].message.args[0]
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 8),
+    reason="Mocker fails with coroutines in PY<=37",
+)
+@pytest.mark.parametrize("postprocess", [True, False])
+async def test_camera_post_process(postprocess, camera, mocker):
+    ppi = mocker.patch.object(camera, "_post_process_internal")
+    await camera.expose(0.1, postprocess=postprocess)
+
+    if postprocess:
+        ppi.assert_awaited()
+    else:
+        ppi.assert_not_awaited()
+
+
+async def test_camera_post_process_fails(camera, mocker):
+    mocker.patch.object(camera, "_post_process_internal", side_effect=ExposureError)
+    with pytest.raises(ExposureError):
+        await camera.expose(0.1, postprocess=True)

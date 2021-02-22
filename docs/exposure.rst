@@ -208,6 +208,8 @@ If ``data=None`` (the default), ``Exposure.data`` will be used to create the ima
 
 The available compression algorithms are the same as astropy's `~astropy.io.fits.CompImageHDU`. Compressed HDUs cannot be the primary header of a FITS file, so in this case an empty HDU will be prepended as the primary extension.
 
+.. _additional-hdus:
+
 Additional HDUs
 ^^^^^^^^^^^^^^^
 

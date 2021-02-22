@@ -284,6 +284,13 @@ async def test_expose_fails(actor, mocker):
     assert command.status.did_fail
 
 
+async def test_expose_post_process_fails(actor, mocker):
+    camera = actor.camera_system.cameras[0]
+    mocker.patch.object(camera, "_post_process_internal", side_effect=ExposureError)
+    command = await actor.invoke_mock_command("expose 1")
+    assert command.status.did_fail
+
+
 async def test_expose_filename_fails(actor, tmp_path):
 
     filename = tmp_path / "test.fits"

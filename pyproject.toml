@@ -83,7 +83,8 @@ exclude_lines = [
     "pragma: no cover",
     "class Poller",  # Already tested in jaeger
     "def __repr__",
-    "raise NotImplementedError"
+    "raise NotImplementedError",
+    "async def _post_process_internal"
 ]
 
 [tool.tox]
