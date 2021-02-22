@@ -709,6 +709,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         fits_model: Optional[FITSModel] = None,
         filename: Optional[str] = None,
         write: bool = False,
+        postprocess: bool = True,
         **kwargs,
     ) -> Exposure:
         """Exposes the camera.
@@ -743,8 +744,12 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             `.ImageNamer`.
         write
             If `True`, writes the image to disk immediately.
+        postprocess
+            Whether to run the post-process stage. This argument is ignored if the
+            subclass of `.BaseCamera` does not override ``_post_process_internal``.
         kwargs
-            Other keyword arguments to pass to the internal expose method.
+            Other keyword arguments to pass to the internal expose and post-process
+            methods.
 
         Returns
         -------
@@ -814,6 +819,17 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         }
         self._notify(CameraEvent.EXPOSURE_DONE, notif_payload)
 
+        post_process_overridden = (
+            self._post_process_internal.__code__
+            != BaseCamera._post_process_internal.__code__
+        )
+        if postprocess and post_process_overridden:
+            try:
+                await self._post_process_internal(exposure, **kwargs)
+            except ExposureError:
+                self._notify(CameraEvent.EXPOSURE_POST_PROCESS_FAILED)
+                raise
+
         if write:
             filename = os.path.realpath(str(exposure.filename))
             self._notify(CameraEvent.EXPOSURE_WRITING, {"filename": filename})
@@ -853,6 +869,19 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         """
 
         raise NotImplementedError
+
+    async def _post_process_internal(self, exposure: Exposure, **kwargs) -> Exposure:
+        """Performs post-process on an exposure.
+
+        This method can be overridden to perform additional processing on the already
+        read exposure. It's called by `.expose` after `._expose_internal` is complete
+        but before the image is returned to the user or written to disk.
+
+        The user is responsible for issuing any events. If an `.ExposureError` is
+        raised, the error will be propagated and the exposure will not be returned.
+        """
+
+        return exposure
 
     async def disconnect(self) -> bool:
         """Shuts down the camera."""
