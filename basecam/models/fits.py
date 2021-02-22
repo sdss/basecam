@@ -149,7 +149,7 @@ class Extension(object):
 
     def __init__(
         self,
-        data: Union[Literal["raw"], Literal["none"], None, bool] = None,
+        data: Union[Literal["raw"], Literal["none"], None, bool, numpy.ndarray] = None,
         header_model: HeaderModel = None,
         name: Optional[str] = None,
         compressed: Union[bool, str] = False,
@@ -241,6 +241,8 @@ class Extension(object):
                 data = exposure.data
             else:
                 data = None
+        elif isinstance(self.data, numpy.ndarray):
+            data = self.data
         elif self.data is None or self.data is True:
             data = exposure.data
         elif self.data is False:
