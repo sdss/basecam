@@ -7,6 +7,7 @@
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
 import os
+import sys
 import warnings
 
 import astropy
@@ -260,6 +261,10 @@ async def test_camera_exception_unknown():
     assert "UNKNOWN - " in ww[0].message.args[0]
 
 
+@pytest.mark.xfail(
+    sys.version_info <= (3, 7),
+    reason="Mocker fails with coroutines in PY<=37",
+)
 @pytest.mark.parametrize("postprocess", [True, False])
 async def test_camera_post_process(postprocess, camera, mocker):
     ppi = mocker.patch.object(camera, "_post_process_internal")
