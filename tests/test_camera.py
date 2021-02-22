@@ -262,7 +262,7 @@ async def test_camera_exception_unknown():
 
 
 @pytest.mark.skipif(
-    sys.version_info <= (3, 7),
+    sys.version_info < (3, 8),
     reason="Mocker fails with coroutines in PY<=37",
 )
 @pytest.mark.parametrize("postprocess", [True, False])
