@@ -59,6 +59,9 @@ Actor
 .. automodule:: basecam.actor.actor
     :members:
 
+.. automodule:: basecam.actor.tools
+    :members:
+
 Exceptions
 ----------
 

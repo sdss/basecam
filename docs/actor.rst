@@ -159,6 +159,21 @@ Then do ::
 
     actor = CameraActor(camera_system, schema='schema.json', host=..., port=...)
 
+Alternatively it's also possible to use `.get_schema` to get the basecam schema and then append to it ::
+
+    from basecam.actor import get_schema
+
+    schema = get_schema()
+    schema['properties']['reboot'] = {
+        "type": "object",
+        "properties": {
+        "camera": { "type": "string" },
+        "text": { "type" "string" },
+        "additionalProperties": false
+    }
+
+    actor = CameraActor(camera_system, schema=schema, ...)
+
 An actor command can also manually opt out of validating a specific message by passing ``validate=False`` ::
 
     command.info(reboot={'camera': camera.name, 'text': 'Reboot started'}, validate=False)

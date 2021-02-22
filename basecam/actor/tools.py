@@ -6,8 +6,13 @@
 # @Filename: commands.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
+import json
+import os
 
-__all__ = ["get_cameras"]
+from typing import Any, Dict
+
+
+__all__ = ["get_cameras", "get_schema"]
 
 
 def get_cameras(command, cameras=None, check_cameras=True, fail_command=False):
@@ -69,3 +74,13 @@ def get_cameras(command, cameras=None, check_cameras=True, fail_command=False):
         return False
 
     return camera_instances
+
+
+def get_schema() -> Dict[str, Any]:
+    """Returns the actor schema as a dictionary."""
+
+    schema = json.loads(
+        open(os.path.join(os.path.dirname(__file__), "schema.json")).read()
+    )
+
+    return schema

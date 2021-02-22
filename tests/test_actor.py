@@ -11,6 +11,7 @@ import pytest
 from clu.tools import ActorHandler
 
 from basecam.actor.actor import BaseCameraActor
+from basecam.actor.tools import get_schema
 
 
 pytestmark = pytest.mark.asyncio
@@ -92,3 +93,9 @@ async def test_set_default_cameras(actor):
 
     with pytest.raises(ValueError):
         actor.set_default_cameras({"bad_input": 1})
+
+
+def test_get_schema():
+    schema = get_schema()
+    assert isinstance(schema, dict)
+    assert "properties" in schema

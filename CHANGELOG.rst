@@ -10,6 +10,7 @@ Changelog
 * :feature:`-` Make `.BaseCamera.notify` a public method.
 * :feature:`22` Add optional post-process step during exposure.
 * :feature:`-` Add hook to invoke a post-process callback coroutine in the ``expose`` actor command.
+* :feature:`-` Add `.get_schema` to retrieve the actor schema as a dictionary.
 
 * :release:`0.4.2 <2021-02-16>`
 * :feature:`16` Use JSONSchema validation for actor keyword datamodel. The datamodel of the actor has been updated. The schema should work for all CLU actors, including ``LegacyActor`` although in this case the keywords will be flattened into a list.
