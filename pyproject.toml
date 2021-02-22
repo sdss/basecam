@@ -26,7 +26,7 @@ include = ["basecam/actor/schema.json"]
 python = "^3.7"
 astropy = "^4.0"
 numpy = "^1.17"
-sdss-clu = "^0.6.0"
+sdss-clu = "^0.7.1"
 sdsstools = ">=0.4.0"
 typing-extensions = {version = "^3.7.4", python = "<=3.7"}
 

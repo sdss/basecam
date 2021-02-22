@@ -801,7 +801,7 @@ docutils = ">=0.11,<1.0"
 
 [[package]]
 name = "sdss-clu"
-version = "0.6.3"
+version = "0.7.1"
 description = "A new protocol for SDSS actors."
 category = "main"
 optional = false
@@ -1107,7 +1107,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "84a1f9fd34745ce743c1c7433da680be7bac833eceb07a6f3162f0d98ba45f60"
+content-hash = "24204049ab9f6a4e685112ceb2e28a091feace5db8bfae7d427975c254e44b93"
 
 [metadata.files]
 aio-pika = [
@@ -1713,8 +1713,8 @@ restructuredtext-lint = [
     {file = "restructuredtext_lint-1.3.2.tar.gz", hash = "sha256:d3b10a1fe2ecac537e51ae6d151b223b78de9fafdd50e5eb6b08c243df173c80"},
 ]
 sdss-clu = [
-    {file = "sdss-clu-0.6.3.tar.gz", hash = "sha256:7bfe3247e677b112f4cd26261052d45fd563172bf8333eaeb0fa158546289987"},
-    {file = "sdss_clu-0.6.3-py3-none-any.whl", hash = "sha256:2d6ee9883df61d97c437d238f5459a9238b5192c6d9f1cf8da0e3a9df08714f1"},
+    {file = "sdss-clu-0.7.1.tar.gz", hash = "sha256:6354d50937a33a58a4bde112db1a90a04024afe7a67c763ed1d895d55193a597"},
+    {file = "sdss_clu-0.7.1-py3-none-any.whl", hash = "sha256:2857ade48e5e86e33ff0be29f662254f911f181ab9b34858ab72daf4c54bd8d5"},
 ]
 sdsstools = [
     {file = "sdsstools-0.4.8-py3-none-any.whl", hash = "sha256:f61dafa7b06cedbf300c40f534d54032abf3d6732e1692e0631da7384c2cfae8"},
