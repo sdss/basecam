@@ -254,6 +254,8 @@ class Card(object):
                 rendered_value = True
             elif re.match("^false$", rendered_value, re.IGNORECASE):
                 rendered_value = False
+            elif re.match("^none$", rendered_value, re.IGNORECASE):
+                rendered_value = self._default if self._default else "None"
             else:
                 try:
                     rendered_value = int(rendered_value)
