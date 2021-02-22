@@ -819,13 +819,9 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         }
         self._notify(CameraEvent.EXPOSURE_DONE, notif_payload)
 
-        post_process_overridden = (
-            self._post_process_internal.__code__
-            != BaseCamera._post_process_internal.__code__
-        )
-        if postprocess and post_process_overridden:
+        if postprocess:
             try:
-                await self._post_process_internal(exposure, **kwargs)
+                exposure = await self._post_process_internal(exposure, **kwargs)
             except ExposureError:
                 self._notify(CameraEvent.EXPOSURE_POST_PROCESS_FAILED)
                 raise
