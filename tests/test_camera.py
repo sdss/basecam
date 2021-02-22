@@ -258,3 +258,20 @@ async def test_camera_exception_unknown():
         Test().warns_camera_warning()
 
     assert "UNKNOWN - " in ww[0].message.args[0]
+
+
+@pytest.mark.parametrize("postprocess", [True, False])
+async def test_camera_post_process(postprocess, camera, mocker):
+    ppi = mocker.patch.object(camera, "_post_process_internal")
+    await camera.expose(0.1, postprocess=postprocess)
+
+    if postprocess:
+        ppi.assert_awaited()
+    else:
+        ppi.assert_not_awaited()
+
+
+async def test_camera_post_process_fails(camera, mocker):
+    mocker.patch.object(camera, "_post_process_internal", side_effect=ExposureError)
+    with pytest.raises(ExposureError):
+        await camera.expose(0.1, postprocess=True)
