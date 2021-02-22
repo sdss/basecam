@@ -54,7 +54,9 @@
             "reading",
             "done",
             "aborted",
-            "failed"
+            "failed",
+            "post_processing",
+            "post_process_failed"
           ],
           "description": "Current stage of the exposure"
         },
@@ -74,6 +76,10 @@
         "n_stack": {
           "type": "integer",
           "description": "Total number of exposures in the stack (0 if not exposing or value not updated)"
+        },
+        "error": {
+          "type": "string",
+          "description": "Description of an error while exposing or post-processing"
         }
       },
       "additionalProperties": false,

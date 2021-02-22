@@ -75,6 +75,19 @@ def report_exposure_state(command, event, payload):
             }
         )
         return
+    elif event == CameraEvent.EXPOSURE_POST_PROCESSING:
+        command.info(
+            state="post_processing",
+            image_type=EXPOSURE_STATE[name].get("image_type", "NA"),
+        )
+        return
+    elif event == CameraEvent.EXPOSURE_POST_PROCESS_FAILED:
+        command.warning(
+            state="post_process_failed",
+            image_type=EXPOSURE_STATE[name].get("image_type", "NA"),
+            error=payload.get("error", "Error unknown"),
+        )
+        return
     else:
         return
 
@@ -98,6 +111,7 @@ async def expose_one_camera(
     image_type,
     stack,
     filename,
+    no_postprocess,
     **extra_kwargs,
 ):
     command.info(text=f"exposing camera {camera.name!r}")
@@ -107,6 +121,7 @@ async def expose_one_camera(
             image_type=image_type,
             stack=stack,
             filename=filename,
+            postprocess=not no_postprocess,
             write=True,
             **extra_kwargs,
         )
@@ -164,6 +179,11 @@ async def expose_one_camera(
     show_default=True,
     help="Number of images to stack.",
 )
+@click.option(
+    "--no-postprocess",
+    is_flag=True,
+    help="Skip the post-process step, if defined.",
+)
 async def expose(
     command,
     cameras,
@@ -171,6 +191,7 @@ async def expose(
     image_type,
     filename,
     stack,
+    no_postprocess,
     **exposure_kwargs,
 ):
     """Exposes and writes an image to disk."""
@@ -203,6 +224,7 @@ async def expose(
                     image_type,
                     stack,
                     filename,
+                    no_postprocess,
                     **exposure_kwargs,
                 )
             )
