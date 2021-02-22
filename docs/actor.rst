@@ -120,25 +120,6 @@ To add new commands to the actor command parser import the ``camera_parser`` and
 
 The new actor command always receives a CLU `~clu.command.Command` as the first argument and a list of connected cameras as the second argument. It's possible to access the actor instance as ``command.actor`` and the camera system as ``command.actor.camera_system``. For more details, refer to CLU's :ref:`parser documentation <clu:parser>`.
 
-Expanding ``expose``
-^^^^^^^^^^^^^^^^^^^^
-
-When calling `~.BaseCamera.expose` we can pass additional keyword arguments that are forwarded to ``_expose_internal``. The local implementation of ``_expose_internal`` can use those arguments to implement additional feature, for example post-processing of exposures.
-
-To allow the same behaviour in the ``expose`` actor command, one can add extra options to the command ::
-
-    import click
-    from basecam.actor.commands import expose
-
-     no_post_process = click.Option(
-            ["--no-postprocess"],
-            is_flag=True,
-            help="Skip post-processing.",
-        )
-    expose.params.append(no_post_process)
-
-It's now possible to pass ``--no-postprocess`` to ``expose``. The resulting keyword argument, ``no_postprocess`` will be passed when calling ``_expose_internal``.
-
 Schema
 ------
 
