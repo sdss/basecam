@@ -261,7 +261,7 @@ async def test_camera_exception_unknown():
     assert "UNKNOWN - " in ww[0].message.args[0]
 
 
-@pytest.mark.xfail(
+@pytest.mark.skipif(
     sys.version_info <= (3, 7),
     reason="Mocker fails with coroutines in PY<=37",
 )
