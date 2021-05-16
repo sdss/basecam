@@ -810,7 +810,11 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         exposure.stack = stack
         exposure.stack_function = stack_function
 
-        exposure.filename = str(filename or self.image_namer(self))
+        if exposure.filename is not None:
+            if filename:
+                exposure.filename = str(filename)
+        else:
+            exposure.filename = str(filename or self.image_namer(self))
 
         notif_payload = {
             "exptime_total": exposure.exptime_n,
