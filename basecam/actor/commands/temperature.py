@@ -10,7 +10,7 @@ import asyncio
 
 import click
 
-from clu.parser import CluCommand
+from clu.parsers.click import CluCommand
 
 from basecam.exceptions import CameraError
 

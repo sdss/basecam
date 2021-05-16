@@ -9,7 +9,7 @@
 import click
 
 from clu.legacy import LegacyActor
-from clu.parser import CluCommand
+from clu.parsers.click import CluCommand
 
 from basecam.exceptions import CameraError
 

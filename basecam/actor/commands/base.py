@@ -8,7 +8,7 @@
 
 import click
 
-from clu.parser import CluGroup, help_, ping
+from clu.parsers.click import CluGroup, help_, ping
 
 
 __all__ = ["camera_parser", "list_"]

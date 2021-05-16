@@ -187,13 +187,3 @@ async def test_log_file(tmp_path):
     # Remove the fh handler so that test_log_file_bad_path doesn't inherit it.
     camera_system.logger.handlers.remove(camera_system.logger.fh)
     camera_system.logger.fh = None
-
-
-async def test_log_file_bad_path():
-
-    log_file = "*InvalidPath*"
-
-    with pytest.warns(RuntimeWarning):
-        camera_system = CameraSystemTester(VirtualCamera, log_file=log_file)
-
-    assert camera_system.logger.fh is None

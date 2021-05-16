@@ -13,7 +13,7 @@ import os
 
 from typing import List, Optional, Union
 
-import clu.parser
+import clu.parsers.click
 from clu import BaseActor, JSONActor
 from clu.tools import ActorHandler
 from sdsstools.logger import SDSSLogger
@@ -49,7 +49,7 @@ class BaseCameraActor(BaseActor):
         default in most command.
     command_parser
         The list of commands to use. It must be a command group deriving from
-        `~clu.parser.CluGroup` containing all the commands to use. If
+        `~clu.parsers.click.CluGroup` containing all the commands to use. If
         ``commands=None``, uses the internal command set.
     schema
         The path to the JSONSchema file with the actor datamodel. If ``"internal"``,
@@ -63,7 +63,7 @@ class BaseCameraActor(BaseActor):
         camera_system: CameraSystem,
         *args,
         default_cameras: Union[List[str], str, None] = None,
-        command_parser: clu.parser.CluGroup = None,
+        command_parser: clu.parsers.click.CluGroup = None,
         schema: Optional[str] = "internal",
         **kwargs,
     ):
