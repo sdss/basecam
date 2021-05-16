@@ -4,6 +4,7 @@
 Changelog
 =========
 
+* :release:`0.5.0 <2021-05-16>`
 * :feature:`19` `.Extension` now accepts `compression_params` that are passed to ``CompImageHDU``.
 * :feature:`20` Allow to dynamically add extra HDUs to `.Exposure`.
 * :feature:`21` Allow to pass extra arguments to ``_expose_internal`` from the actor command.
@@ -11,6 +12,7 @@ Changelog
 * :feature:`22` Add optional post-process step during exposure.
 * :feature:`-` Add hook to invoke a post-process callback coroutine in the ``expose`` actor command.
 * :feature:`-` Add `.get_schema` to retrieve the actor schema as a dictionary.
+* :support:`-` Update CLU to ``^1.0.0``.
 
 * :release:`0.4.2 <2021-02-16>`
 * :feature:`16` Use JSONSchema validation for actor keyword datamodel. The datamodel of the actor has been updated. The schema should work for all CLU actors, including ``LegacyActor`` although in this case the keywords will be flattened into a list.
