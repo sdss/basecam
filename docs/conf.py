@@ -28,6 +28,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.mathjax",
     "sphinx.ext.intersphinx",
+    "sphinx_autodoc_typehints"
     "myst_parser",
     "sphinx-jsonschema",
     "sphinx_click",
@@ -103,6 +104,8 @@ todo_include_todos = False
 
 copybutton_prompt_text = r">>> |\$ "
 copybutton_prompt_is_regexp = True
+
+set_type_checking_flag = True
 
 # Intersphinx mappings
 intersphinx_mapping = {
