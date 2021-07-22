@@ -117,7 +117,7 @@ class CoolerMixIn(object, metaclass=abc.ABCMeta):
 
     _set_temperature_task = None
 
-    _notify: Callable
+    notify: Callable
 
     async def set_temperature(self, temperature):
         """Sets a new temperature goal for the camera.

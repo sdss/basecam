@@ -73,6 +73,8 @@ class BaseCameraActor(BaseActor):
         assert camera_system is not None
         self.camera_system = camera_system
 
+        assert self.camera_system.camera_class
+
         # Add actor to camera class context and all connected cameras.
         self.camera_system.camera_class.fits_model.context.update({"__actor__": self})
         for camera in self.camera_system.cameras:
@@ -128,6 +130,7 @@ class BaseCameraActor(BaseActor):
         """Adds commands and groups based on the mixins present."""
 
         camera_class = self.camera_system.camera_class
+        assert camera_class is not None
 
         for mixin in camera_class.__bases__:
             mixin_name = mixin.__name__

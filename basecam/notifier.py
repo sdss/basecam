@@ -204,6 +204,7 @@ class EventListener(asyncio.Queue):
         events = set(events) if isinstance(events, (list, tuple)) else set([events])
 
         async def _waiter():
+            assert self._event_waiter
             while not events.intersection(self.__events):
                 await self._event_waiter.wait()
                 # Clear the event waiter. If __last_event == event

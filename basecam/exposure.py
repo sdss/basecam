@@ -300,7 +300,8 @@ class ImageNamer(object):
         if len(match_files) == 0:
             return self._last_num + 1
 
-        values = [int(regex.search(file).group(1)) for file in match_files]
+        matches = [regex.search(file) for file in match_files]
+        values = [int(match.group(1)) for match in matches if match is not None]
         return max(values) + 1
 
     def __call__(

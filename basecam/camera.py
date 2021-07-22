@@ -132,6 +132,7 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
         if log_file:
             self.logger.start_file_logger(str(log_file))
             if self.logger.fh:
+                assert self.logger.fh.formatter
                 self.logger.fh.formatter.converter = time.gmtime
                 self.log(f"logging to {log_file}")
 
@@ -156,9 +157,10 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
                 self.log(f"read configuration file from {camera_config}")
 
         # If the config has a section named "cameras", prefer that.
-        if self._config:
+        if self._config is not None:
             if isinstance(self._config.get("cameras", None), dict):
                 self._config = self._config["cameras"]
+            assert self._config is not None
             uids = [self._config[camera]["uid"] for camera in self._config]
             if len(uids) != len(set(uids)):
                 raise ValueError("repeated UIDs in the configuration data.")
@@ -374,6 +376,7 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
 
         self.log(f"adding camera {name!r} with parameters {camera_params!r}")
 
+        assert self.camera_class
         camera = self.camera_class(
             uid, self, name=name, force=force, camera_params=camera_params
         )
