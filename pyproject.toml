@@ -45,11 +45,14 @@ codecov = ">=2.0.15"
 coverage = {version = ">=5.0", extras = ["toml"]}
 ipdb = ">=0.12.3"
 sphinx = ">=3.0.0"
-black = {version = "^20.8b1", allow-prereleases = true}
-asynctest = "^0.13.0"
+black = {version = ">=20.8b1", allow-prereleases = true}
+asynctest = ">=0.13.0"
 sphinx-autodoc-typehints = ">=1.11.1"
 sphinx-jsonschema = ">=1.16.7"
 sphinx-click = ">=2.5.0"
+sphinx-copybutton = ">=0.4.0"
+furo = ">=2021.7.5-beta.38"
+myst-parser = ">=0.15.1"
 
 [tool.black]
 line-length = 88
