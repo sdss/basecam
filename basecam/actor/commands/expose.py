@@ -237,7 +237,7 @@ async def expose(
     command.actor.listener.remove_callback(report_exposure_state_partial)
 
     if not all(results):
-        return command.failed("one or more cameras failed to expose.")
+        return command.fail("One or more cameras failed to expose.")
     else:
         for camera in cameras:
             # Reset cameras to idle
