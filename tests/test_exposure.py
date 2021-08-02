@@ -85,6 +85,8 @@ def test_image_namer(tmp_path):
 
 def test_image_namer_overwrite(tmp_path):
 
+    (tmp_path / "test_0001.fits").touch()
+
     image_namer = ImageNamer("test_{num:04d}.fits", dirname=tmp_path, overwrite=True)
 
     assert image_namer() == tmp_path / "test_0001.fits"
@@ -121,3 +123,20 @@ def test_image_namer_files_exist_fz(camera, tmp_path):
 
     assert image_namer(camera=camera) == tmp_path / "test_camera_0002.fits.fz"
     assert image_namer._last_num == 2
+
+
+def test_image_name_dirname_changes(camera, tmp_path):
+
+    image_namer = ImageNamer(
+        "{camera.name}_{num:04d}.fits.fz",
+        dirname=tmp_path,
+        overwrite=True,
+    )
+
+    image_namer._last_num = 5
+
+    assert image_namer(camera=camera) == tmp_path / "test_camera_0006.fits.fz"
+    assert image_namer._previous_dirname is not None
+
+    image_namer._previous_dirname = "/home/test"
+    assert image_namer(camera=camera) == tmp_path / "test_camera_0001.fits.fz"

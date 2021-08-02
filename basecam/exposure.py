@@ -235,6 +235,9 @@ class ImageNamer(object):
     camera
         A `.BaseCamera` instance. It can also be passed when calling the
         instance.
+    reset_sequence
+        Resets the sequence number when the directory changes (for example when
+        the MJD rolls over).
 
     Examples
     --------
@@ -251,6 +254,7 @@ class ImageNamer(object):
         dirname: str = ".",
         overwrite: bool = False,
         camera: Optional[basecam.camera.BaseCamera] = None,
+        reset_sequence: bool = True,
     ):
 
         assert re.match(r".+(\{num.+\}).+", basename), "invalid basename."
@@ -261,7 +265,11 @@ class ImageNamer(object):
         self.dirname: Union[pathlib.Path, str] = pathlib.Path(dirname)
         self.overwrite: bool = overwrite
 
-        self._last_num = 0
+        self._last_num: int = 0
+
+        self._previous_dirname: str | None = None
+        self._reset_sequence = reset_sequence
+
         self.camera = camera
 
     @property
@@ -280,9 +288,21 @@ class ImageNamer(object):
 
         date = astropy.time.Time.now()
 
-        return pathlib.Path(
-            eval(f'f"{self.dirname}"', {}, {"date": date, "camera": self.camera})
+        dirname = pathlib.Path(
+            eval(
+                f'f"{self.dirname}"',
+                {},
+                {"date": date, "camera": self.camera},
+            )
         )
+
+        if self._previous_dirname and self._previous_dirname != str(dirname):
+            if self._reset_sequence:
+                self._last_num = 0
+
+        self._previous_dirname = str(dirname)
+
+        return dirname
 
     def _get_num(self, basename: str) -> int:
         """Returns the counter value."""
@@ -317,8 +337,9 @@ class ImageNamer(object):
         else:
             expanded_basename = self.basename.format()
 
+        dirname = self.get_dirname()
         num = self._get_num(expanded_basename)
-        path = self.get_dirname() / expanded_basename.format(num=num)
+        path = dirname / expanded_basename.format(num=num)
 
         if update_num:
             self._last_num = num

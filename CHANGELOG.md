@@ -5,6 +5,7 @@
 ### ✨ Improved
 
 * Use `furo` and `myst-parser` for the documentation.
+* `ImageNamer`: allow to reset the sequence number when the directory changes.
 
 
 ## 0.5.0 - May 16, 2021
