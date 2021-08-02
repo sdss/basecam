@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.1 - Aug 2, 2021
+## 0.5.1 - August 2, 2021
 
 ### ✨ Improved
 
