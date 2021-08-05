@@ -19,6 +19,8 @@ from typing import Any, Dict, List, NamedTuple, Optional, Union, cast
 import astropy.io.fits
 import astropy.wcs
 
+from basecam import __version__
+
 from ..exceptions import CardError, CardWarning
 from ..exposure import Exposure
 
@@ -563,6 +565,12 @@ DEFAULT_CARDS: Dict[str, DefaultCard] = {
         "VCAM",
         value="{__camera__.__version__}",
         comment="Version of the camera library",
+        default="NA",
+    ),
+    "BASECAMV": DefaultCard(
+        "BASECAMV",
+        value=__version__,
+        comment="Basecam version",
         default="NA",
     ),
 }

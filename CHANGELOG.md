@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### ✨ Improved
+
+* Add `basecam` version to default header.
+
+
 ## 0.5.1 - August 2, 2021
 
 ### ✨ Improved

@@ -16,6 +16,7 @@ __all__ = ["basic_header_model", "basic_fits_model", "basic_fz_fits_model"]
 basic_header_model = HeaderModel(
     [
         "VCAM",
+        "BASECAMV",
         "CAMNAME",
         "CAMUID",
         "IMAGETYP",
