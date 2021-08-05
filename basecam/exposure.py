@@ -200,11 +200,13 @@ class Exposure(object):
         hdulist = self.to_hdu(context=context)
 
         dirname = os.path.realpath(os.path.dirname(filename))
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
+        os.makedirs(dirname, exist_ok=True)
 
         writeto_partial = functools.partial(
-            hdulist.writeto, filename, overwrite=overwrite, checksum=checksum
+            hdulist.writeto,
+            filename,
+            overwrite=overwrite,
+            checksum=checksum,
         )
 
         loop = asyncio.get_event_loop()
