@@ -1,10 +1,11 @@
 # Changelog
 
-## Next version
+## 0.5.2 - November 24, 2021
 
 ### ✨ Improved
 
 * Add `basecam` version to default header.
+* Prevent isse when multiple cameras try to create the same directory at once.
 
 
 ## 0.5.1 - August 2, 2021
