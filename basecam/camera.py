@@ -711,6 +711,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         stack_function: Callable[..., numpy.ndarray] = numpy.median,
         fits_model: Optional[FITSModel] = None,
         filename: Optional[str] = None,
+        num: Optional[int] = None,
         write: bool = False,
         postprocess: bool = True,
         **kwargs,
@@ -745,6 +746,9 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             The path where to write the image. If not given, a new name is
             automatically assigned based on the camera instance of
             `.ImageNamer`.
+        num
+            If specified, a ``num`` value to pass wot `.ImageNamer` to define
+            the sequence number of the exposure filename.
         write
             If `True`, writes the image to disk immediately.
         postprocess
@@ -817,7 +821,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             if filename:
                 exposure.filename = str(filename)
         else:
-            exposure.filename = str(filename or self.image_namer(self))
+            exposure.filename = str(filename or self.image_namer(self, num=num))
 
         notif_payload = {
             "exptime_total": exposure.exptime_n,

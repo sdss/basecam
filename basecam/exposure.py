@@ -330,6 +330,7 @@ class ImageNamer(object):
         self,
         camera: Optional[basecam.camera.BaseCamera] = None,
         update_num: bool = True,
+        num: Optional[int] = None
     ) -> pathlib.Path:
 
         camera = camera or self.camera
@@ -340,7 +341,7 @@ class ImageNamer(object):
             expanded_basename = self.basename.format()
 
         dirname = self.get_dirname()
-        num = self._get_num(expanded_basename)
+        num = num or self._get_num(expanded_basename)
         path = dirname / expanded_basename.format(num=num)
 
         if update_num:

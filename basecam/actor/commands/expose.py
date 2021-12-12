@@ -111,6 +111,7 @@ async def expose_one_camera(
     image_type,
     stack,
     filename,
+    num,
     no_postprocess,
     **extra_kwargs,
 ):
@@ -122,6 +123,7 @@ async def expose_one_camera(
             image_type=image_type,
             stack=stack,
             filename=filename,
+            num=num,
             postprocess=not no_postprocess,
             write=True,
             **extra_kwargs,
@@ -176,6 +178,13 @@ async def expose_one_camera(
     help="Filename of the imaga to save.",
 )
 @click.option(
+    "-n",
+    "--num",
+    type=int,
+    default=None,
+    help="Sequence number for this exposure filename.",
+)
+@click.option(
     "--stack",
     "-s",
     type=int,
@@ -194,6 +203,7 @@ async def expose(
     exptime,
     image_type,
     filename,
+    num,
     stack,
     no_postprocess,
     **exposure_kwargs,
@@ -228,6 +238,7 @@ async def expose(
                     image_type,
                     stack,
                     filename,
+                    num,
                     no_postprocess,
                     **exposure_kwargs,
                 )
