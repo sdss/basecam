@@ -193,6 +193,13 @@ async def expose_one_camera(
     help="Number of images to stack.",
 )
 @click.option(
+    "-c",
+    "--count",
+    type=int,
+    default=1,
+    help="Number of exposures to take.",
+)
+@click.option(
     "--no-postprocess",
     is_flag=True,
     help="Skip the post-process step, if defined.",
@@ -205,56 +212,59 @@ async def expose(
     filename,
     num,
     stack,
+    count,
     no_postprocess,
     **exposure_kwargs,
 ):
     """Exposes and writes an image to disk."""
 
-    cameras = get_cameras(command, cameras=cameras, fail_command=True)
-    if not cameras:  # pragma: no cover
-        return
+    for _ in range(count):
+        cameras = get_cameras(command, cameras=cameras, fail_command=True)
+        if not cameras:  # pragma: no cover
+            return
 
-    if image_type == "bias":
-        if exptime and exptime > 0:
-            command.warning("setting exposure time for bias to 0 seconds.")
-        exptime = 0.0
+        if image_type == "bias":
+            if exptime and exptime > 0:
+                command.warning("setting exposure time for bias to 0 seconds.")
+            exptime = 0.0
 
-    if filename and len(cameras) > 1:
-        return command.fail(
-            "--filename can only be used when exposing a single camera."
-        )
+        if filename and len(cameras) > 1:
+            return command.fail(
+                "--filename can only be used when exposing a single camera."
+            )
 
-    report_exposure_state_partial = partial(report_exposure_state, command)
+        report_exposure_state_partial = partial(report_exposure_state, command)
 
-    command.actor.listener.register_callback(report_exposure_state_partial)
-    jobs = []
-    for camera in cameras:
-        jobs.append(
-            asyncio.create_task(
-                expose_one_camera(
-                    command,
-                    camera,
-                    exptime,
-                    image_type,
-                    stack,
-                    filename,
-                    num,
-                    no_postprocess,
-                    **exposure_kwargs,
+        command.actor.listener.register_callback(report_exposure_state_partial)
+        jobs = []
+        for camera in cameras:
+            jobs.append(
+                asyncio.create_task(
+                    expose_one_camera(
+                        command,
+                        camera,
+                        exptime,
+                        image_type,
+                        stack,
+                        filename,
+                        num,
+                        no_postprocess,
+                        **exposure_kwargs,
+                    )
                 )
             )
-        )
-    results = await asyncio.gather(*jobs)
-    command.actor.listener.remove_callback(report_exposure_state_partial)
+        results = await asyncio.gather(*jobs)
+        command.actor.listener.remove_callback(report_exposure_state_partial)
 
-    if not all(results):
-        return command.fail("One or more cameras failed to expose.")
-    else:
-        for camera in cameras:
-            # Reset cameras to idle
-            report_exposure_state(
-                command,
-                CameraEvent.EXPOSURE_IDLE,
-                {"name": camera.name},
-            )
-        return command.finish()
+        if not all(results):
+            return command.fail("One or more cameras failed to expose.")
+        else:
+            for camera in cameras:
+                # Reset cameras to idle
+                report_exposure_state(
+                    command,
+                    CameraEvent.EXPOSURE_IDLE,
+                    {"name": camera.name},
+                )
+
+    return command.finish()
