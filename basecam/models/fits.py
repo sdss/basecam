@@ -224,9 +224,6 @@ class Extension(object):
         # the BITPIX keyword). Then append our header.
         hdu = HDUClass(data=data, header=None)
 
-        if data is not None:
-            hdu.scale(data.dtype.name)
-
         if self.header_model:
             hdu.header.extend(self.header_model.to_header(exposure, context=context))
 
