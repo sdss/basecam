@@ -206,6 +206,8 @@ class Exposure(object):
 
         loop = asyncio.get_event_loop()
 
+        filename = str(filename)
+
         if filename.endswith(".gz"):
 
             # Astropy compresses with gzip -9 which takes forever.
@@ -231,11 +233,11 @@ class Exposure(object):
             await loop.run_in_executor(None, writeto_partial)
 
         # Horrible hack to try to fix compressed headers.
-        update_hdu = fits.open(filename, mode='update')
+        update_hdu = fits.open(filename, mode="update")
         for ext in update_hdu:
             try:
-                ext.header.pop('BSCALE', None)
-                ext.header.pop('BZERO', None)
+                ext.header.pop("BSCALE", None)
+                ext.header.pop("BZERO", None)
             except Exception:
                 pass
         update_hdu.close()
@@ -358,7 +360,7 @@ class ImageNamer(object):
         self,
         camera: Optional[basecam.camera.BaseCamera] = None,
         update_num: bool = True,
-        num: Optional[int] = None
+        num: Optional[int] = None,
     ) -> pathlib.Path:
 
         camera = camera or self.camera
