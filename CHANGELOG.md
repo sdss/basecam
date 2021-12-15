@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.3 - December 14, 2021
+
+### 🚀 New
+
+* Added a `--count` flag to the `expose` command to issue a number of continous exposures.
+* It's now possible to pass a `-n` flag to `expose` to se the sequence number of the exposure. Useful when commanding multiple cameras that one wants to keep in sync.
+
+### 🔧 Fixed
+
+* Finally (?) fixed the problem of compressed headers not being read by some software like JS9. The solution is a bit of a hack that requires upading the file headers after writing them, but seems to work fine.
+
+
 ## 0.5.2 - November 24, 2021
 
 ### ✨ Improved
