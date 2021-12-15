@@ -9,7 +9,7 @@
 
 ### 🔧 Fixed
 
-* Finally (?) fixed the problem of compressed headers not being read by some software like JS9. The solution is a bit of a hack that requires upading the file headers after writing them, but seems to work fine.
+* Finally (?) fixed the problem of compressed headers not being read by some software like JS9. The solution is a bit of a hack that requires updating the file headers after writing them, but seems to work fine.
 
 
 ## 0.5.2 - November 24, 2021
