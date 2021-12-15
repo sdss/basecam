@@ -6,14 +6,19 @@
 # @Filename: utils.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
+from __future__ import annotations
+
 import asyncio
 import logging
+import os
+import pathlib
 from contextlib import suppress
+from subprocess import CalledProcessError
 
 from sdsstools.logger import SDSSLogger
 
 
-__all__ = ["LoggerMixIn", "Poller", "cancel_task"]
+__all__ = ["LoggerMixIn", "Poller", "cancel_task", "gzip_async", "subprocess_run_async"]
 
 
 class LoggerMixIn(object):
@@ -172,3 +177,57 @@ async def cancel_task(task):
         task.cancel()
         with suppress(asyncio.CancelledError):
             await task
+
+
+async def subprocess_run_async(*args, shell=False):
+    """Runs a command asynchronously.
+
+    If ``shell=True`` the command will be executed through the shell. In that case
+    the argument must be a single string with the full command. Otherwise, must receive
+    a list of program arguments. Returns the output of stdout.
+    """
+
+    if shell:
+        cmd = await asyncio.create_subprocess_shell(
+            args[0],
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        cmd_str = args[0]
+
+    else:
+        cmd = await asyncio.create_subprocess_exec(
+            *args,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        cmd_str = " ".join(args)
+
+    stdout, stderr = await cmd.communicate()
+    if cmd.returncode and cmd.returncode > 0:
+        raise CalledProcessError(
+            cmd.returncode,
+            cmd=cmd_str,
+            output=stdout,
+            stderr=stderr,
+        )
+
+    if stdout:
+        return stdout.decode()
+
+
+async def gzip_async(file: pathlib.Path | str, complevel=1):
+    """Compresses a file with gzip asynchronously."""
+
+    file = str(file)
+    if not os.path.exists(file):
+        raise FileNotFoundError(f"File not found: {file!r}")
+
+    try:
+        await subprocess_run_async(
+            "gzip",
+            "-" + str(complevel),
+            file,
+        )
+    except Exception as err:
+        raise OSError(f"Failed compressing file {file}: {err}")

@@ -26,6 +26,7 @@ import basecam.camera
 import basecam.models
 
 from .exceptions import ExposureError
+from .utils import gzip_async
 
 
 __all__ = ["Exposure", "ImageNamer"]
@@ -202,15 +203,31 @@ class Exposure(object):
         dirname = os.path.realpath(os.path.dirname(filename))
         os.makedirs(dirname, exist_ok=True)
 
-        writeto_partial = functools.partial(
-            hdulist.writeto,
-            filename,
-            overwrite=overwrite,
-            checksum=checksum,
-        )
-
         loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, writeto_partial)
+
+        if filename.endswith(".gz"):
+
+            # Astropy compresses with gzip -9 which takes forever.
+            # Instead we compress manually with -1, which is still pretty good.
+            writeto_partial = functools.partial(
+                hdulist.writeto,
+                filename,
+                overwrite=overwrite,
+                checksum=checksum,
+            )
+            await loop.run_in_executor(None, writeto_partial)
+            await gzip_async(filename[:-3], complevel=1)
+
+        else:
+
+            writeto_partial = functools.partial(
+                hdulist.writeto,
+                filename,
+                overwrite=overwrite,
+                checksum=checksum,
+            )
+
+            await loop.run_in_executor(None, writeto_partial)
 
         return hdulist
 
