@@ -17,6 +17,7 @@ import re
 from typing import Callable, List, Optional, Tuple, Union
 
 import astropy
+import astropy.io.fits as fits
 import astropy.time
 import astropy.wcs
 import numpy
@@ -228,6 +229,16 @@ class Exposure(object):
             )
 
             await loop.run_in_executor(None, writeto_partial)
+
+        # Horrible hack to try to fix compressed headers.
+        update_hdu = fits.open(filename, mode='update')
+        for ext in update_hdu:
+            try:
+                ext.header.pop('BSCALE', None)
+                ext.header.pop('BZERO', None)
+            except Exception:
+                pass
+        update_hdu.close()
 
         return hdulist
 

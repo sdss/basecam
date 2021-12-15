@@ -227,10 +227,6 @@ class Extension(object):
         if self.header_model:
             hdu.header.extend(self.header_model.to_header(exposure, context=context))
 
-        # Pop these keywords that mess with JS9. I hope they are not important ...
-        hdu.header.pop('BSCALE', None)
-        hdu.header.pop('BZERO', None)
-
         return hdu
 
     def get_data(
