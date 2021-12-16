@@ -236,8 +236,10 @@ class Exposure(object):
         update_hdu = fits.open(filename, mode="update")
         for ext in update_hdu:
             try:
-                ext.header.pop("BSCALE", None)
-                ext.header.pop("BZERO", None)
+                BSCALE = ext.header.pop("BSCALE", 1)
+                BZERO = ext.header.pop("BZERO", 2 ** 15)
+                ext.header["BSCALE"] = BSCALE
+                ext.header["BZERO"] = BZERO
             except Exception:
                 pass
         update_hdu.close()
