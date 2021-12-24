@@ -796,9 +796,9 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             self.notify(CameraEvent.EXPOSURE_INTEGRATING, notif_payload)
             try:
                 await self._expose_internal(exposure, **kwargs)
-            except ExposureError as e:
-                self.notify(CameraEvent.EXPOSURE_FAILED, {"error": str(e)})
-                raise
+            except Exception as err:
+                self.notify(CameraEvent.EXPOSURE_FAILED, {"error": str(err)})
+                raise ExposureError(str(err))
 
             if exposure.data is None:
                 error = "data was not taken."
