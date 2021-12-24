@@ -11,6 +11,8 @@ from functools import partial
 
 import click
 
+from clu.parsers.click import unique
+
 from basecam.events import CameraEvent
 from basecam.exceptions import ExposureError
 
@@ -204,6 +206,7 @@ async def expose_one_camera(
     is_flag=True,
     help="Skip the post-process step, if defined.",
 )
+@unique()
 async def expose(
     command,
     cameras,
