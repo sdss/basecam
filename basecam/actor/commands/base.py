@@ -24,8 +24,13 @@ camera_parser.add_command(ping)
 
 
 @camera_parser.command(name="list")
-async def list_(command):
+@click.option("--available", is_flag=True, help="Lists available cameras.")
+async def list_(command, available):
     """Lists cameras connected to the camera system."""
 
-    cameras = [camera.name for camera in command.actor.camera_system.cameras]
-    command.finish(cameras=cameras, default_cameras=command.actor.default_cameras)
+    if available is False:
+        cameras = [camera.name for camera in command.actor.camera_system.cameras]
+        command.finish(cameras=cameras, default_cameras=command.actor.default_cameras)
+    else:
+        cameras = command.actor.camera_system.list_available_cameras()
+        command.finish(cameras=cameras)
