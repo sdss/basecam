@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.4 - January 7, 2022
+
+### 🚀 New
+
+* Allow to list available cameras.
+* Make expose command unique.
+
+### 🔧 Fixed
+
+* Really (I hope) fixed the issue with compressed headers.
+
+
 ## 0.5.3 - December 14, 2021
 
 ### 🚀 New
