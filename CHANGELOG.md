@@ -1,5 +1,13 @@
 # Changelog
 
+## Next version
+
+### 🔧 Fixed
+
+* Prevent a problem in which if an exposure fails with an uncaught error the listener callback was not removed, which would cause duplicate messages being output in successive exposures.
+* Try and except when saving exposures to disk.
+
+
 ## 0.5.4 - January 7, 2022
 
 ### 🚀 New

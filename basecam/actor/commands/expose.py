@@ -256,8 +256,14 @@ async def expose(
                     )
                 )
             )
-        results = await asyncio.gather(*jobs)
-        command.actor.listener.remove_callback(report_exposure_state_partial)
+
+        try:
+            results = await asyncio.gather(*jobs)
+        except Exception as err:
+            command.error(err)
+            results = (False,)
+        finally:
+            command.actor.listener.remove_callback(report_exposure_state_partial)
 
         if not all(results):
             return command.fail("One or more cameras failed to expose.")

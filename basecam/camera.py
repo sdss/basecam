@@ -840,7 +840,12 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         if write:
             filename = os.path.realpath(str(exposure.filename))
             self.notify(CameraEvent.EXPOSURE_WRITING, {"filename": filename})
-            await exposure.write()
+
+            try:
+                await exposure.write()
+            except Exception as err:
+                raise ExposureError(f"Failed writing image to disk: {err}")
+
             self.notify(CameraEvent.EXPOSURE_WRITTEN, {"filename": filename})
 
         return exposure
