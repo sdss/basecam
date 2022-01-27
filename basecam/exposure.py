@@ -13,6 +13,7 @@ import functools
 import os
 import pathlib
 import re
+import warnings
 
 from typing import Callable, List, Optional, Tuple, Union
 
@@ -25,6 +26,7 @@ from astropy.io.fits import BinTableHDU, HDUList, ImageHDU
 
 import basecam.camera
 import basecam.models
+from basecam.exceptions import ExposureError, ExposureWarning
 
 from .exceptions import ExposureError
 from .utils import gzip_async
@@ -172,6 +174,7 @@ class Exposure(object):
         context={},
         overwrite=False,
         checksum=True,
+        retry=True,
     ) -> HDUList:
         """Writes the image to disk.
 
@@ -187,6 +190,10 @@ class Exposure(object):
         checksum
             When `True` adds both ``DATASUM`` and ``CHECKSUM`` cards to the
             headers of all HDUs written to the file.
+        retry
+            If `True` and the image fails to write, tries again. This can be
+            useful when writing to network volumen where failures are more
+            frequent.
 
         Returns
         -------
@@ -208,29 +215,42 @@ class Exposure(object):
 
         filename = str(filename)
 
-        if filename.endswith(".gz"):
+        for ntry in range(2):
+            try:
+                if filename.endswith(".gz"):
 
-            # Astropy compresses with gzip -9 which takes forever.
-            # Instead we compress manually with -1, which is still pretty good.
-            writeto_partial = functools.partial(
-                hdulist.writeto,
-                filename,
-                overwrite=overwrite,
-                checksum=checksum,
-            )
-            await loop.run_in_executor(None, writeto_partial)
-            await gzip_async(filename[:-3], complevel=1)
+                    # Astropy compresses with gzip -9 which takes forever.
+                    # Instead we compress manually with -1, which is still pretty good.
+                    writeto_partial = functools.partial(
+                        hdulist.writeto,
+                        filename,
+                        overwrite=overwrite,
+                        checksum=checksum,
+                    )
+                    await loop.run_in_executor(None, writeto_partial)
+                    await gzip_async(filename[:-3], complevel=1)
 
-        else:
+                else:
 
-            writeto_partial = functools.partial(
-                hdulist.writeto,
-                filename,
-                overwrite=overwrite,
-                checksum=checksum,
-            )
+                    writeto_partial = functools.partial(
+                        hdulist.writeto,
+                        filename,
+                        overwrite=overwrite,
+                        checksum=checksum,
+                    )
 
-            await loop.run_in_executor(None, writeto_partial)
+                    await loop.run_in_executor(None, writeto_partial)
+
+                break
+
+            except Exception as err:
+                if ntry == 0 and retry is True:
+                    warnings.warn(
+                        f"Retrying after exposure writing failed with error: {err}"
+                    )
+                    continue
+                else:
+                    raise ExposureError(f"Failed writing exposure to disk: {err}")
 
         # Horrible hack to try to fix compressed headers.
         update_hdu = fits.open(filename, mode="update")
