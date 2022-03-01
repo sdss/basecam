@@ -263,6 +263,13 @@ async def expose(
             command.error(err)
             results = (False,)
         finally:
+            # Wait a bit to allow leftover messages sent by the notifier to be output.
+            # TODO: this can be improved by checking EXPOSURE_STATE and confirming that
+            # all EXPOSURE_WRITTEN has been output for all the cameras (assuming no
+            # failures).
+            await asyncio.sleep(0.5)
+
+            # Remove the listener.
             command.actor.listener.remove_callback(report_exposure_state_partial)
 
         if not all(results):
