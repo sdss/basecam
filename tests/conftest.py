@@ -112,7 +112,7 @@ class VirtualCamera(
         xx = numpy.arange(-5, 5, 0.1)
         yy = numpy.arange(-5, 5, 0.1)
         xg, yg = numpy.meshgrid(xx, yy, sparse=True)
-        tile = numpy.sin(xg ** 2 + yg ** 2) / (xg ** 2 + yg ** 2)
+        tile = numpy.sin(xg**2 + yg**2) / (xg**2 + yg**2)
 
         # Repeats the tile to match the size of the image.
         data = numpy.tile(

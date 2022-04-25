@@ -24,11 +24,12 @@ import astropy.wcs
 import numpy
 from astropy.io.fits import BinTableHDU, HDUList, ImageHDU
 
+from sdsstools.time import get_sjd
+
 import basecam.camera
 import basecam.models
-from basecam.exceptions import ExposureError, ExposureWarning
+from basecam.exceptions import ExposureError
 
-from .exceptions import ExposureError
 from .utils import gzip_async
 
 
@@ -257,7 +258,7 @@ class Exposure(object):
         for ext in update_hdu:
             try:
                 BSCALE = ext.header.pop("BSCALE", 1)
-                BZERO = ext.header.pop("BZERO", 2 ** 15)
+                BZERO = ext.header.pop("BZERO", 2**15)
                 ext.header["BSCALE"] = BSCALE
                 ext.header["BZERO"] = BZERO
             except Exception:
@@ -341,12 +342,13 @@ class ImageNamer(object):
         """Returns the evaluated dirname."""
 
         date = astropy.time.Time.now()
+        sjd = get_sjd(raise_error=False)
 
         dirname = pathlib.Path(
             eval(
                 f'f"{self.dirname}"',
                 {},
-                {"date": date, "camera": self.camera},
+                {"date": date, "camera": self.camera, "sjd": sjd},
             )
         )
 

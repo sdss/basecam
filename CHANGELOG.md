@@ -2,6 +2,10 @@
 
 ## Next version
 
+### 🚀 New
+
+* [#26](https://github.com/sdss/basecam/issues/26) The `dirname` in an `ImageNamer` now accepts the `{sjd}` placeholder which will be filled out with the SDSS-style MJD (as returned by sdsstools `get_sjd()`).
+
 ### 🔧 Fixed
 
 * Prevent a problem in which if an exposure fails with an uncaught error the listener callback was not removed, which would cause duplicate messages being output in successive exposures.

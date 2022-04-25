@@ -65,7 +65,7 @@ class FITSModel(list):
 
     def __init__(
         self,
-        extensions: List[Extension] = None,
+        extensions: Optional[List[Extension]] = None,
         context: Dict[str, Any] = {},
     ):
 
@@ -150,7 +150,7 @@ class Extension(object):
     def __init__(
         self,
         data: Union[Literal["raw"], Literal["none"], None, bool, numpy.ndarray] = None,
-        header_model: HeaderModel = None,
+        header_model: Optional[HeaderModel] = None,
         name: Optional[str] = None,
         compressed: Union[bool, str] = False,
         compression_params: dict[str, Any] = {},
