@@ -25,10 +25,15 @@ async def status(command, cameras):
         return
 
     for camera in cameras:
-        status = {
-            "camera": camera.name,
-            **camera.get_status(update=True),
-        }
-        command.info(status=status)
+        status = camera.get_status(update=True)
+        if status is None:
+            return command.fail(
+                {
+                    "camera": camera.name,
+                    "error": "Camera did not respond to status request.",
+                }
+            )
+
+        command.info(status={"camera": camera.name, **status})
 
     command.finish()

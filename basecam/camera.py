@@ -685,7 +685,11 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         """
 
         if update or not self._status:
-            self._status = self._status_internal()
+            try:
+                self._status = self._status_internal()
+            except Exception as err:
+                self.log(f"Failed to receive status: {err}", WARNING)
+                self._status = {}
 
         return self._status
 
