@@ -26,9 +26,8 @@ from astropy.io.fits import BinTableHDU, HDUList, ImageHDU
 
 import basecam.camera
 import basecam.models
-from basecam.exceptions import ExposureError, ExposureWarning
+from basecam.exceptions import ExposureError
 
-from .exceptions import ExposureError
 from .utils import gzip_async
 
 
@@ -257,7 +256,7 @@ class Exposure(object):
         for ext in update_hdu:
             try:
                 BSCALE = ext.header.pop("BSCALE", 1)
-                BZERO = ext.header.pop("BZERO", 2 ** 15)
+                BZERO = ext.header.pop("BZERO", 2**15)
                 ext.header["BSCALE"] = BSCALE
                 ext.header["BZERO"] = BZERO
             except Exception:
