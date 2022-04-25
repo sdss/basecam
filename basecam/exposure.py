@@ -24,6 +24,8 @@ import astropy.wcs
 import numpy
 from astropy.io.fits import BinTableHDU, HDUList, ImageHDU
 
+from sdsstools.time import get_sjd
+
 import basecam.camera
 import basecam.models
 from basecam.exceptions import ExposureError
@@ -340,12 +342,13 @@ class ImageNamer(object):
         """Returns the evaluated dirname."""
 
         date = astropy.time.Time.now()
+        sjd = get_sjd(raise_error=False)
 
         dirname = pathlib.Path(
             eval(
                 f'f"{self.dirname}"',
                 {},
-                {"date": date, "camera": self.camera},
+                {"date": date, "camera": self.camera, "sjd": sjd},
             )
         )
 

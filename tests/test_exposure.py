@@ -10,6 +10,8 @@ import pytest
 from astropy.io.fits import BinTableHDU
 from astropy.table import Table
 
+from sdsstools.time import get_sjd
+
 from basecam.exceptions import ExposureError
 from basecam.exposure import ImageNamer
 
@@ -80,6 +82,17 @@ def test_image_namer(tmp_path):
     image_namer = ImageNamer("test_{num:04d}.fits", dirname=tmp_path)
 
     assert image_namer() == tmp_path / "test_0001.fits"
+    assert image_namer._last_num == 1
+
+
+def test_image_namer_sjd(tmp_path, monkeypatch):
+
+    monkeypatch.setenv("OBSERVATORY", "APO")
+
+    image_namer = ImageNamer("test_{num:04d}.fits", dirname=str(tmp_path) + "/{sjd}")
+    sjd = get_sjd("APO")
+
+    assert image_namer() == tmp_path / f"{sjd}/test_0001.fits"
     assert image_namer._last_num == 1
 
 
