@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.2 - June 4, 2022
+
+### ✨ New
+
+* Adjust dependencies to support Python 3.10
+
+
 ## 0.6.1 - June 4, 2022
 
 ### ✨ Improved
