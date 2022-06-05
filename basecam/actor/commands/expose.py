@@ -6,8 +6,12 @@
 # @Filename: expose.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
+from __future__ import annotations
+
 import asyncio
 from functools import partial
+
+from typing import TYPE_CHECKING
 
 import click
 
@@ -20,13 +24,17 @@ from ..tools import get_cameras
 from .base import camera_parser
 
 
+if TYPE_CHECKING:
+    from basecam import BaseCamera
+    from basecam.actor import BasecamCommand
+
 __all__ = ["expose"]
 
 
 EXPOSURE_STATE = {}
 
 
-def report_exposure_state(command, event, payload):
+def report_exposure_state(command: BasecamCommand, event, payload):
     global EXPOSURE_STATE
 
     if event not in CameraEvent:
@@ -141,7 +149,7 @@ async def expose_one_camera(
 
 @camera_parser.command()
 @click.argument("CAMERAS", nargs=-1, type=str, required=False)
-@click.argument("EXPTIME", type=float, required=True)
+@click.argument("EXPTIME", type=float, required=False)
 @click.option(
     "--object",
     "image_type",
@@ -208,15 +216,15 @@ async def expose_one_camera(
 )
 @unique()
 async def expose(
-    command,
-    cameras,
-    exptime,
-    image_type,
-    filename,
-    num,
-    stack,
-    count,
-    no_postprocess,
+    command: BasecamCommand,
+    cameras: list[BaseCamera],
+    exptime: float | None = None,
+    image_type: str = "object",
+    filename: str | None = None,
+    num: int | None = None,
+    stack: int | None = None,
+    count: int = 1,
+    no_postprocess: bool = False,
     **exposure_kwargs,
 ):
     """Exposes and writes an image to disk."""
@@ -228,8 +236,11 @@ async def expose(
 
         if image_type == "bias":
             if exptime and exptime > 0:
-                command.warning("setting exposure time for bias to 0 seconds.")
+                command.warning("Setting exposure time for bias to 0 seconds.")
             exptime = 0.0
+
+        if exptime is None:
+            return command.fail("Exposure time not provided.")
 
         if filename and len(cameras) > 1:
             return command.fail("--filename can only be used with a single camera.")

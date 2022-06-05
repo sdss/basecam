@@ -14,7 +14,7 @@ import os
 from typing import List, Optional, Union
 
 import clu.parsers.click
-from clu import BaseActor, JSONActor
+from clu import BaseActor, Command, JSONActor
 from clu.tools import ActorHandler
 from sdsstools.logger import SDSSLogger
 
@@ -24,7 +24,7 @@ from basecam.exceptions import CameraWarning
 from . import commands
 
 
-__all__ = ["BaseCameraActor", "CameraActor"]
+__all__ = ["BaseCameraActor", "CameraActor", "BasecamCommand"]
 
 
 class BaseCameraActor(BaseActor):
@@ -63,7 +63,7 @@ class BaseCameraActor(BaseActor):
         camera_system: CameraSystem,
         *args,
         default_cameras: Union[List[str], str, None] = None,
-        command_parser: clu.parsers.click.CluGroup = None,
+        command_parser: clu.parsers.click.CluGroup | None = None,
         schema: Optional[str] = "internal",
         **kwargs,
     ):
@@ -176,3 +176,6 @@ class CameraActor(BaseCameraActor, JSONActor):
     """A camera actor that replies with JSONs using `~clu.actor.JSONActor`."""
 
     pass
+
+
+BasecamCommand = Command[BaseCameraActor]
