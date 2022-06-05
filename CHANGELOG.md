@@ -1,6 +1,6 @@
 # Changelog
 
-## Next version
+## 0.6.0 - June 4, 2022
 
 ### 🚀 New
 
@@ -11,6 +11,7 @@
 * Prevent a problem in which if an exposure fails with an uncaught error the listener callback was not removed, which would cause duplicate messages being output in successive exposures.
 * Try and except when saving exposures to disk.
 * Fix case in actor when camera fails to return status.
+* Issues with zero seconds exposure time.
 
 
 ## 0.5.4 - January 7, 2022
