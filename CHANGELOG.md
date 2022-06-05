@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### ✨ Improved
+
+* Support defining a card in `HeaderModel` with a list `(name, value, [comment])`, e.g., `header_model.append(("BIASFILE", "/data/bias.fits"))`.
+
+
 ## 0.6.0 - June 4, 2022
 
 ### 🚀 New

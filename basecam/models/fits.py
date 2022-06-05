@@ -43,7 +43,7 @@ ImageHDUType = Union[
     astropy.io.fits.CompImageHDU,
     astropy.io.fits.PrimaryHDU,
 ]
-_CardTypes = Union[Card, CardGroup, MacroCard, str, None]
+_CardTypes = Union[Card, CardGroup, MacroCard, str, tuple, list, None]
 T = TypeVar("T", bound="FITSModel")
 
 
@@ -288,6 +288,9 @@ class HeaderModel(list):
             if input_card not in DEFAULT_CARDS:
                 raise CardError(f"{input_card} is not a default card.")
             return Card(input_card.upper())
+        elif isinstance(input_card, (tuple, list)):
+            name, value, *other = input_card
+            return Card(name, value=value, comment=other[0] if other else "")
         elif input_card is None:
             return None
         else:
@@ -325,10 +328,12 @@ class HeaderModel(list):
 
         for card in self:
 
-            if isinstance(card, Card):
-                header.append(card.evaluate(exposure, context=context))
-            elif isinstance(card, (CardGroup, MacroCard)):
-                header += card.to_header(exposure, context=context)
+            processed_card = self._process_input(card)
+            if processed_card is not None:
+                if isinstance(processed_card, Card):
+                    header.append(processed_card.evaluate(exposure, context=context))
+                elif isinstance(processed_card, (CardGroup, MacroCard)):
+                    header += processed_card.to_header(exposure, context=context)
 
         return header
 
@@ -345,6 +350,6 @@ class HeaderModel(list):
             elif isinstance(card, MacroCard):
                 rows.append(("### MACRO", card.__class__.__name__, ""))
             else:
-                raise CardError(f"invalid card {card}. This should not have happened.")
+                raise CardError(f"Invalid card {card}. This should not have happened.")
 
         return astropy.table.Table(rows=rows, names=["name", "value", "comment"])

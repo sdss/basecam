@@ -370,6 +370,14 @@ def test_header_model_None(exposure):
     assert len(header) == 2
 
 
+def test_header_model_tuple(exposure):
+    header_model = HeaderModel([Card("KEY1", 1), ("KEY2", 2)])
+    header = header_model.to_header(exposure)
+
+    assert len(header) == 2
+    assert header["KEY2"] == 2
+
+
 def test_header_bad_default_card(exposure):
     with pytest.raises(CardError) as err:
         HeaderModel([Card("KEY1", 1), "BADCARD"])
