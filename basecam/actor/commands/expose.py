@@ -232,9 +232,7 @@ async def expose(
             exptime = 0.0
 
         if filename and len(cameras) > 1:
-            return command.fail(
-                "--filename can only be used when exposing a single camera."
-            )
+            return command.fail("--filename can only be used with a single camera.")
 
         report_exposure_state_partial = partial(report_exposure_state, command)
 

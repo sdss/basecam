@@ -304,9 +304,7 @@ async def test_expose_filename_fails(actor, tmp_path):
     )
 
     assert command.status.did_fail
-    assert (
-        "-filename can only be used when exposing a single camera" in actor.mock_replies
-    )
+    assert "--filename can only be used with a single camera." in actor.mock_replies
 
 
 @pytest.mark.skipif(
