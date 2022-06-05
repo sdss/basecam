@@ -6,6 +6,10 @@
 
 * Adjust dependencies to support Python 3.10
 
+### 🔧 Fixed
+
+* Force `sdsstools>=0.5.2` to fix the calculation of SJD.
+
 
 ## 0.6.1 - June 4, 2022
 
