@@ -148,7 +148,7 @@ async def expose_one_camera(
 
 
 @camera_parser.command()
-@click.argument("CAMERAS", nargs=-1, type=str, required=False)
+@click.argument("CAMERA_NAMES", nargs=-1, type=str, required=False)
 @click.argument("EXPTIME", type=float, required=False)
 @click.option(
     "--object",
@@ -217,7 +217,7 @@ async def expose_one_camera(
 @unique()
 async def expose(
     command: BasecamCommand,
-    cameras: list[BaseCamera],
+    camera_names: list[str],
     exptime: float | None = None,
     image_type: str = "object",
     filename: str | None = None,
@@ -229,8 +229,11 @@ async def expose(
 ):
     """Exposes and writes an image to disk."""
 
-    for _ in range(count):
-        cameras = get_cameras(command, cameras=cameras, fail_command=True)
+    for nexp in range(1, count + 1):
+        if count > 1:
+            command.info(f"Taking exposure {nexp} of {count}")
+
+        cameras = get_cameras(command, cameras=camera_names, fail_command=True)
         if not cameras:  # pragma: no cover
             return
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### 🔧 Fixed
+
+* Fix the use of `--count` with the `expose` command.
+
+
 ## 0.6.2 - June 4, 2022
 
 ### ✨ New
