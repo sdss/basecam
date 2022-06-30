@@ -5,6 +5,7 @@
 ### 🔧 Fixed
 
 * Fix the use of `--count` with the `expose` command.
+* [#28](https://github.com/sdss/basecam/issues/28) Deal with `numpy.asscalar` being deprecated in `numpy` 1.23. Restricted `numpy<1.22.0` to prevent `astropy` 4 running along with `numpy` 1.23.
 
 
 ## 0.6.2 - June 4, 2022
