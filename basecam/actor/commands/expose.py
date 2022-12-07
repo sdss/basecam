@@ -25,7 +25,6 @@ from .base import camera_parser
 
 
 if TYPE_CHECKING:
-    from basecam import BaseCamera
     from basecam.actor import BasecamCommand
 
 __all__ = ["expose"]
