@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.0 - December 22, 2022
+
+### 💥 Breaking changes
+
+* Dropped Python 3.7 to allow newer versions of `numpy` and `scipy`. `numpy` is not explicitely in the requirements and is installed by `astropy` (see [#31](https://github.com/sdss/basecam/issues/31)).
+
+### ✨ Improved
+
+* Compress gzipped FITS file in temporary directory before moving it to the final location.
+
+
 ## 0.6.3 - June 29, 2022
 
 ### 🔧 Fixed
