@@ -24,10 +24,7 @@ include = ["basecam/actor/schema.json"]
 
 [tool.poetry.dependencies]
 python = "^3.8,<4.0"
-astropy = [
-    {version = "^4.2", python = ">=3.7,<3.10"},
-    {version = "^5.0", python = ">=3.10"}
-]
+astropy = "^5.2"
 sdss-clu = "^1.6.0"
 sdsstools = ">=0.5.2"
 typing-extensions = {version = "^3.7.4", python = "<=3.7"}
@@ -75,6 +72,7 @@ lines_after_imports = 2
 
 [tool.pytest.ini_options]
 addopts = "--cov basecam --cov-report xml --cov-report html --cov-report term"
+asyncio_mode = "auto"
 
 [tool.coverage.run]
 branch = true
