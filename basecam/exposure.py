@@ -13,6 +13,8 @@ import functools
 import os
 import pathlib
 import re
+import shutil
+import tempfile
 import warnings
 
 from typing import Callable, List, Optional, Tuple, Union
@@ -220,16 +222,22 @@ class Exposure(object):
             try:
                 if filename.endswith(".gz"):
 
+                    # We compress in a local temporary file, which is faster when we are
+                    # going to save a file across the network.
+                    tmp_name = tempfile.NamedTemporaryFile(suffix=".gz").name
+
                     # Astropy compresses with gzip -9 which takes forever.
                     # Instead we compress manually with -1, which is still pretty good.
                     writeto_partial = functools.partial(
                         hdulist.writeto,
-                        filename,
+                        tmp_name[:-3],
                         overwrite=overwrite,
                         checksum=checksum,
                     )
                     await loop.run_in_executor(None, writeto_partial)
-                    await gzip_async(filename[:-3], complevel=1)
+                    await gzip_async(tmp_name[:-3], complevel=1)
+
+                    shutil.move(tmp_name, filename)
 
                 else:
 
