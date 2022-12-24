@@ -267,7 +267,6 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
 
         try:
             uids = self.list_available_cameras()
-            self.log(f"List cameras returned: {uids}", logging.DEBUG)
         except NotImplementedError:
             self.log(
                 "get_connected cameras is not implemented. Stopping camera poller.",
