@@ -8,7 +8,7 @@
 
 import click
 
-from clu.parsers.click import CluGroup, help_, ping
+from clu.parsers.click import CluGroup, get_command_model, help_, ping
 
 
 __all__ = ["camera_parser", "list_"]
@@ -21,6 +21,7 @@ def camera_parser():
 
 camera_parser.add_command(help_)
 camera_parser.add_command(ping)
+camera_parser.add_command(get_command_model)
 
 
 @camera_parser.command(name="list")

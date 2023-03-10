@@ -25,7 +25,7 @@ include = ["basecam/actor/schema.json"]
 [tool.poetry.dependencies]
 python = "^3.8,<4.0"
 astropy = "^5.2"
-sdss-clu = ">=2.0.0b1"
+sdss-clu = ">=2.0.0b2"
 sdsstools = ">=0.5.2"
 
 [tool.poetry.dev-dependencies]

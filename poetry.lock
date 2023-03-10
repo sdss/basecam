@@ -2040,14 +2040,14 @@ docutils = ">=0.11,<1.0"
 
 [[package]]
 name = "sdss-clu"
-version = "2.0.0b1"
+version = "2.0.0b2"
 description = "A new protocol for SDSS actors."
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "sdss_clu-2.0.0b1-py3-none-any.whl", hash = "sha256:e0507da2563b0671cacafea9dcbd5c2e1b3f8fbf95e81a2946f2590a9f645a7e"},
-    {file = "sdss_clu-2.0.0b1.tar.gz", hash = "sha256:b469346e3b76304160ac0f109ba2c3c49506f96168c85cb87303edc0bc3721f8"},
+    {file = "sdss_clu-2.0.0b2-py3-none-any.whl", hash = "sha256:00f75b42b9be53ce21dd9f4492df38dedb9d6d030fa4d7092dc5936ad84a072d"},
+    {file = "sdss_clu-2.0.0b2.tar.gz", hash = "sha256:ae0b11ed160fcf03606f378ad370a7036b6b17b8f71f75949bce3373afe487fb"},
 ]
 
 [package.dependencies]
@@ -2578,4 +2578,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8,<4.0"
-content-hash = "69fd56e7b2bba1a76f62f6388a2ece454929524e10dd917389f3eb25902db0ba"
+content-hash = "a9e86fcf6d43e5094104e09b29f8464aa4761ed5571edb6a6763245b41e78781"
