@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.1 - March 10, 2023
+
+### ✨ Improved
+
+* Updated to using `sdss-clu 2.0.0`.
+
+
 ## 0.7.1b1 - March 10, 2023
 
 ### ✨ Improved
