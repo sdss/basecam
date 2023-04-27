@@ -5,6 +5,7 @@
 ### ✨ Improved
 
 * Improved overwritting of `BSCALE` and `BZERO` for compressed headers.
+* Cast data to `float32` before stacking multiple exposures.
 
 
 ## 0.7.1 - March 10, 2023

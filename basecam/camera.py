@@ -812,7 +812,11 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
             exposures.append(exposure)
 
         if len(exposures) > 1:
-            data = [cast(numpy.ndarray, exp.data) for exp in exposures]
+            data = [
+                exp.data.astype(numpy.float32)
+                for exp in exposures
+                if exp.data is not None
+            ]
             stacked_data = stack_function(numpy.stack(data), axis=0)
             exposures[0].data = stacked_data
 
