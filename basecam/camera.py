@@ -790,8 +790,7 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         }
 
         for idx in range(stack):
-
-            notif_payload.update({"n_stack": idx + 1})
+            notif_payload.update({"current_stack": idx + 1})
 
             exposure = Exposure(self, fits_model=fits_model)
             exposure.image_type = image_type
@@ -834,7 +833,8 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         notif_payload = {
             "exptime_total": exposure.exptime_n,
             "image_type": image_type,
-            "stack": stack,
+            "current_stack": 0,
+            "n_stack": 0,
         }
         self.notify(CameraEvent.EXPOSURE_DONE, notif_payload)
 
