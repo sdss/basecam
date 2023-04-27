@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### ✨ Improved
+
+* Improved overwritting of `BSCALE` and `BZERO` for compressed headers.
+
+
 ## 0.7.1 - March 10, 2023
 
 ### ✨ Improved

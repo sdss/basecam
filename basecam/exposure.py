@@ -87,7 +87,6 @@ class Exposure(object):
         fits_model: Optional[basecam.models.FITSModel] = None,
         wcs: Optional[astropy.wcs.WCS] = None,
     ):
-
         self.camera = camera
         self.data = data
         self.fits_model = fits_model.copy() if fits_model else None
@@ -117,7 +116,6 @@ class Exposure(object):
 
     @obstime.setter
     def obstime(self, value: astropy.time.Time):
-
         if isinstance(value, astropy.time.Time):
             self._obstime = value
         elif isinstance(value, str):
@@ -221,7 +219,6 @@ class Exposure(object):
         for ntry in range(2):
             try:
                 if filename.endswith(".gz"):
-
                     # We compress in a local temporary file, which is faster when we are
                     # going to save a file across the network.
                     tmp_name = tempfile.NamedTemporaryFile(suffix=".gz").name
@@ -240,7 +237,6 @@ class Exposure(object):
                     shutil.move(tmp_name, filename)
 
                 else:
-
                     writeto_partial = functools.partial(
                         hdulist.writeto,
                         filename,
@@ -265,11 +261,13 @@ class Exposure(object):
         update_hdu = fits.open(filename, mode="update")
         for ext in update_hdu:
             try:
-                BSCALE = ext.header.pop("BSCALE", 1)
-                BZERO = ext.header.pop("BZERO", 2**15)
-                ext.header["BSCALE"] = BSCALE
-                ext.header["BZERO"] = BZERO
+                if "BSCALE" in ext.header:
+                    BSCALE = ext.header.pop("BSCALE", 1)
+                    BZERO = ext.header.pop("BZERO", 2**15)
+                    ext.header["BSCALE"] = BSCALE
+                    ext.header["BZERO"] = BZERO
             except Exception:
+                raise
                 pass
         update_hdu.close()
 
@@ -319,7 +317,6 @@ class ImageNamer(object):
         camera: Optional[basecam.camera.BaseCamera] = None,
         reset_sequence: bool = True,
     ):
-
         assert re.match(r".+(\{num.+\}).+", basename), "invalid basename."
 
         self._basename: str
@@ -394,7 +391,6 @@ class ImageNamer(object):
         update_num: bool = True,
         num: Optional[int] = None,
     ) -> pathlib.Path:
-
         camera = camera or self.camera
 
         if camera:
