@@ -149,7 +149,7 @@ async def test_bad_image_namer(camera_system):
 async def test_expose_stack_two(camera):
     exposure = await camera.expose(1.0, stack=2)
 
-    assert exposure.data.dtype == numpy.dtype("float64")
+    assert exposure.data.dtype == numpy.dtype("float32")
 
     hdu = exposure.to_hdu()
     assert hdu[0].header["EXPTIME"] == 1.0
