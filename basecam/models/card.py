@@ -107,7 +107,6 @@ class Card(object):
     """
 
     def __new__(cls, name: Union[str, Iterable[Any]], *args, **kwargs):
-
         if isinstance(name, str):
             if cls == Card and name.upper() in DEFAULT_CARDS:
                 if len(args) == 0 and len(kwargs) == 0:
@@ -128,7 +127,6 @@ class Card(object):
         evaluate: bool = False,
         context: Dict[str, Any] = {},
     ):
-
         if hasattr(self, "name"):
             return
 
@@ -297,7 +295,6 @@ class CardGroup(list):
         name: Optional[str] = None,
         use_group_title: bool = True,
     ):
-
         self.name = name or self.name
         self.use_group_title: bool = use_group_title
 
@@ -305,7 +302,6 @@ class CardGroup(list):
         list.__init__(self, cards)
 
     def __repr__(self):
-
         return f"<CardGroup {list.__repr__(self)!s}>"
 
     def _process_input(self, card: Union[Card, Iterable]):
@@ -402,13 +398,11 @@ class MacroCard(object, metaclass=abc.ABCMeta):
         use_group_title: bool = False,
         **kwargs,
     ):
-
         self.name = name or self.name
         self.use_group_title = use_group_title
         self.kwargs = kwargs
 
     def __repr__(self):
-
         return f"<{self.__class__.__name__} (name={self.name})>"
 
     @abc.abstractmethod

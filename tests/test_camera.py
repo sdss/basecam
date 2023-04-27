@@ -36,7 +36,6 @@ async def test_camera(camera):
 
 
 async def test_status(camera):
-
     status = camera.get_status()
     assert status["temperature"] == 25.0
 
@@ -45,7 +44,6 @@ async def test_status(camera):
 
 
 async def test_connect_fails(camera, mocker):
-
     mocker.patch.object(camera, "_connect_internal", side_effect=CameraConnectionError)
     with pytest.raises(CameraConnectionError):
         # Force reconnect.
@@ -53,7 +51,6 @@ async def test_connect_fails(camera, mocker):
 
 
 async def test_disconnect_fails(camera, mocker):
-
     mocker.patch.object(
         camera, "_disconnect_internal", side_effect=CameraConnectionError
     )
@@ -62,7 +59,6 @@ async def test_disconnect_fails(camera, mocker):
 
 
 async def test_expose(camera):
-
     exposure = await camera.expose(1.0)
     assert isinstance(exposure, Exposure)
 
@@ -83,19 +79,16 @@ async def test_expose(camera):
 
 
 async def test_expose_negative_exptime(camera):
-
     with pytest.raises(ExposureError):
         await camera.expose(-0.1)
 
 
 async def test_expose_bias_positive_exptime(camera):
-
     with pytest.warns(ExposureWarning):
         await camera.expose(1, image_type="bias")
 
 
 async def test_expose_write(camera, tmp_path):
-
     filename = tmp_path / "test.fits"
 
     await camera.expose(1.0, write=True, filename=filename)
@@ -104,7 +97,6 @@ async def test_expose_write(camera, tmp_path):
 
 
 async def test_expose_bad_data(camera):
-
     camera.data = None
 
     with pytest.raises(ExposureError) as ee:
@@ -114,13 +106,11 @@ async def test_expose_bad_data(camera):
 
 
 async def test_reconnect_fails(camera):
-
     with pytest.raises(CameraConnectionError):
         await camera.connect()
 
 
 async def test_expose_no_filename(camera):
-
     exposure = await camera.expose(1.0)
 
     assert exposure.filename is not None
@@ -139,7 +129,6 @@ async def test_expose_no_filename(camera):
     ),
 )
 async def test_expose_image_namer(camera_system, image_namer):
-
     camera = VirtualCamera("test_camera", camera_system, image_namer=image_namer)
     await camera.connect()
 
@@ -153,13 +142,11 @@ async def test_expose_image_namer(camera_system, image_namer):
 
 
 async def test_bad_image_namer(camera_system):
-
     with pytest.raises(CameraError):
         VirtualCamera("test_camera", camera_system, image_namer="bad_value")
 
 
 async def test_expose_stack_two(camera):
-
     exposure = await camera.expose(1.0, stack=2)
 
     assert exposure.data.dtype == numpy.dtype("float64")
@@ -172,14 +159,12 @@ async def test_expose_stack_two(camera):
 
 
 async def test_instantiate_no_config():
-
     camera_system = CameraSystemTester(VirtualCamera)
 
     assert camera_system._config is None
 
 
 async def test_instantiate_bad_file():
-
     with pytest.raises(FileNotFoundError):
         CameraSystemTester(VirtualCamera, camera_config="bad_config")
 
@@ -210,7 +195,6 @@ async def test_camera_error(camera_system):
 
 
 async def test_camera_error_no_self():
-
     with pytest.raises(CameraError) as ee:
         raise CameraError("test")
 
@@ -231,7 +215,6 @@ async def test_camera_warning(camera_system):
 
 
 async def test_camera_warning_no_self():
-
     with pytest.warns(CameraWarning) as ww:
         warnings.warn("test", CameraWarning)
 

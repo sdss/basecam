@@ -19,7 +19,6 @@ pytestmark = pytest.mark.asyncio
 
 @pytest.fixture()
 async def listener(event_loop):
-
     listener = EventListener(event_loop)
 
     yield listener
@@ -29,7 +28,6 @@ async def listener(event_loop):
 
 @pytest.fixture()
 async def camera_system(camera_system, listener):
-
     camera_system.notifier.register_listener(listener)
 
     camera_system.events = []
@@ -52,7 +50,6 @@ async def camera_system(camera_system, listener):
 
 
 async def test_listener(camera_system, listener):
-
     events = camera_system.events
 
     await camera_system.add_camera("test_camera")
@@ -75,7 +72,6 @@ async def test_listener(camera_system, listener):
 
 
 async def test_callback_function(camera_system, listener, mocker):
-
     func_callback = mocker.MagicMock()
 
     listener.register_callback(func_callback)
@@ -87,7 +83,6 @@ async def test_callback_function(camera_system, listener, mocker):
 
 
 async def test_remove_callback(camera_system, listener):
-
     assert len(listener.callbacks) == 1
     cb = listener.callbacks[0]
 
@@ -104,13 +99,11 @@ async def test_remove_bad_callback(listener):
 
 
 async def test_add_same_listener(camera_system, listener):
-
     camera_system.notifier.register_listener(listener)
     assert len(camera_system.notifier.listeners) == 1
 
 
 async def test_remove_not_registered_listener(camera_system, event_loop):
-
     listener_new = EventListener(event_loop)
 
     with pytest.raises(ValueError):
@@ -120,7 +113,6 @@ async def test_remove_not_registered_listener(camera_system, event_loop):
 
 
 async def test_filter_notifications(camera_system, listener, event_loop):
-
     filtered_listener = EventListener(
         event_loop, filter_events=CameraSystemEvent.CAMERA_ADDED
     )

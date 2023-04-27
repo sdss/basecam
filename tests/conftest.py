@@ -33,7 +33,6 @@ EXPOSURE_DIR = tempfile.TemporaryDirectory()
 
 
 class CameraSystemTester(CameraSystem):
-
     _connected_cameras = []
     __version__ = "0.1.0"
 
@@ -60,7 +59,6 @@ class VirtualCamera(
     _uid = "DEV_12345"
 
     def __init__(self, *args, **kwargs):
-
         self._shutter_position = False
 
         self.temperature = 25
@@ -79,7 +77,6 @@ class VirtualCamera(
         self.image_namer.dirname = EXPOSURE_DIR.name
 
     async def _connect_internal(self, **connection_params):
-
         return True
 
     def _status_internal(self):
@@ -97,7 +94,6 @@ class VirtualCamera(
         self._change_temperature_task = self.loop.create_task(change_temperature())
 
     async def _expose_internal(self, exposure, **kwargs):
-
         image_type = exposure.image_type
 
         if image_type in ["bias", "dark"]:
@@ -138,14 +134,12 @@ class VirtualCamera(
         return exposure
 
     async def _set_shutter_internal(self, shutter_open):
-
         self._shutter_position = shutter_open
 
     async def _get_shutter_internal(self):
         return self._shutter_position
 
     async def _disconnect_internal(self):
-
         return True
 
     async def _get_binning_internal(self):
@@ -155,11 +149,9 @@ class VirtualCamera(
         self._binning = (hbin, vbin)
 
     async def _get_image_area_internal(self):
-
         return self._image_area
 
     async def _set_image_area_internal(self, area=None):
-
         if area is None:
             self._image_area = (1, self.width, 1, self.height)
         else:
@@ -168,7 +160,6 @@ class VirtualCamera(
 
 @pytest.fixture(scope="function", autouse=True)
 def clean_exposure_dir():
-
     for ff in glob.glob(os.path.join(EXPOSURE_DIR.name, "*.fits")):
         os.remove(ff)
 
@@ -189,7 +180,6 @@ def event_loop(request):
 
 @pytest.fixture(scope="function")
 async def camera_system(config, event_loop):
-
     camera_system = CameraSystemTester(VirtualCamera, camera_config=config).setup()
 
     yield camera_system
@@ -199,7 +189,6 @@ async def camera_system(config, event_loop):
 
 @pytest.fixture
 async def camera(camera_system):
-
     camera = await camera_system.add_camera("test_camera")
     camera.events = []
 
@@ -237,7 +226,6 @@ async def actor_setup(config):
 
 @pytest.fixture(scope="function")
 async def actor(actor_setup):
-
     await actor_setup.camera_system.add_camera("test_camera")
 
     yield actor_setup
@@ -253,14 +241,12 @@ async def actor(actor_setup):
 
 @pytest.fixture(scope="function")
 async def command(actor):
-
     command = TestCommand(commander_id=1, actor=actor)
     yield command
 
 
 @pytest.fixture(scope="function")
 def exposure(camera):
-
     exp = Exposure(camera)
 
     exp.data = numpy.zeros((10, 10), dtype=numpy.uint16)

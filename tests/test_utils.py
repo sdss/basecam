@@ -17,12 +17,10 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_cancel_task():
-
     task = asyncio.create_task(asyncio.sleep(3))
 
     assert await cancel_task(task) is None
 
 
 async def test_cancel_None():
-
     assert await cancel_task(None) is None

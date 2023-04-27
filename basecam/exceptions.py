@@ -15,7 +15,6 @@ class CameraError(Exception):
     """A custom core exception"""
 
     def __init__(self, message=""):
-
         stack = inspect.stack()
         f_locals = stack[1][0].f_locals
 
@@ -52,7 +51,6 @@ class CameraWarning(UserWarning):
     """Base warning."""
 
     def __init__(self, message, *args, **kwargs):
-
         stack = inspect.stack()
         f_locals = stack[1][0].f_locals
 

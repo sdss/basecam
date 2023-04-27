@@ -18,7 +18,6 @@ CONFIG_FILE = os.path.join(os.path.dirname(__file__), "data/test_config.yaml")
 
 
 async def main(loop):
-
     camera_system = CameraSystemTester(VirtualCamera, camera_config=CONFIG_FILE).setup()
     await camera_system.add_camera("test_camera")
 
@@ -27,6 +26,5 @@ async def main(loop):
 
 
 if __name__ == "__main__":
-
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main(loop))

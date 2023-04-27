@@ -22,7 +22,6 @@ class EventNotifier(object):
     """
 
     def __init__(self):
-
         self.listeners = []
 
     def register_listener(self, listener):
@@ -64,7 +63,6 @@ class EventNotifier(object):
         assert isinstance(event, enum.Enum), "event is not an enum."
 
         for listener in self.listeners:
-
             if listener.filter_events and event not in listener.filter_events:
                 return False
 
@@ -87,7 +85,6 @@ class EventListener(asyncio.Queue):
     """
 
     def __init__(self, loop=None, filter_events=None, autostart=True):
-
         asyncio.Queue.__init__(self)
 
         self.callbacks = []

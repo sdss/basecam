@@ -33,7 +33,6 @@ async def binning(command, cameras, binning):
 
     failed = False
     for camera in cameras:
-
         if not binning:
             binning = list(await camera.get_binning())
             command.info(

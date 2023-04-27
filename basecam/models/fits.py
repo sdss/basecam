@@ -68,7 +68,6 @@ class FITSModel(list):
         extensions: Optional[List[Extension]] = None,
         context: Dict[str, Any] = {},
     ):
-
         self.context: Dict[str, Any] = context
 
         extensions = extensions or []
@@ -155,7 +154,6 @@ class Extension(object):
         compressed: Union[bool, str] = False,
         compression_params: dict[str, Any] = {},
     ):
-
         if isinstance(data, numpy.ndarray):
             self.data = data
         else:
@@ -271,12 +269,10 @@ class HeaderModel(list):
     """
 
     def __init__(self, cards: List[_CardTypes] = []):
-
         cards = [self._process_input(card) for card in cards]
         list.__init__(self, cards)
 
     def __repr__(self):
-
         return f"<HeaderModel {list.__repr__(self)!s}>"
 
     def _process_input(self, input_card: _CardTypes) -> _CardTypes:
@@ -327,7 +323,6 @@ class HeaderModel(list):
         header = astropy.io.fits.Header()
 
         for card in self:
-
             processed_card = self._process_input(card)
             if processed_card is not None:
                 if isinstance(processed_card, Card):

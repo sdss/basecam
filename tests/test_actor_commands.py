@@ -22,7 +22,6 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_ping(actor):
-
     command = await actor.invoke_mock_command("ping")
 
     assert command.status.did_succeed
@@ -30,7 +29,6 @@ async def test_ping(actor):
 
 
 async def test_help(actor):
-
     command = await actor.invoke_mock_command("help")
 
     assert command.status.did_succeed
@@ -39,7 +37,6 @@ async def test_help(actor):
 
 
 async def test_list(actor):
-
     command = await actor.invoke_mock_command("list")
 
     await asyncio.sleep(1)
@@ -52,7 +49,6 @@ async def test_list(actor):
 @pytest.mark.parametrize("fail_command", (True, False))
 @pytest.mark.parametrize("check_cameras", (True, False))
 async def test_get_cameras(command, fail_command, check_cameras):
-
     assert command.actor.default_cameras == ["test_camera"]
     assert command.status == command.flags.READY
 
@@ -65,7 +61,6 @@ async def test_get_cameras(command, fail_command, check_cameras):
 @pytest.mark.parametrize("fail_command", (True, False))
 @pytest.mark.parametrize("check_cameras", (True, False))
 async def test_get_cameras_no_default(command, fail_command, check_cameras):
-
     command.actor.set_default_cameras()
     cameras = get_cameras(
         command, fail_command=fail_command, check_cameras=check_cameras
@@ -79,7 +74,6 @@ async def test_get_cameras_no_default(command, fail_command, check_cameras):
 @pytest.mark.parametrize("fail_command", (True, False))
 @pytest.mark.parametrize("check_cameras", (True, False))
 async def test_get_cameras_no_cameras(command, fail_command, check_cameras):
-
     command.actor.default_cameras = []
     command.actor.camera_system.cameras = []
     assert (
@@ -96,7 +90,6 @@ async def test_get_cameras_no_cameras(command, fail_command, check_cameras):
 @pytest.mark.parametrize("fail_command", (True, False))
 @pytest.mark.parametrize("check_cameras", (True, False))
 async def test_get_cameras_bad_default(command, fail_command, check_cameras):
-
     command.actor.set_default_cameras("bad_camera")
     assert (
         get_cameras(command, check_cameras=check_cameras, fail_command=fail_command)
@@ -110,7 +103,6 @@ async def test_get_cameras_bad_default(command, fail_command, check_cameras):
 @pytest.mark.parametrize("fail_command", (True, False))
 @pytest.mark.parametrize("check_cameras", (True, False))
 async def test_get_cameras_pass_cameras(command, fail_command, check_cameras):
-
     assert (
         get_cameras(
             command,
@@ -124,7 +116,6 @@ async def test_get_cameras_pass_cameras(command, fail_command, check_cameras):
 
 @pytest.mark.parametrize("fail_command", (True, False))
 async def test_get_cameras_check(command, fail_command):
-
     command.actor.set_default_cameras("test_camera")
     assert command.actor.camera_system.cameras[0].name == "test_camera"
     command.actor.camera_system.cameras[0].connected = False
@@ -138,7 +129,6 @@ async def test_get_cameras_check(command, fail_command):
 
 
 async def test_set_default(actor):
-
     actor.set_default_cameras()
 
     await actor.invoke_mock_command("set-default test_camera")
@@ -163,7 +153,6 @@ async def test_set_default(actor):
 
 
 async def test_status(actor):
-
     command = await actor.invoke_mock_command("status")
 
     assert command.status.did_succeed
@@ -176,14 +165,12 @@ async def test_status(actor):
 
 
 async def test_reconnect(actor):
-
     command = await actor.invoke_mock_command("reconnect")
 
     assert command.status.did_succeed
 
 
 async def test_reconnect_disconnect_fails(actor, mocker):
-
     camera = actor.camera_system.cameras[0]
 
     mocker.patch.object(
@@ -199,7 +186,6 @@ async def test_reconnect_disconnect_fails(actor, mocker):
 
 
 async def test_reconnect_connect_fails(actor, mocker):
-
     camera = actor.camera_system.cameras[0]
 
     mocker.patch.object(
@@ -231,7 +217,6 @@ async def test_reconnect_timesout(actor):
 
 @pytest.mark.parametrize("image_type", (None, "object", "flat", "bias", "dark"))
 async def test_expose(actor, tmp_path, image_type):
-
     filename = tmp_path / "test_exposure.fits"
 
     command_str = f"expose 1 --filename {filename}"
@@ -259,7 +244,6 @@ async def test_expose(actor, tmp_path, image_type):
 
 
 async def test_expose_stack(actor):
-
     command = await actor.invoke_mock_command("expose 1 --stack 2")
 
     assert command.status.did_succeed
@@ -275,7 +259,6 @@ async def test_expose_stack(actor):
 
 
 async def test_expose_fails(actor, mocker):
-
     camera = actor.camera_system.cameras[0]
 
     mocker.patch.object(camera, "_expose_internal", side_effect=ExposureError)
@@ -293,7 +276,6 @@ async def test_expose_post_process_fails(actor, mocker):
 
 
 async def test_expose_filename_fails(actor, tmp_path):
-
     filename = tmp_path / "test.fits"
 
     await actor.camera_system.add_camera(name="AAA", uid="AAA", force=True)
@@ -319,12 +301,10 @@ async def test_expose_post_process_callback(actor, mocker):
 
 
 async def test_shutter_command_exists(actor):
-
     assert "shutter" in actor.parser.commands
 
 
 async def test_get_shutter(actor):
-
     command = await actor.invoke_mock_command("shutter")
     assert command.status.did_succeed
     assert actor.mock_replies[-2]["shutter"]["shutter"] == "closed"
@@ -332,7 +312,6 @@ async def test_get_shutter(actor):
 
 @pytest.mark.parametrize("shutter_position", ("open", "close"))
 async def test_set_shutter(actor, shutter_position):
-
     command = await actor.invoke_mock_command(f"shutter --{shutter_position}")
     assert command.status.did_succeed
     assert actor.camera_system.cameras[0]._shutter_position == (
@@ -341,7 +320,6 @@ async def test_set_shutter(actor, shutter_position):
 
 
 async def test_set_shutter_fails(actor, mocker):
-
     camera = actor.camera_system.cameras[0]
 
     mocker.patch.object(camera, "_set_shutter_internal", side_effect=CameraError)
@@ -351,7 +329,6 @@ async def test_set_shutter_fails(actor, mocker):
 
 
 async def test_get_temperature(actor):
-
     temperature = actor.camera_system.cameras[0].temperature
 
     command = await actor.invoke_mock_command("temperature")
@@ -361,7 +338,6 @@ async def test_get_temperature(actor):
 
 
 async def test_set_temperature(actor):
-
     command = await actor.invoke_mock_command("temperature 100")
     await command
 
@@ -370,7 +346,6 @@ async def test_set_temperature(actor):
 
 
 async def test_set_temperature_fails(actor, mocker):
-
     camera = actor.camera_system.cameras[0]
 
     mocker.patch.object(
@@ -386,7 +361,6 @@ async def test_set_temperature_fails(actor, mocker):
 
 
 async def test_get_binning(actor):
-
     command = await actor.invoke_mock_command("binning")
 
     assert command.status.did_succeed
@@ -396,7 +370,6 @@ async def test_get_binning(actor):
 
 
 async def test_set_binning(actor):
-
     command = await actor.invoke_mock_command("binning 2 2")
 
     assert command.status.did_succeed
@@ -406,7 +379,6 @@ async def test_set_binning(actor):
 
 
 async def test_set_binning_fails(actor, mocker):
-
     camera = actor.camera_system.cameras[0]
 
     mocker.patch.object(camera, "_set_binning_internal", side_effect=CameraError)
@@ -417,7 +389,6 @@ async def test_set_binning_fails(actor, mocker):
 
 
 async def test_get_area(actor):
-
     camera = actor.camera_system.cameras[0]
 
     command = await actor.invoke_mock_command("area")
@@ -428,7 +399,6 @@ async def test_get_area(actor):
 
 
 async def test_set_area(actor):
-
     command = await actor.invoke_mock_command("area 10 100 20 40")
 
     assert command.status.did_succeed
@@ -437,7 +407,6 @@ async def test_set_area(actor):
 
 
 async def test_set_area_reset(actor):
-
     camera = actor.camera_system.cameras[0]
 
     command = await actor.invoke_mock_command("area 10 100 20 40 --reset")
@@ -448,7 +417,6 @@ async def test_set_area_reset(actor):
 
 
 async def test_set_area_fails(actor, mocker):
-
     camera = actor.camera_system.cameras[0]
 
     mocker.patch.object(

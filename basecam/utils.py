@@ -52,7 +52,6 @@ class Poller(object):
     """
 
     def __init__(self, name, callback, delay=1, loop=None):
-
         self.name = name
         self.callback = callback
 
@@ -71,7 +70,6 @@ class Poller(object):
         """The polling loop."""
 
         while True:
-
             try:
                 if asyncio.iscoroutinefunction(self.callback):
                     await self.callback()

@@ -58,7 +58,6 @@ async def area(command, cameras, area, reset):
 
     failed = False
     for camera in cameras:
-
         if not area and reset is False:
             report_area(command, camera, tuple(await camera.get_image_area()))
         else:

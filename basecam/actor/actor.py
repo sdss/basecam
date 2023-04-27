@@ -67,7 +67,6 @@ class BaseCameraActor(BaseActor):
         schema: Optional[str] = "internal",
         **kwargs,
     ):
-
         self._check_is_subclass()
 
         assert camera_system is not None

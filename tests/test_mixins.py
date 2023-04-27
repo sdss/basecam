@@ -17,7 +17,6 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_bias(camera, mocker):
-
     mock = mocker.patch.object(
         camera,
         "_set_shutter_internal",
@@ -39,7 +38,6 @@ async def test_bias(camera, mocker):
 
 
 async def test_dark(camera, mocker):
-
     mock = mocker.patch.object(
         camera,
         "_set_shutter_internal",
@@ -57,7 +55,6 @@ async def test_dark(camera, mocker):
 
 
 async def test_flat(camera, mocker):
-
     mock = mocker.patch.object(
         camera,
         "_set_shutter_internal",
@@ -77,7 +74,6 @@ async def test_flat(camera, mocker):
 
 
 async def test_object(camera, mocker):
-
     mock = mocker.patch.object(
         camera,
         "_set_shutter_internal",
@@ -97,7 +93,6 @@ async def test_object(camera, mocker):
 
 
 async def test_shutter(camera):
-
     assert await camera.get_shutter() is False
 
     await camera.open_shutter()
@@ -108,12 +103,10 @@ async def test_shutter(camera):
 
 
 async def test_get_temperature(camera):
-
     assert await camera.get_temperature() == camera.temperature
 
 
 async def test_set_temperature(camera):
-
     await camera.set_temperature(100.0)
 
     assert await camera.get_temperature() == 100.0
@@ -124,7 +117,6 @@ async def test_set_temperature(camera):
 
 
 async def test_set_temperature_override(camera):
-
     await camera.set_temperature(100.0)
 
     await asyncio.sleep(0.01)
@@ -135,29 +127,24 @@ async def test_set_temperature_override(camera):
 
 
 async def test_get_binning(camera):
-
     assert await camera.get_binning() == (1, 1)
 
 
 async def test_set_binning(camera):
-
     await camera.set_binning(2, 2)
     assert await camera.get_binning() == (2, 2)
 
 
 async def test_set_binning_only_hbin(camera):
-
     await camera.set_binning(2)
     assert await camera.get_binning() == (2, 2)
 
 
 async def test_get_image_area(camera):
-
     assert await camera.get_image_area() == (1, camera.width, 1, camera.height)
 
 
 async def test_set_image_area(camera):
-
     await camera.set_image_area((10, 100, 20, 40))
     assert await camera.get_image_area() == (10, 100, 20, 40)
 

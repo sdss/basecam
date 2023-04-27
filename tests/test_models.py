@@ -29,7 +29,6 @@ class MacroCardTest(models.MacroCard):
 
 
 def test_fits_model():
-
     fits_model = models.FITSModel()
 
     assert len(fits_model) == 1
@@ -38,7 +37,6 @@ def test_fits_model():
 
 
 def test_fits_model_to_hdu(exposure):
-
     fits_model = models.FITSModel()
 
     hdulist = fits_model.to_hdu(exposure)
@@ -51,7 +49,6 @@ def test_fits_model_to_hdu(exposure):
 
 @pytest.mark.parametrize("compressed", [True, "GZIP_1"])
 def test_model_compressed(exposure, compressed):
-
     fits_model = models.FITSModel([models.Extension(data=None, compressed=compressed)])
 
     exposure.fits_model = fits_model
@@ -70,7 +67,6 @@ def test_model_compressed(exposure, compressed):
 
 
 def test_fits_model_multi_extension(exposure):
-
     fits_model = models.FITSModel(
         [
             models.Extension(data="none", name="FIRST"),
@@ -101,7 +97,6 @@ def test_fits_model_multi_extension(exposure):
 
 
 def test_fits_model_multi_extension_compressed(exposure):
-
     fits_model = models.FITSModel(
         [
             models.Extension(data=None, compressed=True),
@@ -125,7 +120,6 @@ def test_fits_model_multi_extension_compressed(exposure):
 
 
 def test_basic_header_model(exposure):
-
     basic_header_model = models.basic_header_model
     basic_header_model.append(MacroCardTest())
     basic_header_model.append(models.Card("TEST", "test"))
@@ -137,7 +131,6 @@ def test_basic_header_model(exposure):
 
 
 def test_header_model_insert(exposure):
-
     basic_header_model = models.basic_header_model
     basic_header_model.insert(0, Card("A", 1))
 
@@ -147,14 +140,12 @@ def test_header_model_insert(exposure):
 
 
 def test_header_invalid_card():
-
     with pytest.raises(CardError):
         basic_header_model = models.basic_header_model
         basic_header_model.insert(0, {})
 
 
 def test_header_describe(exposure):
-
     basic_header_model = models.basic_header_model
     basic_header_model.append(MacroCardTest())
     basic_header_model.append(
@@ -177,7 +168,6 @@ def test_header_describe(exposure):
 
 
 def test_macro(exposure):
-
     macro = MacroCardTest(name="test_macro", use_group_title=False)
 
     cards = macro.evaluate(exposure)
@@ -191,7 +181,6 @@ def test_macro(exposure):
 
 
 def test_macro_with_group_title(exposure):
-
     macro = MacroCardTest(name="test_macro", use_group_title=True)
     header = macro.to_header(exposure)
 
@@ -202,7 +191,6 @@ def test_macro_with_group_title(exposure):
 
 
 def test_card_group(exposure):
-
     card_group = models.CardGroup(
         [Card("KEYW1", 1, "The first card"), ("KEYW2", 2)], name="card_group"
     )
@@ -220,7 +208,6 @@ def test_card_group(exposure):
 
 
 def test_card_group_append(exposure):
-
     card_group = models.CardGroup([Card("KEYW1", 1, "The first card")])
     card_group.append(Card("KEYW2", 2))
 
@@ -229,7 +216,6 @@ def test_card_group_append(exposure):
 
 
 def test_card_group_insert(exposure):
-
     card_group = models.CardGroup([Card("KEYW1", 1, "The first card")])
     card_group.insert(0, Card("KEYW2", 2))
 
@@ -238,7 +224,6 @@ def test_card_group_insert(exposure):
 
 
 def test_evaluate_callable(exposure):
-
     card = models.Card("testcall", value=lambda x, y: x + y, fargs=(1, 2))
 
     name, value, comment = card.evaluate(exposure)
@@ -249,13 +234,11 @@ def test_evaluate_callable(exposure):
 
 
 def test_card_evaluate(exposure):
-
     card = Card("TESTCARD", value="2+2", evaluate=True)
     assert card.evaluate(exposure)[1] == 4
 
 
 def test_card_default_evaluate(exposure):
-
     models.DEFAULT_CARDS["TESTCARD"] = models.DefaultCard(
         "TESTCARD",
         value="2+2",
@@ -268,13 +251,11 @@ def test_card_default_evaluate(exposure):
 
 
 def test_default_card_overridden():
-
     card = models.Card("VCAM", value="a value")
     assert card.value == "a value"
 
 
 def test_card_name_trimming():
-
     with pytest.warns(CardWarning):
         card = models.Card("AVERYLARGENAME", "value")
 

@@ -111,7 +111,6 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
         log_file: Optional[AnyPath] = None,
         verbose: Optional[Union[bool, int]] = False,
     ):
-
         self.camera_class = camera_class or self.camera_class
 
         if not self.camera_class or not issubclass(self.camera_class, BaseCamera):
@@ -411,7 +410,6 @@ class CameraSystem(LoggerMixIn, Generic[_T_BaseCamera], metaclass=abc.ABCMeta):
 
         for camera in self.cameras:
             if camera.name == name or camera.uid == uid:
-
                 await camera.disconnect()
                 self.cameras.remove(camera)
 
@@ -571,7 +569,6 @@ class BaseCamera(LoggerMixIn, metaclass=abc.ABCMeta):
         image_namer: Optional[Union[ImageNamer, dict]] = None,
         camera_params={},
     ):
-
         self.uid = uid
         self.name = name or self.uid
 

@@ -18,7 +18,6 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_load_config():
-
     camera_system = CameraSystemTester(VirtualCamera, camera_config=TEST_CONFIG_FILE)
 
     assert isinstance(camera_system, CameraSystemTester)
@@ -26,7 +25,6 @@ async def test_load_config():
 
 
 async def test_discover(camera_system):
-
     await camera_system.start_camera_poller(0.1)
     camera_system._connected_cameras = ["DEV_12345"]
 
@@ -43,7 +41,6 @@ async def test_discover(camera_system):
 
 
 async def test_camera_connected(camera_system):
-
     camera_system.on_camera_connected("DEV_12345")
 
     await asyncio.sleep(0.1)
@@ -59,7 +56,6 @@ async def test_camera_connected(camera_system):
 
 
 async def test_get_cameras_not_implemented(camera_system, mocker):
-
     camera_system.list_available_cameras = mocker.Mock(side_effect=NotImplementedError)
 
     await camera_system.start_camera_poller(0.1)
@@ -70,19 +66,16 @@ async def test_get_cameras_not_implemented(camera_system, mocker):
 
 
 async def test_config_bad_name(camera_system):
-
     data = camera_system.get_camera_config("BAD_CAMERA")
     assert data is None
 
 
 async def test_config_bad_uid(camera_system):
-
     data = camera_system.get_camera_config(uid="BAD_UID")
     assert data is None
 
 
 async def test_no_config(camera_system):
-
     camera_system._config = None
 
     data = camera_system.get_camera_config("test_camera")
@@ -90,7 +83,6 @@ async def test_no_config(camera_system):
 
 
 async def test_config_from_uid(camera_system):
-
     data = camera_system.get_camera_config(uid="DEV_12345")
 
     assert data["name"] == "test_camera"
@@ -99,7 +91,6 @@ async def test_config_from_uid(camera_system):
 
 @pytest.mark.parametrize("param,value", [("name", "test_camera"), ("uid", "DEV_12345")])
 async def test_add_camerera_already_connected(camera_system, caplog, param, value):
-
     camera = await eval(f"camera_system.add_camera({param}={value!r})")
     assert camera
     assert getattr(camera, param) == value
@@ -118,7 +109,6 @@ async def test_add_camerera_already_connected(camera_system, caplog, param, valu
 
 
 async def test_remove_camera_not_connected(camera_system):
-
     with pytest.raises(ValueError):
         await camera_system.remove_camera("not_connected_camera")
 
@@ -128,7 +118,6 @@ async def test_remove_camera_not_connected(camera_system):
     ['name="test_camera"', 'uid="DEV_12345"', 'name="test_camera", uid="DEV_12345"'],
 )
 async def test_get_camera(camera_system, params):
-
     await camera_system.add_camera(name="test_camera")
 
     camera = eval(f"camera_system.get_camera({params})")
@@ -138,14 +127,12 @@ async def test_get_camera(camera_system, params):
 
 
 async def test_get_camera_not_found(camera_system):
-
     camera = camera_system.get_camera("bad_camera")
 
     assert camera is False
 
 
 async def test_get_camera_no_params(camera_system):
-
     await camera_system.add_camera(name="test_camera")
     camera = camera_system.get_camera()
 
@@ -153,19 +140,16 @@ async def test_get_camera_no_params(camera_system):
 
 
 async def test_add_camera_autoconnect(camera_system):
-
     camera = await camera_system.add_camera(name="test_camera")
     assert camera.connected
 
 
 async def test_bad_camera_class():
-
     with pytest.raises(ValueError):
         CameraSystemTester(dict)
 
 
 async def test_verbose():
-
     camera_system = CameraSystemTester(VirtualCamera, verbose=True)
     assert camera_system.logger.sh.level == 1
 
@@ -174,7 +158,6 @@ async def test_verbose():
 
 
 async def test_log_file(tmp_path):
-
     log_file = tmp_path / "logfile.log"
 
     camera_system = CameraSystemTester(VirtualCamera, log_file=log_file)

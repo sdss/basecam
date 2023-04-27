@@ -17,7 +17,6 @@ from basecam.exposure import ImageNamer
 
 
 def test_exposure_no_model(exposure):
-
     exposure.fits_model = None
     hdulist = exposure.to_hdu()
 
@@ -28,7 +27,6 @@ def test_exposure_no_model(exposure):
 
 @pytest.mark.asyncio
 async def test_exposure_write(exposure, tmp_path):
-
     test_filename = tmp_path / "test.fits"
     assert not test_filename.exists()
 
@@ -43,7 +41,6 @@ async def test_exposure_write(exposure, tmp_path):
 
 @pytest.mark.asyncio
 async def test_exposure_write_fails(exposure):
-
     exposure.filename = None
 
     with pytest.raises(ExposureError):
@@ -51,13 +48,11 @@ async def test_exposure_write_fails(exposure):
 
 
 def test_obstime_fails(exposure):
-
     with pytest.raises(ExposureError):
         exposure.obstime = 12345
 
 
 def test_obstime_str(exposure):
-
     test_date = "2019-01-01 00:00:00.000"
     exposure.obstime = test_date
 
@@ -66,7 +61,6 @@ def test_obstime_str(exposure):
 
 @pytest.mark.parametrize("index", [None, 1])
 def test_exposure_extra_hdu(exposure, index):
-
     extra_hdu = BinTableHDU(Table(rows=[[1, 2, 3]], names=["a", "b", "c"]))
     exposure.add_hdu(extra_hdu, index=index)
 
@@ -78,7 +72,6 @@ def test_exposure_extra_hdu(exposure, index):
 
 
 def test_image_namer(tmp_path):
-
     image_namer = ImageNamer("test_{num:04d}.fits", dirname=tmp_path)
 
     assert image_namer() == tmp_path / "test_0001.fits"
@@ -86,7 +79,6 @@ def test_image_namer(tmp_path):
 
 
 def test_image_namer_sjd(tmp_path, monkeypatch):
-
     monkeypatch.setenv("OBSERVATORY", "APO")
 
     image_namer = ImageNamer("test_{num:04d}.fits", dirname=str(tmp_path) + "/{sjd}")
@@ -97,7 +89,6 @@ def test_image_namer_sjd(tmp_path, monkeypatch):
 
 
 def test_image_namer_overwrite(tmp_path):
-
     (tmp_path / "test_0001.fits").touch()
 
     image_namer = ImageNamer("test_{num:04d}.fits", dirname=tmp_path, overwrite=True)
@@ -107,7 +98,6 @@ def test_image_namer_overwrite(tmp_path):
 
 
 def test_image_namer_files_exist(tmp_path):
-
     (tmp_path / "test_0001.fits").touch()
     (tmp_path / "test_0004.fits").touch()
 
@@ -119,7 +109,6 @@ def test_image_namer_files_exist(tmp_path):
 
 @pytest.mark.asyncio
 async def test_image_name_non_existent_directory(exposure, tmp_path):
-
     test_filename = tmp_path / "test_dir/another_dir/test.fits"
     assert not test_filename.exists()
 
@@ -129,7 +118,6 @@ async def test_image_name_non_existent_directory(exposure, tmp_path):
 
 
 def test_image_namer_files_exist_fz(camera, tmp_path):
-
     (tmp_path / "test_camera_0001.fits.fz").touch()
 
     image_namer = ImageNamer("{camera.name}_{num:04d}.fits.fz", dirname=tmp_path)
@@ -139,7 +127,6 @@ def test_image_namer_files_exist_fz(camera, tmp_path):
 
 
 def test_image_name_dirname_changes(camera, tmp_path):
-
     image_namer = ImageNamer(
         "{camera.name}_{num:04d}.fits.fz",
         dirname=tmp_path,

@@ -39,7 +39,6 @@ async def reconnect(command, cameras, timeout):
 
     failed = False
     for camera in cameras:
-
         command.warning(text=f"reconnecting camera {camera.name!r}")
 
         try:

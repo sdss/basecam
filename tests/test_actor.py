@@ -18,7 +18,6 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_actor_basic(actor, config):
-
     actor_config = config["actor"]
 
     assert actor.host == actor_config["host"]
@@ -31,7 +30,6 @@ async def test_actor_basic(actor, config):
 
 
 async def test_logger(actor):
-
     assert actor.log is not None
     assert len(actor.log.handlers) == 1
     # It's one because we don't have a file handler for testing.
@@ -68,7 +66,6 @@ async def test_check_subclass(camera_system):
 
 
 async def test_arguments_from_config(actor):
-
     assert actor.config is not None
     assert "default_cameras" in actor.config["actor"]
 
@@ -76,7 +73,6 @@ async def test_arguments_from_config(actor):
 
 
 async def test_set_default_cameras(actor):
-
     assert actor.default_cameras == ["test_camera"]
 
     actor.set_default_cameras()
