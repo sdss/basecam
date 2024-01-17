@@ -6,6 +6,12 @@
 
 * Cast output ``exposure_time`` to float.
 
+### ⚙️ Engineering
+
+* Lint using `ruff`.
+* Update workflows.
+* Update RTD config and docs building.
+
 
 ## 0.7.2 - April 27, 2023
 
