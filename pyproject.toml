@@ -101,37 +101,6 @@ exclude_lines = [
     "async def _post_process_internal"
 ]
 
-[tool.tox]
-legacy_tox_ini = """
-[tox]
-envlist = py37, py38, build_docs
-requires =
-
-[testenv]
-extras =
-    dev
-commands = pytest
-
-[testenv:py37]
-commands = pytest --cov basecam --cov-report html
-
-[testenv:build_docs]
-description = Build docs using Sphinx
-basepython = python3.7
-changedir = docs
-extras =
-    dev
-    docs
-whitelist_externals =
-    rm
-    cd
-    sphinx
-    make
-commands =
-    rm -Rf _build
-    sphinx-build . _build --color -W -bhtml {posargs}
-"""
-
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

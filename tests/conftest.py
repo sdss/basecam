@@ -204,7 +204,7 @@ async def camera(camera_system):
     await listener.stop_listening()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 async def actor_setup(config):
     """Setups an actor for testing, mocking the client transport.
 
