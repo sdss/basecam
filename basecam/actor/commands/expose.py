@@ -106,7 +106,7 @@ def report_exposure_state(command: BasecamCommand, event, payload):
             "state": state,
             "image_type": EXPOSURE_STATE[name].get("image_type", "NA"),
             "remaining_time": EXPOSURE_STATE[name].get("remaining_time", 0),
-            "exposure_time": EXPOSURE_STATE[name].get("exptime", 0),
+            "exposure_time": float(EXPOSURE_STATE[name].get("exptime", 0.0)),
             "current_stack": EXPOSURE_STATE[name].get("current_stack", 0),
             "n_stack": EXPOSURE_STATE[name].get("n_stack", 0),
         }

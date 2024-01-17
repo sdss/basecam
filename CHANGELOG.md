@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### ✨ Improved
+
+* Cast output ``exposure_time`` to float.
+
+
 ## 0.7.2 - April 27, 2023
 
 ### ✨ Improved
