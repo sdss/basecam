@@ -28,7 +28,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.mathjax",
     "sphinx.ext.intersphinx",
-    "sphinx_autodoc_typehints",
+    # "sphinx_autodoc_typehints",
     "myst_parser",
     "sphinx-jsonschema",
     "sphinx_click",
