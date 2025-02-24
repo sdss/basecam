@@ -63,8 +63,7 @@ def get_cameras(command, cameras=None, check_cameras=True, fail_command=False):
             if not camera_instance.connected:
                 if fail_command:
                     command.fail(
-                        text=f"camera {camera_instance.name} "
-                        "has not been initialised."
+                        text=f"camera {camera_instance.name} has not been initialised."
                     )
                 return False
 

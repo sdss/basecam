@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     env:
       OBSERVATORY: APO
@@ -22,39 +22,32 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+          enable-cache: true
 
-      - name: Install dependencies
-        run: |
-          pip install --upgrade wheel pip setuptools
-          pip install .
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
 
-      - name: Lint with ruff
+      - name: Install package
         run: |
-          pip install ruff
-          ruff check basecam/ tests/
-
-      - name: Lint with black
-        run: |
-          pip install black
-          black --check basecam/ tests/
+          uv sync --no-dev
 
       - name: Test with pytest
         run: |
-          pip install pytest pytest-cov pytest-asyncio pytest-mock asynctest pytest-sugar
-          pytest
+          uv pip install pytest pytest-cov pytest-asyncio pytest-mock asynctest pytest-sugar
+          uv run pytest
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
+          files: ./coverage.xml

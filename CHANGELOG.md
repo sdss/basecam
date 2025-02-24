@@ -1,5 +1,13 @@
 # Changelog
 
+## Next version
+
+### ⚙️ Engineering
+
+* Use `uv` for dependency management.
+* Update workflows and RTDs.
+
+
 ## 0.8.0 - January 16, 2024
 
 ### ✨ Improved
