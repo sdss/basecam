@@ -1,6 +1,6 @@
 [project]
 name = "sdss-basecam"
-version = "0.8.1a0"
+version = "0.8.1"
 description = "A base library for camera wrapping and actor."
 authors = [{ name = "José Sánchez-Gallego", email = "gallegoj@uw.edu" }]
 license = "BSD-3-Clause"

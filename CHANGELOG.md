@@ -1,6 +1,6 @@
 # Changelog
 
-## Next version
+## 0.8.1 - February 24, 2025
 
 ### ⚙️ Engineering
 
