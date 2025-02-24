@@ -8,12 +8,7 @@
 
 import asyncio
 
-import pytest
-
 from basecam.utils import cancel_task
-
-
-pytestmark = pytest.mark.asyncio
 
 
 async def test_cancel_task():

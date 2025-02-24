@@ -16,14 +16,11 @@ from basecam.actor import BaseCameraActor
 from .conftest import CameraSystemTester, VirtualCamera
 
 
-pytestmark = pytest.mark.asyncio
-
-
 class ActorLegacyTest(BaseCameraActor, LegacyActor):
     pass
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 async def actor_setup(config):
     """Setups an actor for testing, mocking the client transport.
 
@@ -41,7 +38,7 @@ async def actor_setup(config):
     yield actor
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 async def actor(actor_setup):
     await actor_setup.camera_system.add_camera("test_camera")
 

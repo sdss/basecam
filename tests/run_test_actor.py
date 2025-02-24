@@ -22,7 +22,7 @@ async def main(loop):
     await camera_system.add_camera("test_camera")
 
     camera_actor = await CameraActor.from_config(CONFIG_FILE, camera_system).start()
-    await camera_actor.server.server.serve_forever()
+    await camera_actor.server.serve_forever()
 
 
 if __name__ == "__main__":

@@ -14,12 +14,9 @@ from basecam.events import CameraSystemEvent
 from basecam.notifier import EventListener
 
 
-pytestmark = pytest.mark.asyncio
-
-
 @pytest.fixture()
-async def listener(event_loop):
-    listener = EventListener(event_loop)
+async def listener():
+    listener = EventListener()
 
     yield listener
 
@@ -103,8 +100,8 @@ async def test_add_same_listener(camera_system, listener):
     assert len(camera_system.notifier.listeners) == 1
 
 
-async def test_remove_not_registered_listener(camera_system, event_loop):
-    listener_new = EventListener(event_loop)
+async def test_remove_not_registered_listener(camera_system):
+    listener_new = EventListener()
 
     with pytest.raises(ValueError):
         camera_system.notifier.remove_listener(listener_new)
@@ -112,10 +109,8 @@ async def test_remove_not_registered_listener(camera_system, event_loop):
     await listener_new.stop_listening()
 
 
-async def test_filter_notifications(camera_system, listener, event_loop):
-    filtered_listener = EventListener(
-        event_loop, filter_events=CameraSystemEvent.CAMERA_ADDED
-    )
+async def test_filter_notifications(camera_system, listener):
+    filtered_listener = EventListener(filter_events=CameraSystemEvent.CAMERA_ADDED)
 
     camera_system.notifier.remove_listener(listener)
     camera_system.notifier.register_listener(filtered_listener)
@@ -137,12 +132,12 @@ async def test_filter_notifications(camera_system, listener, event_loop):
     await filtered_listener.stop_listening()
 
 
-async def test_listener_wait_for(camera_system, listener, event_loop):
+async def test_listener_wait_for(camera_system, listener):
     async def add_camera_delayed():
         await asyncio.sleep(0.1)
         await camera_system.add_camera("test_camera")
 
-    task = event_loop.create_task(add_camera_delayed())
+    task = asyncio.create_task(add_camera_delayed())
 
     result = await listener.wait_for(CameraSystemEvent.CAMERA_ADDED)
     assert CameraSystemEvent.CAMERA_ADDED in result
@@ -150,12 +145,12 @@ async def test_listener_wait_for(camera_system, listener, event_loop):
     await task
 
 
-async def test_listener_wait_for_timeout(camera_system, listener, event_loop):
+async def test_listener_wait_for_timeout(camera_system, listener):
     async def add_camera_delayed():
         await asyncio.sleep(0.2)
         await camera_system.add_camera("test_camera")
 
-    task = event_loop.create_task(add_camera_delayed())
+    task = asyncio.create_task(add_camera_delayed())
 
     result = await listener.wait_for(CameraSystemEvent.CAMERA_ADDED, 0.1)
     assert result is False

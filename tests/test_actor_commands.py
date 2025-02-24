@@ -18,9 +18,6 @@ from basecam import CameraConnectionError, CameraError, ExposureError
 from basecam.actor.tools import get_cameras
 
 
-pytestmark = pytest.mark.asyncio
-
-
 async def test_ping(actor):
     command = await actor.invoke_mock_command("ping")
 

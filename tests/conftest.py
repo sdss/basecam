@@ -34,7 +34,10 @@ EXPOSURE_DIR = tempfile.TemporaryDirectory()
 
 class CameraSystemTester(CameraSystem):
     _connected_cameras = []
-    __version__ = "0.1.0"
+
+    @property
+    def __version__(self):
+        return "0.1.0"
 
     def list_available_cameras(self):
         return self._connected_cameras
@@ -169,17 +172,8 @@ def config():
     return read_yaml_file(TEST_CONFIG_FILE)
 
 
-@pytest.fixture(scope="module")
-def event_loop(request):
-    """A module-scoped event loop."""
-
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
-
-
 @pytest.fixture(scope="function")
-async def camera_system(config, event_loop):
+async def camera_system(config):
     camera_system = CameraSystemTester(VirtualCamera, camera_config=config).setup()
 
     yield camera_system
@@ -195,7 +189,7 @@ async def camera(camera_system):
     def add_event(event, payload):
         camera.events.append((event, payload))
 
-    listener = EventListener(loop=camera.loop)
+    listener = EventListener()
     camera.camera_system.notifier.register_listener(listener)
     listener.register_callback(add_event)
 

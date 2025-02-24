@@ -14,9 +14,6 @@ from basecam.actor.actor import BaseCameraActor
 from basecam.actor.tools import get_schema
 
 
-pytestmark = pytest.mark.asyncio
-
-
 async def test_actor_basic(actor, config):
     actor_config = config["actor"]
 

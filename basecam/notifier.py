@@ -84,12 +84,10 @@ class EventListener(asyncio.Queue):
 
     """
 
-    def __init__(self, loop=None, filter_events=None, autostart=True):
+    def __init__(self, filter_events=None, autostart=True):
         asyncio.Queue.__init__(self)
 
         self.callbacks = []
-
-        self.loop = loop or asyncio.get_running_loop()
 
         self.filter_events = filter_events
         if self.filter_events and not isinstance(self.filter_events, (list, tuple)):
@@ -101,7 +99,7 @@ class EventListener(asyncio.Queue):
         self.__events = set()  # A list of events received to be used by wait_for
 
         if autostart:
-            self.listerner_task = self.loop.create_task(self._process_queue())
+            self.listerner_task = asyncio.create_task(self._process_queue())
 
     async def _process_queue(self):
         """Processes the queue and calls callbacks."""
@@ -115,7 +113,7 @@ class EventListener(asyncio.Queue):
             for callback in self.callbacks:
                 cb = callback(event, payload)
                 if asyncio.iscoroutine(cb):
-                    self.loop.create_task(cb)
+                    asyncio.create_task(cb)
 
             if self._event_waiter:
                 self.__events.add(event)
@@ -134,7 +132,7 @@ class EventListener(asyncio.Queue):
             except asyncio.QueueEmpty:
                 break
 
-        self.listerner_task = self.loop.create_task(self._process_queue())
+        self.listerner_task = asyncio.create_task(self._process_queue())
 
     async def stop_listening(self):
         """Stops the listener task."""

@@ -28,9 +28,6 @@ from basecam.exposure import ImageNamer
 from .conftest import EXPOSURE_DIR, CameraSystemTester, VirtualCamera
 
 
-pytestmark = pytest.mark.asyncio
-
-
 async def test_camera(camera):
     assert isinstance(camera, VirtualCamera)
 

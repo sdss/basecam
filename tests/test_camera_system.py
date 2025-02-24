@@ -14,9 +14,6 @@ import pytest
 from .conftest import TEST_CONFIG_FILE, CameraSystemTester, VirtualCamera
 
 
-pytestmark = pytest.mark.asyncio
-
-
 async def test_load_config():
     camera_system = CameraSystemTester(VirtualCamera, camera_config=TEST_CONFIG_FILE)
 

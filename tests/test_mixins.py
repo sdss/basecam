@@ -8,12 +8,7 @@
 
 import asyncio
 
-import pytest
-
 from basecam.events import CameraEvent
-
-
-pytestmark = pytest.mark.asyncio
 
 
 async def test_bias(camera, mocker):
