@@ -1,5 +1,12 @@
 # Changelog
 
+## Next release
+
+### ✨ Improved
+
+* Add `version` command to camera parser.
+
+
 ## 0.8.1 - February 24, 2025
 
 ### ⚙️ Engineering
