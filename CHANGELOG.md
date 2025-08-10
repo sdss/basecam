@@ -5,6 +5,7 @@
 ### ✨ Improved
 
 * Add `version` command to camera parser.
+* Update `sdss-clu` to `2.5.3`.
 
 
 ## 0.8.1 - February 24, 2025
