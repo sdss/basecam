@@ -10,7 +10,7 @@ requires-python = ">=3.8,<4"
 
 dependencies = [
     "astropy>=5.2",
-    "sdss-clu>=2.0.0",
+    "sdss-clu>=2.5.3",
     "sdsstools>=1.9.0"
 ]
 
